@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    
+    <!-- Vehicle Types -->
+    <vType id="passenger" accel="2.6" decel="4.5" sigma="0.5" length="5.0" minGap="2.5" maxSpeed="70.0" guiShape="passenger"/>
+    <vType id="emergency" accel="3.0" decel="5.0" sigma="0.2" length="6.0" minGap="2.0" maxSpeed="80.0" guiShape="emergency" color="red"/>
+    
+    <!-- Simple Routes -->
+    <route id="simple_ew" edges="E1 E2"/>
+    <route id="simple_ns" edges="E5 E6"/>
+    
+    <!-- Test Vehicles -->
+    <vehicle id="car1" type="passenger" route="simple_ew" depart="1" color="blue"/>
+    <vehicle id="car2" type="passenger" route="simple_ew" depart="3" color="green"/>
+    <vehicle id="car3" type="passenger" route="simple_ns" depart="2" color="yellow"/>
+    <vehicle id="car4" type="passenger" route="simple_ns" depart="4" color="cyan"/>
+    <vehicle id="emergency1" type="emergency" route="simple_ew" depart="5" color="red"/>
+    
+    <!-- More test vehicles -->
+    <vehicle id="car5" type="passenger" route="simple_ew" depart="10"/>
+    <vehicle id="car6" type="passenger" route="simple_ew" depart="15"/>
+    <vehicle id="car7" type="passenger" route="simple_ns" depart="12"/>
+    <vehicle id="car8" type="passenger" route="simple_ns" depart="18"/>
+
+</routes>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<additionalFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+
+    <!-- Traffic Light Programs -->
+    <tlLogic id="J2" type="static" programID="adaptive" offset="0">
+        <phase duration="30" state="GGrr"/>
+        <phase duration="5"  state="yyrr"/>
+        <phase duration="30" state="rrGG"/>
+        <phase duration="5"  state="rryy"/>
+    </tlLogic>
+    
+    <tlLogic id="J3" type="static" programID="adaptive" offset="0">
+        <phase duration="30" state="GGrr"/>
+        <phase duration="5"  state="yyrr"/>
+        <phase duration="30" state="rrGG"/>
+        <phase duration="5"  state="rryy"/>
+    </tlLogic>
+
+    <!-- Sensor Detectors (every 100m over 0.5km approach) -->
+    
+    <!-- E1 Approach Sensors (East-West) -->
+    <inductionLoop id="sensor_E1_500m" lane="E1_0" pos="0" freq="1" file="output/sensor_E1_500m.xml"/>
+    <inductionLoop id="sensor_E1_400m" lane="E1_0" pos="100" freq="1" file="output/sensor_E1_400m.xml"/>
+    <inductionLoop id="sensor_E1_300m" lane="E1_0" pos="200" freq="1" file="output/sensor_E1_300m.xml"/>
+    <inductionLoop id="sensor_E1_200m" lane="E1_0" pos="300" freq="1" file="output/sensor_E1_200m.xml"/>
+    <inductionLoop id="sensor_E1_100m" lane="E1_0" pos="400" freq="1" file="output/sensor_E1_100m.xml"/>
+    <inductionLoop id="sensor_E1_stop" lane="E1_0" pos="495" freq="1" file="output/sensor_E1_stop.xml"/>
+    
+    <!-- E2 Approach Sensors -->
+    <inductionLoop id="sensor_E2_500m" lane="E2_0" pos="0" freq="1" file="output/sensor_E2_500m.xml"/>
+    <inductionLoop id="sensor_E2_400m" lane="E2_0" pos="100" freq="1" file="output/sensor_E2_400m.xml"/>
+    <inductionLoop id="sensor_E2_300m" lane="E2_0" pos="200" freq="1" file="output/sensor_E2_300m.xml"/>
+    <inductionLoop id="sensor_E2_200m" lane="E2_0" pos="300" freq="1" file="output/sensor_E2_200m.xml"/>
+    <inductionLoop id="sensor_E2_100m" lane="E2_0" pos="400" freq="1" file="output/sensor_E2_100m.xml"/>
+    <inductionLoop id="sensor_E2_stop" lane="E2_0" pos="495" freq="1" file="output/sensor_E2_stop.xml"/>
+    
+    <!-- E5 Approach Sensors (North-South) -->
+    <inductionLoop id="sensor_E5_500m" lane="E5_0" pos="0" freq="1" file="output/sensor_E5_500m.xml"/>
+    <inductionLoop id="sensor_E5_400m" lane="E5_0" pos="100" freq="1" file="output/sensor_E5_400m.xml"/>
+    <inductionLoop id="sensor_E5_300m" lane="E5_0" pos="200" freq="1" file="output/sensor_E5_300m.xml"/>
+    <inductionLoop id="sensor_E5_200m" lane="E5_0" pos="300" freq="1" file="output/sensor_E5_200m.xml"/>
+    <inductionLoop id="sensor_E5_100m" lane="E5_0" pos="400" freq="1" file="output/sensor_E5_100m.xml"/>
+    <inductionLoop id="sensor_E5_stop" lane="E5_0" pos="495" freq="1" file="output/sensor_E5_stop.xml"/>
+    
+    <!-- E7 Approach Sensors -->
+    <inductionLoop id="sensor_E7_500m" lane="E7_0" pos="0" freq="1" file="output/sensor_E7_500m.xml"/>
+    <inductionLoop id="sensor_E7_400m" lane="E7_0" pos="100" freq="1" file="output/sensor_E7_400m.xml"/>
+    <inductionLoop id="sensor_E7_300m" lane="E7_0" pos="200" freq="1" file="output/sensor_E7_300m.xml"/>
+    <inductionLoop id="sensor_E7_200m" lane="E7_0" pos="300" freq="1" file="output/sensor_E7_200m.xml"/>
+    <inductionLoop id="sensor_E7_100m" lane="E7_0" pos="400" freq="1" file="output/sensor_E7_100m.xml"/>
+    <inductionLoop id="sensor_E7_stop" lane="E7_0" pos="495" freq="1" file="output/sensor_E7_stop.xml"/>
+
+    <!-- Lane Area Detectors for Queue Length -->
+    <laneAreaDetector id="queue_E1" lane="E1_0" pos="400" endPos="500" freq="1" file="output/queue_E1.xml"/>
+    <laneAreaDetector id="queue_E2" lane="E2_0" pos="400" endPos="500" freq="1" file="output/queue_E2.xml"/>
+    <laneAreaDetector id="queue_E5" lane="E5_0" pos="400" endPos="500" freq="1" file="output/queue_E5.xml"/>
+    <laneAreaDetector id="queue_E7" lane="E7_0" pos="400" endPos="500" freq="1" file="output/queue_E7.xml"/>
+
+</additionalFile>

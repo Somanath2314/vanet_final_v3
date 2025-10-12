@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="maps/simple_network.net.xml"/>
+        <route-files value="maps/routes_simple.rou.xml"/>
+    </input>
+
+    <output>
+        <summary-output value="output/summary.xml"/>
+        <tripinfo-output value="output/tripinfo.xml"/>
+    </output>
+
+    <time>
+        <begin value="0"/>
+        <end value="100"/>
+        <step-length value="1"/>
+    </time>
+
+    <processing>
+        <time-to-teleport value="300"/>
+    </processing>
+
+    <traci_server>
+        <remote-port value="8813"/>
+    </traci_server>
+
+    <gui_only>
+        <gui-settings-file value="maps/gui-settings.cfg"/>
+        <start value="true"/>
+        <quit-on-end value="false"/>
+    </gui_only>
+
+</configuration>

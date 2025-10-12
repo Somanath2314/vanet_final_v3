@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    
+    <!-- Vehicle Types -->
+    <vType id="passenger" accel="2.6" decel="4.5" sigma="0.5" length="5.0" minGap="2.5" maxSpeed="70.0" guiShape="passenger"/>
+    <vType id="emergency" accel="3.0" decel="5.0" sigma="0.2" length="6.0" minGap="2.0" maxSpeed="80.0" guiShape="emergency" color="red"/>
+    
+    <!-- Routes -->
+    <route id="route_east_west" edges="E1 E2 E3 E4"/>
+    <route id="route_north_south_j2" edges="E5 E6"/>
+    <route id="route_north_south_j3" edges="E7 E8"/>
+    
+    <!-- Simpler test routes -->
+    <route id="simple_ew" edges="E1 E2"/>
+    <route id="simple_ns" edges="E5 E6"/>
+    
+    <!-- Individual Vehicles for Testing -->
+    <vehicle id="test_vehicle_1" type="passenger" route="simple_ew" depart="1"/>
+    <vehicle id="test_vehicle_2" type="passenger" route="simple_ew" depart="5"/>
+    <vehicle id="test_vehicle_3" type="passenger" route="simple_ns" depart="3"/>
+    <vehicle id="test_vehicle_4" type="passenger" route="simple_ns" depart="7"/>
+    <vehicle id="emergency_1" type="emergency" route="simple_ew" depart="10"/>
+    
+    <!-- Vehicle Flows with proper timing -->
+    <!-- East-West Traffic -->
+    <flow id="flow_ew" type="passenger" route="simple_ew" begin="10" end="3600" 
+          vehsPerHour="300" departLane="best" departSpeed="max"/>
+    
+    <!-- North-South Traffic -->
+    <flow id="flow_ns1" type="passenger" route="simple_ns" begin="15" end="3600" 
+          vehsPerHour="200" departLane="best" departSpeed="max"/>
+    
+    <!-- Emergency Vehicles -->
+    <flow id="emergency_flow" type="emergency" route="simple_ew" begin="30" end="3600" 
+          vehsPerHour="5" departLane="best" departSpeed="max"/>
+
+</routes>
