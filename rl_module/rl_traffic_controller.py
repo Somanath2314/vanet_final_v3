@@ -12,7 +12,7 @@ from collections import OrderedDict
 # Add parent directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from .vanet_env import VANETTrafficEnv
+from vanet_env import VANETTrafficEnv
 
 
 class RLTrafficController:
@@ -67,17 +67,22 @@ class RLTrafficController:
             action_spec = OrderedDict()
             for tl_id in tl_ids:
                 try:
-                    # Get current state to determine format
-                    current_state = traci.trafficlight.getRedYellowGreenState(tl_id)
-                    
-                    # Create simple two-phase system (all green vs all red alternating)
-                    # This can be customized based on intersection geometry
-                    green_state = current_state
-                    red_state = 'r' * len(current_state)
-                    
-                    action_spec[tl_id] = [green_state, red_state]
+                    # Get the actual program logic to get all phases
+                    logic = traci.trafficlight.getAllProgramLogics(tl_id)[0]
+                    phases = [phase.state for phase in logic.phases]
+
+                    print(f"Traffic light {tl_id}: {len(phases)} phases")
+                    for i, phase in enumerate(phases):
+                        print(f"  Phase {i}: {phase}")
+
+                    action_spec[tl_id] = phases
                 except Exception as e:
                     print(f"Error processing traffic light {tl_id}: {e}")
+                    # Fallback to simple two-phase system
+                    current_state = traci.trafficlight.getRedYellowGreenState(tl_id)
+                    green_state = current_state
+                    red_state = 'r' * len(current_state)
+                    action_spec[tl_id] = [green_state, red_state]
             
             # Update config with detected action spec
             self.config['action_spec'] = action_spec
@@ -154,7 +159,7 @@ class RLTrafficController:
     def step(self):
         """
         Execute one step of RL control.
-        
+
         Returns
         -------
         metrics : dict
@@ -162,35 +167,54 @@ class RLTrafficController:
         """
         if self.env is None:
             return {'error': 'Environment not initialized'}
-        
+
         try:
             # Get current state
             if self.current_state is None:
-                self.current_state = self.env.reset()
-            
-            # Get action
+                reset_result = self.env.reset()
+                if len(reset_result) == 2:
+                    # Gymnasium API
+                    self.current_state, _ = reset_result
+                else:
+                    # Gym API or single return
+                    self.current_state = reset_result
+
+            # Get action from RL agent
             action = self.get_action(self.current_state)
-            
-            # Execute action
-            next_state, reward, done, info = self.env.step(action)
-            
+
+            # Execute action in environment
+            step_result = self.env.step(action)
+            if len(step_result) == 5:
+                # Gymnasium API
+                next_state, reward, terminated, truncated, info = step_result
+                done = terminated or truncated
+            else:
+                # Gym API
+                next_state, reward, done, info = step_result
+
             # Update tracking
             self.current_episode_reward += reward
             self.current_episode_length += 1
-            
+
             # Update state
             self.current_state = next_state
-            
+
             # Handle episode end
             if done:
                 self.episode_rewards.append(self.current_episode_reward)
                 self.episode_lengths.append(self.current_episode_length)
-                
+
                 # Reset for next episode
-                self.current_state = self.env.reset()
+                reset_result = self.env.reset()
+                if len(reset_result) == 2:
+                    # Gymnasium API
+                    self.current_state, _ = reset_result
+                else:
+                    # Gym API or single return
+                    self.current_state = reset_result
                 self.current_episode_reward = 0
                 self.current_episode_length = 0
-            
+
             # Return metrics
             metrics = {
                 'reward': float(reward),
@@ -200,9 +224,9 @@ class RLTrafficController:
                 'mean_emission': info.get('mean_emission', 0),
                 'action': int(action) if isinstance(action, (int, np.integer)) else action.tolist(),
             }
-            
+
             return metrics
-            
+
         except Exception as e:
             print(f"Error in RL step: {e}")
             import traceback
@@ -223,11 +247,83 @@ class RLTrafficController:
     def reset(self):
         """Reset the RL controller."""
         if self.env:
-            self.current_state = self.env.reset()
+            reset_result = self.env.reset()
+            if len(reset_result) == 2:
+                # Gymnasium API
+                self.current_state, _ = reset_result
+            else:
+                # Gym API or single return
+                self.current_state = reset_result
             self.current_episode_reward = 0
             self.current_episode_length = 0
     
-    def close(self):
-        """Close the RL controller."""
-        if self.env:
-            self.env.close()
+    def run_simulation(self, config_path=None, max_steps=3600):
+        """
+        Run RL-based simulation.
+
+        Parameters
+        ----------
+        config_path : str
+            Path to SUMO configuration file
+        max_steps : int
+            Maximum simulation steps
+        """
+        print("Starting RL-based traffic control simulation...")
+
+        # Import required modules
+        import traci
+        import sumolib
+
+        # Start SUMO
+        if config_path is None:
+            config_path = os.path.join(os.path.dirname(__file__), '..', 'sumo_simulation', 'simulation.sumocfg')
+
+        sumo_binary = sumolib.checkBinary('sumo')
+        sumo_cmd = [sumo_binary, "-c", config_path, "--start"]
+
+        try:
+            traci.start(sumo_cmd)
+            print("✓ Connected to SUMO simulation")
+        except Exception as e:
+            print(f"✗ Error connecting to SUMO: {e}")
+            return
+
+        # Initialize RL controller
+        if not self.initialize(sumo_connected=True):
+            print("✗ Failed to initialize RL controller")
+            traci.close()
+            return
+
+        # Load model if available
+        model_path = os.path.join(os.path.dirname(__file__), 'models', 'dqn_traffic_model.pth')
+        if os.path.exists(model_path):
+            self.load_model(model_path)
+            print(f"✓ Loaded trained model from {model_path}")
+        else:
+            print("⚠ No trained model found, using random policy")
+
+        # Run simulation loop
+        step = 0
+        try:
+            while step < max_steps and traci.simulation.getMinExpectedNumber() > 0:
+                # Execute RL step
+                metrics = self.step()
+
+                if 'error' in metrics:
+                    print(f"✗ Error in step {step}: {metrics['error']}")
+                    break
+
+                # Print progress
+                if step % 100 == 0:
+                    print(f"Step {step}: Reward={metrics.get('reward', 0):.2f}, "
+                          f"Episode Reward={metrics.get('episode_reward', 0):.2f}")
+
+                step += 1
+
+        except KeyboardInterrupt:
+            print("\\nSimulation interrupted by user")
+        except Exception as e:
+            print(f"\\nSimulation error: {e}")
+        finally:
+            print(f"Simulation completed after {step} steps")
+            traci.close()

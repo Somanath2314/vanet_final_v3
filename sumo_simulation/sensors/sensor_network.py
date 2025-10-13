@@ -206,11 +206,55 @@ class SensorNetwork:
     def detect_emergency_vehicles(self) -> List[VehicleDetection]:
         """Detect emergency vehicles from all sensors"""
         emergency_vehicles = []
+
+        # Check recent detections (last 10 time steps)
+        for detection in self.detection_history[-100:]:  # Check last 100 detections
+            if detection.is_emergency and detection.timestamp > time.time() - 10:  # Within last 10 seconds
+                emergency_vehicles.append(detection)
+
+        # Also check current sensor readings
         for sensor in self.sensors.values():
             for detection in sensor.detections:
                 if detection.is_emergency:
                     emergency_vehicles.append(detection)
-        return emergency_vehicles
+
+        # Also check SUMO directly for emergency vehicles
+        try:
+            import traci
+            all_vehicles = traci.vehicle.getIDList()
+            for veh_id in all_vehicles:
+                if 'emergency' in veh_id.lower() or 'ambulance' in veh_id.lower() or 'fire' in veh_id.lower():
+                    try:
+                        lane_id = traci.vehicle.getLaneID(veh_id)
+                        distance = traci.vehicle.getLanePosition(veh_id)
+                        lane_length = traci.lane.getLength(lane_id)
+                        distance_from_intersection = lane_length - distance
+
+                        # Create emergency detection
+                        emergency_detection = VehicleDetection(
+                            vehicle_id=veh_id,
+                            timestamp=time.time(),
+                            speed=traci.vehicle.getSpeed(veh_id) * 3.6,  # Convert to km/h
+                            distance_from_intersection=distance_from_intersection,
+                            lane_id=lane_id,
+                            vehicle_type='emergency',
+                            is_emergency=True
+                        )
+                        emergency_vehicles.append(emergency_detection)
+                    except:
+                        continue
+        except:
+            pass
+
+        # Remove duplicates based on vehicle_id
+        seen_ids = set()
+        unique_emergencies = []
+        for emergency in emergency_vehicles:
+            if emergency.vehicle_id not in seen_ids:
+                seen_ids.add(emergency.vehicle_id)
+                unique_emergencies.append(emergency)
+
+        return unique_emergencies
     
     def get_sensor_data_summary(self) -> Dict:
         """Get summary of all sensor data for API"""

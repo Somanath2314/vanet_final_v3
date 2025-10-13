@@ -6,7 +6,13 @@ Adapted from RL-Traffic-optimization_CIL4sys
 import numpy as np
 import traci
 from collections import OrderedDict
-from .helpers import flatten
+
+# Import with proper path handling
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+
+from helpers import flatten
 
 
 class TrafficLightsStates:

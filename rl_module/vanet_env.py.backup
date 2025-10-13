@@ -11,13 +11,8 @@ import traci
 from collections import OrderedDict
 import itertools
 
-# Import with proper path handling
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__)))
-
-from rewards import Rewards
-from states import States
+from .rewards import Rewards
+from .states import States
 
 
 class VANETTrafficEnv(gym.Env):
@@ -131,30 +126,16 @@ class VANETTrafficEnv(gym.Env):
     def _update_obs_veh_acc(self):
         """Updates the observed vehicle speed and acceleration data structures."""
         placeholder = 0.
-        obs_veh_ids = self.get_observable_veh_ids()
+        speed_odict = OrderedDict([('vehicle_' + str(i), placeholder) for i in range(self.beta)])
 
-        # Create speed dict with actual vehicle IDs
-        speed_odict = OrderedDict()
-        for i, veh_id in enumerate(obs_veh_ids[:self.beta]):
+        for veh_id in self.get_observable_veh_ids():
             try:
                 speed_odict[veh_id] = traci.vehicle.getSpeed(veh_id)
             except:
                 speed_odict[veh_id] = 0.
 
-        # Fill remaining slots with placeholders
-        for i in range(len(speed_odict), self.beta):
-            speed_odict['vehicle_' + str(i)] = placeholder
-
-        # Update accelerations
-        for veh_id in speed_odict.keys():
-            if veh_id in self._obs_veh_vel:
-                new_acc = (speed_odict[veh_id] - self._obs_veh_vel[veh_id]) / self.sim_step
-            else:
-                new_acc = 0.
-
-            if veh_id not in self.obs_veh_acc:
-                self.obs_veh_acc[veh_id] = [0]
-
+        for veh_id in self.get_observable_veh_ids():
+            new_acc = (speed_odict[veh_id] - self._obs_veh_vel[veh_id]) / self.sim_step
             list_acc = self.obs_veh_acc[veh_id].copy()
             list_acc.append(new_acc)
             self.obs_veh_acc[veh_id] = list_acc
@@ -284,22 +265,15 @@ class VANETTrafficEnv(gym.Env):
     
     def _update_obs_wait_steps(self):
         """Update vehicle wait steps."""
-        obs_veh_ids = self.get_observable_veh_ids()
-        
-        # Update wait steps for observed vehicles
-        for veh_id in obs_veh_ids:
+        for veh_id in self.get_observable_veh_ids():
             try:
                 speed = traci.vehicle.getSpeed(veh_id)
-                if veh_id not in self.obs_veh_wait_steps:
-                    self.obs_veh_wait_steps[veh_id] = 0
-                    
-                if speed < 0.1:  # Vehicle is waiting
-                    self.obs_veh_wait_steps[veh_id] += 1
+                if speed < 0.1:  # Vehicle is stopped
+                    self.obs_veh_wait_steps[veh_id] = self.obs_veh_wait_steps.get(veh_id, 0) + 1
                 else:
                     self.obs_veh_wait_steps[veh_id] = 0
             except:
-                if veh_id not in self.obs_veh_wait_steps:
-                    self.obs_veh_wait_steps[veh_id] = 0
+                self.obs_veh_wait_steps[veh_id] = 0
         
         # Patch for missing vehicles
         for k in self._all_obs_veh_names:
@@ -340,141 +314,74 @@ class VANETTrafficEnv(gym.Env):
         return state.astype(np.float32)
     
     def compute_reward(self, rl_actions):
-        """Compute reward based on traffic metrics with stronger congestion penalties."""
-        min_speed = 8  # km/h (lower threshold for better flow)
-        idled_max_steps = 60  # steps (reduced from 80 for more sensitivity)
-        max_abs_acc = 0.1  # m/s^2 (stricter acceleration control)
-        c = 0.01  # Base reward scaling
-
-        # Base reward from traffic metrics with stronger penalties
-        base_reward = c * (
+        """Compute reward based on traffic metrics."""
+        min_speed = 10  # km/h
+        idled_max_steps = 80  # steps
+        max_abs_acc = 0.15  # m/s^2
+        c = 0.001
+        
+        reward = c * (
             self.rewards.penalize_min_speed(min_speed) +
-            self.rewards.penalize_max_wait(self.obs_veh_wait_steps, idled_max_steps, 0, -50) +  # Increased penalty
+            self.rewards.penalize_max_wait(self.obs_veh_wait_steps, idled_max_steps, 0, -10) +
             self.rewards.penalize_max_acc(self.obs_veh_acc, max_abs_acc, 1, 0)
         )
-
-        # Emergency vehicle bonus - HUGE reward for prioritizing emergency vehicles
-        emergency_bonus = 0
-        try:
-            # Check for emergency vehicles in the simulation
-            emergency_vehicles = []
-            try:
-                # Try to get emergency vehicles from SUMO directly
-                all_vehicles = traci.vehicle.getIDList()
-                for veh_id in all_vehicles:
-                    if 'emergency' in veh_id.lower() or 'ambulance' in veh_id.lower() or 'fire' in veh_id.lower():
-                        try:
-                            lane_id = traci.vehicle.getLaneID(veh_id)
-                            distance = traci.vehicle.getLanePosition(veh_id)
-                            # Calculate distance from intersection (simplified)
-                            lane_length = traci.lane.getLength(lane_id)
-                            distance_from_intersection = lane_length - distance
-
-                            if distance_from_intersection < 300:  # 300m range for emergency vehicles
-                                emergency_bonus += 100  # Large bonus for handling emergency vehicles
-                                break  # Only need one emergency vehicle to trigger bonus
-                        except:
-                            continue
-            except:
-                pass
-        except:
-            pass
-
-        # Queue length penalty - heavily penalize long queues
-        queue_penalty = 0
-        try:
-            # Check queue lengths across all lanes
-            for lane_id in ['E1_0', 'E2_0', 'E5_0', 'E7_0']:
-                try:
-                    # Get vehicles on lane
-                    vehicles_on_lane = traci.lane.getLastStepVehicleIDs(lane_id)
-                    if vehicles_on_lane:
-                        # Calculate average speed on this lane
-                        speeds = [traci.vehicle.getSpeed(v) for v in vehicles_on_lane[:5]]  # First 5 vehicles
-                        avg_speed = sum(speeds) / len(speeds) if speeds else 0
-
-                        # Heavily penalize slow-moving traffic (congestion indicator)
-                        if avg_speed < 2.0:  # Less than 2 m/s (7.2 km/h)
-                            queue_penalty -= 20  # Penalty for congestion
-                        elif avg_speed < 5.0:  # Less than 5 m/s (18 km/h)
-                            queue_penalty -= 5   # Small penalty for moderate congestion
-                except:
-                    continue
-        except:
-            pass
-
-        total_reward = base_reward + emergency_bonus + queue_penalty
-
-        # Ensure minimum reward to prevent agent from giving up
-        return max(total_reward, -200)  # Lower minimum to allow more learning
+        
+        return reward
     
-    def reset(self, seed=None, options=None):
+    def reset(self):
         """Reset the environment to initial state."""
-        super().reset(seed=seed)
-
         self.current_step = 0
         self.episode_reward = 0
-
+        
         # Reset tracking variables
         self._init_obs_veh_acc()
         self._init_obs_veh_wait_steps()
         self._init_obs_tl_wait_steps()
-
+        
         # Get initial state
         try:
             state = self.get_state()
         except:
             # Return zero state if SUMO not connected
             state = np.zeros(self.observation_space.shape[0], dtype=np.float32)
-
-        return state, {}
+        
+        return state
     
     def step(self, action):
         """Execute one step in the environment."""
         # Apply action
         self._apply_rl_actions(action)
-
+        
         # Advance simulation
         try:
             traci.simulationStep()
-        except Exception as e:
-            print(f"Error advancing simulation: {e}")
-            # Return a safe state if simulation fails
-            state = np.zeros(self.observation_space.shape[0], dtype=np.float32)
-            reward = -10.0  # Penalty for connection issues
-            terminated = True
-            truncated = False
-            info = {'episode_reward': self.episode_reward, 'mean_speed': 0, 'mean_emission': 0}
-            return state, reward, terminated, truncated, info
-
+        except:
+            pass
+        
         # Update tracking
-        try:
-            self._update_obs_wait_steps()
-            self._increment_obs_tl_wait_steps()
-            self._update_obs_veh_acc()
-        except Exception as e:
-            print(f"Error updating observations: {e}")
-
+        self._update_obs_wait_steps()
+        self._increment_obs_tl_wait_steps()
+        self._update_obs_veh_acc()
+        
         # Get new state
         state = self.get_state()
-
+        
         # Compute reward
         reward = self.compute_reward(action)
         self.episode_reward += reward
-
+        
         # Check if done
         self.current_step += 1
-        terminated = self.current_step >= self.horizon
-        truncated = False
-
+        done = self.current_step >= self.horizon
+        
         # Info dict
         info = {
             'episode_reward': self.episode_reward,
             'mean_speed': self.rewards.mean_speed(),
             'mean_emission': self.rewards.mean_emission(),
         }
-
-        return state, reward, terminated, truncated, info
+        
+        return state, reward, done, info
     
     def render(self, mode='human'):
         """Render the environment (SUMO GUI handles this)."""
@@ -482,5 +389,7 @@ class VANETTrafficEnv(gym.Env):
     
     def close(self):
         """Close the environment."""
-        # Don't close TraCI connection during simulation - let main controller handle it
-        pass
+        try:
+            traci.close()
+        except:
+            pass

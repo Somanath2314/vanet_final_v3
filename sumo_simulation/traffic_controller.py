@@ -181,15 +181,15 @@ class AdaptiveTrafficController:
     def calculate_adaptive_timing(self, intersection_id: str) -> Tuple[int, bool]:
         """Calculate adaptive signal timing based on sensor data"""
         intersection = self.intersections[intersection_id]
-        
+
         # Get current phase information
         current_phase = intersection.current_phase
         phases = self.default_phases.get(intersection_id, [])
         if not phases:
             return 30, False
-        
+
         phase = phases[current_phase]
-        
+
         # Determine which lanes are currently green
         if current_phase == 0:  # East-West Green
             green_lanes = ['E1_0', 'E2_0'] if intersection_id == 'J2' else ['E2_0', 'E3_0']
@@ -200,45 +200,53 @@ class AdaptiveTrafficController:
         else:
             # Yellow phases - keep default timing
             return phase.duration, False
-        
-        # Calculate traffic metrics
+
+        # Check for emergency vehicles FIRST
+        emergency_vehicles = self.sensor_network.detect_emergency_vehicles()
+        emergency_priority = False
+        emergency_direction = None
+
+        for emergency in emergency_vehicles:
+            if emergency.distance_from_intersection < 300:  # Emergency vehicle within 300m
+                # Determine which direction the emergency vehicle is approaching from
+                if emergency.lane_id in red_lanes:
+                    emergency_priority = True
+                    emergency_direction = 'red_lanes'  # Need to switch to red lanes
+                    break
+                elif emergency.lane_id in green_lanes:
+                    # Emergency vehicle already has green light, maintain it
+                    return min(self.max_green_time, intersection.time_in_phase + 10), False
+
+        # If emergency vehicle detected, immediately switch
+        if emergency_priority:
+            print(f"🚨 EMERGENCY VEHICLE DETECTED at {intersection_id} - switching to {emergency_direction}")
+            return 5, True  # Cut current phase short
+
+        # Calculate traffic metrics for normal operation
         green_demand = 0
         red_demand = 0
-        emergency_priority = False
-        
+
         for lane in green_lanes:
             density, value = self.sensor_network.get_traffic_density(lane)
             queue_length = self.sensor_network.get_queue_length(lane)
             green_demand += value + (queue_length / 100)  # Normalize queue length
-        
+
         for lane in red_lanes:
             density, value = self.sensor_network.get_traffic_density(lane)
             queue_length = self.sensor_network.get_queue_length(lane)
             red_demand += value + (queue_length / 100)
-        
-        # Check for emergency vehicles
-        emergency_vehicles = self.sensor_network.detect_emergency_vehicles()
-        for emergency in emergency_vehicles:
-            if emergency.lane_id in red_lanes and emergency.distance_from_intersection < 200:
-                emergency_priority = True
-                break
-        
+
         # Adaptive timing logic
-        if emergency_priority:
-            # Immediately switch to emergency vehicle direction
-            return 5, True  # Cut current phase short
-        
-        # Extend green if there's significant demand and low opposing demand
         if intersection.time_in_phase >= self.min_green_time:
             demand_ratio = green_demand / (red_demand + 0.1)  # Avoid division by zero
-            
+
             if demand_ratio > 2.0 and intersection.time_in_phase < self.max_green_time:
                 # Extend green phase
                 return intersection.phase_duration + self.extension_time, False
             elif demand_ratio < 0.5:
                 # Early termination if no demand
                 return max(self.min_green_time, intersection.time_in_phase + 5), False
-        
+
         return phase.duration, False
     
     def control_intersection(self, intersection_id: str):
@@ -377,12 +385,53 @@ class AdaptiveTrafficController:
                 'phase_duration': intersection.phase_duration
             }
         
-        return metrics
+    def run_simulation_with_rl(self, rl_controller, steps: int = 3600):
+        """Run simulation with RL controller"""
+        print(f"Starting RL-based traffic control simulation for {steps} steps")
+        self.running = True
+
+        try:
+            for step in range(steps):
+                if not self.running:
+                    break
+
+                # Update sensor data
+                try:
+                    self.update_sensor_data()
+                except Exception as e:
+                    print(f"Error updating sensor data: {e}")
+                    break
+
+                # Apply RL control
+                try:
+                    rl_metrics = rl_controller.step()
+                    if 'error' in rl_metrics:
+                        print(f"RL Error: {rl_metrics['error']}")
+                        break
+                except Exception as e:
+                    print(f"RL controller error: {e}")
+                    break
+
+                # Print status every 60 seconds
+                if step % 60 == 0:
+                    self.print_status()
+
+                time.sleep(0.1)  # Small delay for visualization
+
+        except KeyboardInterrupt:
+            print("RL simulation interrupted by user")
+        except Exception as e:
+            print(f"Simulation error: {e}")
+            import traceback
+            traceback.print_exc()
+        finally:
+            self.stop_simulation()
+
 
 # Main execution
 if __name__ == "__main__":
     controller = AdaptiveTrafficController()
-    
+
     # Connect to SUMO
     config_path = "simulation.sumocfg"
     if controller.connect_to_sumo(config_path):
