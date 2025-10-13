@@ -5,33 +5,37 @@
     <vType id="passenger" accel="2.6" decel="4.5" sigma="0.5" length="5.0" minGap="2.5" maxSpeed="70.0" guiShape="passenger"/>
     <vType id="emergency" accel="3.0" decel="5.0" sigma="0.2" length="6.0" minGap="2.0" maxSpeed="80.0" guiShape="emergency" color="red"/>
     
-    <!-- Routes -->
-    <route id="route_east_west" edges="E1 E2 E3 E4"/>
+    <!-- Routes - Valid directions only (network is one-way) -->
+    <route id="route_east_west_full" edges="E1 E2 E3 E4"/>
+    <route id="route_east_west_short" edges="E1 E2 E3"/>
     <route id="route_north_south_j2" edges="E5 E6"/>
     <route id="route_north_south_j3" edges="E7 E8"/>
     
-    <!-- Simpler test routes -->
-    <route id="simple_ew" edges="E1 E2"/>
-    <route id="simple_ns" edges="E5 E6"/>
+    <!-- Individual Vehicles for Testing (sorted by departure time) -->
+    <vehicle id="test_vehicle_1" type="passenger" route="route_east_west_short" depart="1"/>
+    <vehicle id="test_vehicle_2" type="passenger" route="route_north_south_j2" depart="3"/>
+    <vehicle id="test_vehicle_3" type="passenger" route="route_east_west_short" depart="5"/>
+    <vehicle id="test_vehicle_4" type="passenger" route="route_north_south_j3" depart="7"/>
+    <vehicle id="emergency_1" type="emergency" route="route_east_west_full" depart="10"/>
     
-    <!-- Individual Vehicles for Testing -->
-    <vehicle id="test_vehicle_1" type="passenger" route="simple_ew" depart="1"/>
-    <vehicle id="test_vehicle_2" type="passenger" route="simple_ew" depart="5"/>
-    <vehicle id="test_vehicle_3" type="passenger" route="simple_ns" depart="3"/>
-    <vehicle id="test_vehicle_4" type="passenger" route="simple_ns" depart="7"/>
-    <vehicle id="emergency_1" type="emergency" route="simple_ew" depart="10"/>
+    <!-- Vehicle Flows - Valid directions -->
+    <!-- East-West Traffic (Main flow) -->
+    <flow id="flow_ew_j2" type="passenger" route="route_east_west_short" begin="15" end="3600" 
+          vehsPerHour="400" departLane="best" departSpeed="max"/>
     
-    <!-- Vehicle Flows with proper timing -->
-    <!-- East-West Traffic -->
-    <flow id="flow_ew" type="passenger" route="simple_ew" begin="10" end="3600" 
+    <flow id="flow_ew_full" type="passenger" route="route_east_west_full" begin="20" end="3600" 
           vehsPerHour="300" departLane="best" departSpeed="max"/>
     
-    <!-- North-South Traffic -->
-    <flow id="flow_ns1" type="passenger" route="simple_ns" begin="15" end="3600" 
-          vehsPerHour="200" departLane="best" departSpeed="max"/>
+    <!-- North-South Traffic at J2 -->
+    <flow id="flow_ns_j2" type="passenger" route="route_north_south_j2" begin="25" end="3600" 
+          vehsPerHour="350" departLane="best" departSpeed="max"/>
+    
+    <!-- North-South Traffic at J3 -->
+    <flow id="flow_ns_j3" type="passenger" route="route_north_south_j3" begin="30" end="3600" 
+          vehsPerHour="350" departLane="best" departSpeed="max"/>
     
     <!-- Emergency Vehicles -->
-    <flow id="emergency_flow" type="emergency" route="simple_ew" begin="30" end="3600" 
-          vehsPerHour="5" departLane="best" departSpeed="max"/>
+    <flow id="emergency_flow" type="emergency" route="route_east_west_full" begin="50" end="3600" 
+          vehsPerHour="10" departLane="best" departSpeed="max"/>
 
 </routes>

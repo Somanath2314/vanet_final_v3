@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<additionalFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
 
     <!-- Traffic Light Programs -->
     <tlLogic id="J2" type="static" programID="adaptive" offset="0">
@@ -56,4 +56,4 @@
     <laneAreaDetector id="queue_E5" lane="E5_0" pos="400" endPos="500" freq="1" file="output/queue_E5.xml"/>
     <laneAreaDetector id="queue_E7" lane="E7_0" pos="400" endPos="500" freq="1" file="output/queue_E7.xml"/>
 
-</additionalFile>
+</additional>

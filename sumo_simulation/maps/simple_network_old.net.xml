@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<net version="1.20" junctionCornerDetail="5" limitTurnSpeed="5.50" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="0.00,0.00" convBoundary="0.00,0.00,2000.00,2000.00" origBoundary="-10000000000.00,-10000000000.00,10000000000.00,10000000000.00" projParameter="!"/>
+
+    <!-- Edges (Roads) -->
+    <edge id="E1" from="J1" to="J2" priority="1">
+        <lane id="E1_0" index="0" speed="13.89" length="500.00" shape="0.00,500.00 500.00,500.00"/>
+        <lane id="E1_1" index="1" speed="13.89" length="500.00" shape="0.00,503.20 500.00,503.20"/>
+    </edge>
+    
+    <edge id="E2" from="J2" to="J3" priority="1">
+        <lane id="E2_0" index="0" speed="13.89" length="500.00" shape="500.00,500.00 1000.00,500.00"/>
+        <lane id="E2_1" index="1" speed="13.89" length="500.00" shape="500.00,503.20 1000.00,503.20"/>
+    </edge>
+    
+    <edge id="E3" from="J3" to="J4" priority="1">
+        <lane id="E3_0" index="0" speed="13.89" length="500.00" shape="1000.00,500.00 1500.00,500.00"/>
+        <lane id="E3_1" index="1" speed="13.89" length="500.00" shape="1000.00,503.20 1500.00,503.20"/>
+    </edge>
+    
+    <edge id="E4" from="J4" to="J5" priority="1">
+        <lane id="E4_0" index="0" speed="13.89" length="500.00" shape="1500.00,500.00 2000.00,500.00"/>
+        <lane id="E4_1" index="1" speed="13.89" length="500.00" shape="1500.00,503.20 2000.00,503.20"/>
+    </edge>
+
+    <!-- North-South Roads -->
+    <edge id="E5" from="J6" to="J2" priority="1">
+        <lane id="E5_0" index="0" speed="13.89" length="500.00" shape="500.00,0.00 500.00,500.00"/>
+        <lane id="E5_1" index="1" speed="13.89" length="500.00" shape="503.20,0.00 503.20,500.00"/>
+    </edge>
+    
+    <edge id="E6" from="J2" to="J7" priority="1">
+        <lane id="E6_0" index="0" speed="13.89" length="500.00" shape="500.00,500.00 500.00,1000.00"/>
+        <lane id="E6_1" index="1" speed="13.89" length="500.00" shape="503.20,500.00 503.20,1000.00"/>
+    </edge>
+    
+    <edge id="E7" from="J8" to="J3" priority="1">
+        <lane id="E7_0" index="0" speed="13.89" length="500.00" shape="1000.00,0.00 1000.00,500.00"/>
+        <lane id="E7_1" index="1" speed="13.89" length="500.00" shape="1003.20,0.00 1003.20,500.00"/>
+    </edge>
+    
+    <edge id="E8" from="J3" to="J9" priority="1">
+        <lane id="E8_0" index="0" speed="13.89" length="500.00" shape="1000.00,500.00 1000.00,1000.00"/>
+        <lane id="E8_1" index="1" speed="13.89" length="500.00" shape="1003.20,500.00 1003.20,1000.00"/>
+    </edge>
+
+    <!-- Junctions (Intersections) -->
+    <junction id="J1" type="priority" x="0.00" y="500.00" incLanes="" intLanes="" shape="0.00,506.40 0.00,498.40"/>
+    <junction id="J2" type="traffic_light" x="500.00" y="500.00" incLanes="E1_0 E1_1 E5_0 E5_1" intLanes="" shape="500.00,506.40 500.00,498.40 498.40,500.00 506.40,500.00">
+        <request index="0" response="0000" foes="0000"/>
+        <request index="1" response="0000" foes="0000"/>
+        <request index="2" response="0000" foes="0000"/>
+        <request index="3" response="0000" foes="0000"/>
+    </junction>
+    <junction id="J3" type="traffic_light" x="1000.00" y="500.00" incLanes="E2_0 E2_1 E7_0 E7_1" intLanes="" shape="1000.00,506.40 1000.00,498.40 998.40,500.00 1006.40,500.00">
+        <request index="0" response="0000" foes="0000"/>
+        <request index="1" response="0000" foes="0000"/>
+        <request index="2" response="0000" foes="0000"/>
+        <request index="3" response="0000" foes="0000"/>
+    </junction>
+    <junction id="J4" type="priority" x="1500.00" y="500.00" incLanes="E3_0 E3_1" intLanes="" shape="1500.00,506.40 1500.00,498.40"/>
+    <junction id="J5" type="priority" x="2000.00" y="500.00" incLanes="E4_0 E4_1" intLanes="" shape="2000.00,506.40 2000.00,498.40"/>
+    <junction id="J6" type="priority" x="500.00" y="0.00" incLanes="" intLanes="" shape="506.40,0.00 498.40,0.00"/>
+    <junction id="J7" type="priority" x="500.00" y="1000.00" incLanes="E6_0 E6_1" intLanes="" shape="506.40,1000.00 498.40,1000.00"/>
+    <junction id="J8" type="priority" x="1000.00" y="0.00" incLanes="" intLanes="" shape="1006.40,0.00 998.40,0.00"/>
+    <junction id="J9" type="priority" x="1000.00" y="1000.00" incLanes="E8_0 E8_1" intLanes="" shape="1006.40,1000.00 998.40,1000.00"/>
+
+</net>

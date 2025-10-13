@@ -13,7 +13,7 @@ import sys
 import os
 
 # Add sensor network to path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'sensors'))
+sys.path.append(os.path.join(os.path.dirname(__file__), 'sensors'))
 from sensor_network import SensorNetwork, SensorReading
 
 class SignalState(Enum):
@@ -46,19 +46,21 @@ class AdaptiveTrafficController:
         self.running = False
         self.simulation_step = 0
         
-        # Traffic light programs
+        # Traffic light programs - 4-way intersections
+        # State format: 6 connections per intersection (3 per direction)
+        # Format: [N-S lane0, N-S lane1, N-S turn, E-W lane0, E-W lane1, E-W turn]
         self.default_phases = {
             "J2": [
-                TrafficPhase(30, "GGrr", "East-West Green"),
-                TrafficPhase(5, "yyrr", "East-West Yellow"),
-                TrafficPhase(30, "rrGG", "North-South Green"),
-                TrafficPhase(5, "rryy", "North-South Yellow")
+                TrafficPhase(30, "rrrGGG", "East-West Green"),
+                TrafficPhase(5, "rrryyy", "East-West Yellow"),
+                TrafficPhase(30, "GGGrrr", "North-South Green"),
+                TrafficPhase(5, "yyyrrr", "North-South Yellow")
             ],
             "J3": [
-                TrafficPhase(30, "GGrr", "East-West Green"),
-                TrafficPhase(5, "yyrr", "East-West Yellow"), 
-                TrafficPhase(30, "rrGG", "North-South Green"),
-                TrafficPhase(5, "rryy", "North-South Yellow")
+                TrafficPhase(30, "rrrGGG", "East-West Green"),
+                TrafficPhase(5, "rrryyy", "East-West Yellow"), 
+                TrafficPhase(30, "GGGrrr", "North-South Green"),
+                TrafficPhase(5, "yyyrrr", "North-South Yellow")
             ]
         }
         
@@ -71,15 +73,24 @@ class AdaptiveTrafficController:
     def connect_to_sumo(self, config_path: str = None):
         """Connect to SUMO simulation"""
         try:
+            # Close any existing connections
+            try:
+                traci.close()
+            except:
+                pass
+            
+            # Start SUMO with GUI
             if config_path:
-                traci.start(["sumo-gui", "-c", config_path, "--remote-port", "8813"])
+                traci.start(["sumo-gui", "-c", config_path])
             else:
-                traci.start(["sumo-gui", "-c", "simulation.sumocfg", "--remote-port", "8813"])
+                traci.start(["sumo-gui", "-c", "simulation.sumocfg"])
             print("Connected to SUMO simulation")
             self._initialize_intersections()
             return True
         except Exception as e:
             print(f"Failed to connect to SUMO: {e}")
+            import traceback
+            traceback.print_exc()
             return False
     
     def _initialize_intersections(self):

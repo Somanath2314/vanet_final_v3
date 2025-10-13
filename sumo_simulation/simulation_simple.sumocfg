@@ -4,8 +4,6 @@
     <input>
         <net-file value="maps/simple_network.net.xml"/>
         <route-files value="maps/routes.rou.xml"/>
-        <!-- Detectors disabled - controlled via TraCI -->
-        <!-- <additional-files value="maps/detectors.add.xml"/> -->
     </input>
 
     <output>
@@ -22,11 +20,6 @@
     <processing>
         <time-to-teleport value="300"/>
     </processing>
-
-    <!-- TraCI server port is auto-assigned by TraCI -->
-    <!-- <traci_server>
-        <remote-port value="8813"/>
-    </traci_server> -->
 
     <gui_only>
         <gui-settings-file value="maps/gui-settings.cfg"/>

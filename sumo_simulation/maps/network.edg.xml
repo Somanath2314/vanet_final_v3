@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edges xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/edges_file.xsd">
+    <!-- Horizontal edges (East-West) -->
+    <edge id="E1" from="J1" to="J2" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="E2" from="J2" to="J3" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="E3" from="J3" to="J4" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="E4" from="J4" to="J5" priority="1" numLanes="2" speed="13.89"/>
+    
+    <!-- Vertical edges at J2 (North-South) -->
+    <edge id="E5" from="J6" to="J2" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="E6" from="J2" to="J7" priority="1" numLanes="2" speed="13.89"/>
+    
+    <!-- Vertical edges at J3 (North-South) -->
+    <edge id="E7" from="J8" to="J3" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="E8" from="J3" to="J9" priority="1" numLanes="2" speed="13.89"/>
+</edges>
