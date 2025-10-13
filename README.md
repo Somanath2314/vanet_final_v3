@@ -349,6 +349,24 @@ This project is developed for SIH2025. If you use this code for research:
 
 ---
 
+## 🎯 **For New Developers - Quick Start**
+
+**Get everything running in 5 minutes:**
+
+```bash
+# 1. Run setup script
+./new_developer_setup.sh
+
+# 2. Start system (3 terminals)
+# Terminal 1: cd backend && python3 app.py
+# Terminal 2: cd sumo_simulation && sumo-gui -c test_simple.sumocfg  
+# Terminal 3: curl http://localhost:5000/api/status
+```
+
+**See QUICK_START.md for detailed instructions.**
+
+---
+
 *Last Updated: October 12, 2025*  
 *Phase 1 Implementation: COMPLETE*  
 *Next Phase: RL Agent Training & Backend Intelligence*
