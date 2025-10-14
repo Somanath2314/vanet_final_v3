@@ -1,0 +1,16 @@
+# Minimal requirements for RL training in rl_module
+# Many core deps are also listed in backend/requirements.txt
+
+gymnasium==0.28.1
+torch==2.4.1
+numpy==1.24.3
+traci==1.18.0
+sumolib
+pandas
+matplotlib
+scipy
+ray[rllib]==2.9.0
+
+# Optional / helpful
+# gymnasium[classic_control]
+# box2d-py (if using Box2D envs)
