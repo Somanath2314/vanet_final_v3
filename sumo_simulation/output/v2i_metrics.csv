@@ -1,0 +1,10 @@
+total_packets,11473
+successful_packets,11185
+PDR,0.9748975856358407
+mean_latency_s,0.6686886851084684
+jitter_s,1.159433164622054
+packet_loss_rate,0.025102414364159276
+throughput_bps,305425.06666666665
+loss_reasons,"{'rx_error': 246, 'handoff_ok': 30, 'handoff_fail': 12}"
+handoff_success_rate,0.9622641509433962
+rsu_stats_sample,"{'rsu_0': {'utilization': 0.00061303466666667, 'tx_bytes': 447488}, 'rsu_1': {'utilization': 0.0011386880000000162, 'tx_bytes': 826368}, 'rsu_2': {'utilization': 0.000839680000000009, 'tx_bytes': 623616}, 'rsu_3': {'utilization': 0.001253472000000015, 'tx_bytes': 800768}, 'rsu_4': {'utilization': 0.00329725866666668, 'tx_bytes': 701440}, 'rsu_5': {'utilization': 0.0010418453333333468, 'tx_bytes': 644096}, 'rsu_6': {'utilization': 0.004946176000000014, 'tx_bytes': 693248}, 'rsu_7': {'utilization': 0.011073343999999959, 'tx_bytes': 532480}, 'rsu_8': {'utilization': 0.002697781333333339, 'tx_bytes': 388096}, 'rsu_9': {'utilization': 0.000282624, 'tx_bytes': 209920}}"
