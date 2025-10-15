@@ -32,6 +32,12 @@ metrics_history = []
 current_metrics = {}
 rl_metrics_history = []
 
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
+from models.traffic_metrics import insert_traffic_metrics
+
 @app.route('/')
 def home():
     """Home endpoint"""
@@ -216,8 +222,7 @@ def start_simulation():
         return jsonify({"message": "Simulation already running"}), 200
     
     try:
-        # Import here to avoid circular imports
-        from traffic_controller import AdaptiveTrafficController
+        from sumo_simulation.traffic_controller import AdaptiveTrafficController
         
         traffic_controller = AdaptiveTrafficController()
         
@@ -477,6 +482,22 @@ def rl_step():
             rl_metrics_history = rl_metrics_history[-1000:]
         
         return jsonify(metrics)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/traffic/metrics/populate', methods=['POST'])
+def populate_traffic_metrics():
+    """Populate traffic metrics into MongoDB."""
+    global metrics_history
+
+    if not metrics_history:
+        return jsonify({"error": "No metrics available to populate"}), 400
+
+    try:
+        for metric in metrics_history:
+            insert_traffic_metrics(metric)
+
+        return jsonify({"message": "Traffic metrics populated successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
