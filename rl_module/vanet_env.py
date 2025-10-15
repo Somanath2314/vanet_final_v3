@@ -429,9 +429,78 @@ class VANETTrafficEnv(gym.Env):
 
         return state, {}
     
+    def emergency_override(self):
+        """Override traffic lights to prioritize emergency vehicles."""
+        try:
+            all_vehicles = traci.vehicle.getIDList()
+            for veh_id in all_vehicles:
+                if 'emergency' in veh_id.lower() or 'ambulance' in veh_id.lower() or 'fire' in veh_id.lower():
+                    lane_id = traci.vehicle.getLaneID(veh_id)
+                    distance = traci.vehicle.getLanePosition(veh_id)
+                    lane_length = traci.lane.getLength(lane_id)
+                    distance_from_intersection = lane_length - distance
+
+                    if distance_from_intersection < 300:  # 300m range for emergency vehicles
+                        controlled_tls = self.get_controlled_tl_ids()
+                        for tl_id in controlled_tls:
+                            connections = traci.trafficlight.getControlledLinks(tl_id)
+                            for link in connections:
+                                if link[0][0] == lane_id:  # Match lane to traffic light
+                                    traci.trafficlight.setRedYellowGreenState(tl_id, 'G' * len(traci.trafficlight.getRedYellowGreenState(tl_id)))
+                                    print(f"Emergency override: Set green for lane {lane_id} at traffic light {tl_id}")
+                                    return  # Only need one override per step
+        except Exception as e:
+            print(f"Error in emergency override: {e}")
+
+    def density_based_override(self):
+        """Override traffic lights based on vehicle density when no emergency vehicles are detected."""
+        try:
+            all_vehicles = traci.vehicle.getIDList()
+            emergency_detected = any(
+                'emergency' in veh_id.lower() or 'ambulance' in veh_id.lower() or 'fire' in veh_id.lower()
+                for veh_id in all_vehicles
+            )
+
+            if emergency_detected:
+                return  # Emergency override will handle this
+
+            controlled_tls = self.get_controlled_tl_ids()
+            lane_densities = {}
+
+            # Measure density for all lanes connected to traffic lights
+            for tl_id in controlled_tls:
+                connections = traci.trafficlight.getControlledLinks(tl_id)
+                for link in connections:
+                    lane_id = link[0][0]  # Get lane ID
+                    try:
+                        density = traci.lane.getLastStepOccupancy(lane_id)  # Get density
+                        lane_densities[lane_id] = density
+                    except Exception as e:
+                        print(f"Error getting density for lane {lane_id}: {e}")
+
+            # Find the lane with the highest density
+            if lane_densities:
+                max_density_lane = max(lane_densities, key=lane_densities.get)
+                max_density = lane_densities[max_density_lane]
+
+                # Set green for the traffic light controlling the lane with the highest density
+                for tl_id in controlled_tls:
+                    connections = traci.trafficlight.getControlledLinks(tl_id)
+                    for link in connections:
+                        if link[0][0] == max_density_lane:  # Match lane to traffic light
+                            traci.trafficlight.setRedYellowGreenState(tl_id, 'G' * len(traci.trafficlight.getRedYellowGreenState(tl_id)))
+                            print(f"Density-based override: Set green for lane {max_density_lane} at traffic light {tl_id} with density {max_density}")
+                            return  # Only need one override per step
+        except Exception as e:
+            print(f"Error in density-based override: {e}")
+
     def step(self, action):
         """Execute one step in the environment."""
-        # Apply action
+        # Apply emergency override or density-based override before RL actions
+        self.emergency_override()
+        self.density_based_override()
+
+        # Apply RL actions
         self._apply_rl_actions(action)
 
         # Advance simulation
