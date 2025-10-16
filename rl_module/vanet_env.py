@@ -444,11 +444,22 @@ class VANETTrafficEnv(gym.Env):
                         controlled_tls = self.get_controlled_tl_ids()
                         for tl_id in controlled_tls:
                             connections = traci.trafficlight.getControlledLinks(tl_id)
-                            for link in connections:
+                            for link_index, link in enumerate(connections):
                                 if link[0][0] == lane_id:  # Match lane to traffic light
-                                    traci.trafficlight.setRedYellowGreenState(tl_id, 'G' * len(traci.trafficlight.getRedYellowGreenState(tl_id)))
-                                    print(f"Emergency override: Set green for lane {lane_id} at traffic light {tl_id}")
-                                    return  # Only need one override per step
+                                    # Find a phase that gives green to this link index
+                                    phase_index = self._find_phase_for_link(tl_id, link_index)
+                                    if phase_index is not None:
+                                        # Respect minimum green timer before forcing a new phase
+                                        timer = self.obs_tl_wait_steps.get(tl_id, {}).get('timer', 0)
+                                        if timer >= self.tl_constraint_min:
+                                            traci.trafficlight.setPhase(tl_id, phase_index)
+                                            print(f"Emergency override: Set phase {phase_index} at traffic light {tl_id} for lane {lane_id}")
+                                            return
+                                        else:
+                                            # If min green not met, still set immediately for emergencies
+                                            traci.trafficlight.setPhase(tl_id, phase_index)
+                                            print(f"Emergency override (forced): Set phase {phase_index} at traffic light {tl_id} for lane {lane_id}")
+                                            return
         except Exception as e:
             print(f"Error in emergency override: {e}")
 
@@ -483,16 +494,63 @@ class VANETTrafficEnv(gym.Env):
                 max_density_lane = max(lane_densities, key=lane_densities.get)
                 max_density = lane_densities[max_density_lane]
 
-                # Set green for the traffic light controlling the lane with the highest density
+                # Set appropriate phase for the traffic light controlling the lane with the highest density
                 for tl_id in controlled_tls:
                     connections = traci.trafficlight.getControlledLinks(tl_id)
-                    for link in connections:
+                    for link_index, link in enumerate(connections):
                         if link[0][0] == max_density_lane:  # Match lane to traffic light
-                            traci.trafficlight.setRedYellowGreenState(tl_id, 'G' * len(traci.trafficlight.getRedYellowGreenState(tl_id)))
-                            print(f"Density-based override: Set green for lane {max_density_lane} at traffic light {tl_id} with density {max_density}")
-                            return  # Only need one override per step
+                            phase_index = self._find_phase_for_link(tl_id, link_index)
+                            if phase_index is not None:
+                                # Hysteresis: only override if density sufficiently higher than current green lanes
+                                # Compute current green lanes density
+                                current_state = traci.trafficlight.getRedYellowGreenState(tl_id)
+                                green_indices = [i for i, ch in enumerate(current_state) if ch == 'G']
+                                green_density = 0.0
+                                if green_indices:
+                                    vals = []
+                                    for gi in green_indices:
+                                        try:
+                                            lane_i = connections[gi][0][0]
+                                            vals.append(traci.lane.getLastStepOccupancy(lane_i))
+                                        except Exception:
+                                            pass
+                                    if vals:
+                                        green_density = sum(vals) / len(vals)
+
+                                # Only switch if target density noticeably higher (20% more) or current green very low
+                                if max_density > max(green_density * 1.2, 0.05):
+                                    timer = self.obs_tl_wait_steps.get(tl_id, {}).get('timer', 0)
+                                    if timer >= self.tl_constraint_min:
+                                        traci.trafficlight.setPhase(tl_id, phase_index)
+                                        print(f"Density-based override: Set phase {phase_index} for lane {max_density_lane} at traffic light {tl_id} with density {max_density}")
+                                        return
+                                    else:
+                                        # defer change until min green reached
+                                        print(f"Density override skipped for {tl_id} (min green not met)")
+                                        return
         except Exception as e:
             print(f"Error in density-based override: {e}")
+
+    def _find_phase_for_link(self, tl_id: str, link_index: int):
+        """Find a phase index for a traffic light that gives green to the given controlled link index.
+
+        Returns None if no phase found.
+        """
+        try:
+            # Get all program logics (including phases)
+            programs = traci.trafficlight.getAllProgramLogics(tl_id)
+            if not programs:
+                return None
+            # Use the first program's phases
+            phases = programs[0].getPhases()
+            for idx, phase in enumerate(phases):
+                state = phase.getRedYellowGreenState()
+                # Ensure state length aligns with controlled links, otherwise skip
+                if link_index < len(state) and state[link_index] == 'G':
+                    return idx
+            return None
+        except Exception:
+            return None
 
     def step(self, action):
         """Execute one step in the environment."""
