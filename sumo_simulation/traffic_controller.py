@@ -14,6 +14,7 @@ import os
 
 # Add sensor network to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'sensors'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'v2v_communication'))
 from sensor_network import SensorNetwork, SensorReading
 
 class SignalState(Enum):
@@ -45,6 +46,21 @@ class AdaptiveTrafficController:
         self.intersections: Dict[str, IntersectionData] = {}
         self.running = False
         self.simulation_step = 0
+        
+        # V2V Communication integration
+        try:
+            from v2v_communication.v2v_simulator import V2VSimulator
+            from v2v_communication.v2v_security import RSASecurityManager
+            
+            self.v2v_security_manager = RSASecurityManager()
+            self.v2v_simulator = V2VSimulator()
+            self.v2v_enabled = True
+            print("V2V communication initialized")
+        except ImportError as e:
+            print(f"V2V communication not available: {e}")
+            self.v2v_enabled = False
+            self.v2v_simulator = None
+            self.v2v_security_manager = None
         
         # Traffic light programs - 4-way intersections
         # State format: 6 connections per intersection (3 per direction)
@@ -318,6 +334,10 @@ class AdaptiveTrafficController:
                 # Don't break simulation if visualization update fails
                 pass
             
+            # V2V Communication integration
+            if self.v2v_enabled and self.v2v_simulator:
+                self.update_v2v_communication()
+            
             # Control intersections every second
             if self.simulation_step % 1 == 0:
                 for intersection_id in self.intersections:
@@ -398,8 +418,70 @@ class AdaptiveTrafficController:
                 'phase_duration': intersection.phase_duration
             }
         
+        return metrics
+    
+    def update_v2v_communication(self):
+        """Update V2V communication for all vehicles"""
+        try:
+            # Get all vehicles in simulation
+            vehicle_ids = traci.vehicle.getIDList()
+            
+            for veh_id in vehicle_ids:
+                # Register vehicle if not already registered
+                if veh_id not in self.v2v_simulator.vehicles:
+                    self.v2v_simulator.register_vehicle(veh_id)
+                
+                # Get vehicle position and update V2V
+                try:
+                    x, y = traci.vehicle.getPosition(veh_id)
+                    speed = traci.vehicle.getSpeed(veh_id)
+                    lane = traci.vehicle.getLaneID(veh_id)
+                    
+                    self.v2v_simulator.update_vehicle_position(veh_id, x, y, speed, lane)
+                    
+                    # Process received messages
+                    received_messages = self.v2v_simulator.process_received_messages(veh_id)
+                    
+                    # Handle emergency messages for traffic control
+                    for message in received_messages:
+                        if message.message_type == 'safety' and message.payload.get('emergency'):
+                            self.handle_emergency_v2v_message(veh_id, message)
+                            
+                except Exception as e:
+                    print(f"Error updating V2V for vehicle {veh_id}: {e}")
+                    
+        except Exception as e:
+            print(f"Error in V2V communication update: {e}")
+    
+    def handle_emergency_v2v_message(self, vehicle_id: str, message: Dict):
+        """Handle emergency messages received via V2V"""
+        print(f"🚨 EMERGENCY V2V MESSAGE from {message.sender_id} to {vehicle_id}")
+        
+        # In a real implementation, this would trigger emergency protocols
+        # For now, we'll just log it and potentially adjust traffic signals
+        
+        # Find which intersection this emergency vehicle is approaching
+        sender_location = message.payload.get('location', {})
+        if sender_location:
+            # Determine which intersection based on location
+            x, y = sender_location.get('x', 0), sender_location.get('y', 0)
+            
+            # Simple logic: if vehicle is within 300m of an intersection, prioritize it
+            for intersection_id in self.intersections:
+                # This is simplified - in reality you'd need proper intersection coordinates
+                intersection = self.intersections[intersection_id]
+                intersection.emergency_detected = True
+                
+                print(f"Emergency vehicle approaching {intersection_id}")
+    
+    def get_v2v_metrics(self) -> Dict:
+        """Get V2V communication metrics"""
+        if not self.v2v_enabled or not self.v2v_simulator:
+            return {"v2v_enabled": False}
+        
+        return self.v2v_simulator.get_communication_stats()
+    
     def run_simulation_with_rl(self, rl_controller, steps: int = 3600):
-        """Run simulation with RL controller"""
         print(f"Starting RL-based traffic control simulation for {steps} steps")
         self.running = True
 
@@ -420,6 +502,10 @@ class AdaptiveTrafficController:
                     self.sensor_network.detect_emergency_vehicles_and_update_pole()
                 except Exception:
                     pass
+                # V2V Communication integration for RL
+                if self.v2v_enabled and self.v2v_simulator:
+                    self.update_v2v_communication()
+
                 # Apply RL control
                 try:
                     rl_metrics = rl_controller.step()
