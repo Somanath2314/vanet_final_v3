@@ -45,6 +45,22 @@ class SensorNetwork:
         self.sensors: Dict[str, SensorReading] = {}
         self.detection_history: List[VehicleDetection] = []
         self.sensor_positions = self._initialize_sensor_positions()
+        # Central pole / visualization state and debounce counters
+        self.central_pole_id = None
+        self.central_pole_position = None
+        # central_pole_state: 'green', 'black' (in-network), 'blue' (near)
+        self.central_pole_state = 'green'
+        # debounce counters for 'blue' (close) detection
+        self._emergency_counter = 0
+        self._no_emergency_counter = 0
+        self._emergency_debounce_threshold = 3  # steps required to switch to blue
+        self._no_emergency_debounce_threshold = 5  # steps required to switch back to green from blue
+        self._pole_detection_distance = 150.0  # meters for pole-triggering events
+        # counters for global (in-network) emergency presence -> 'black' state
+        self._global_emergency_counter = 0
+        self._no_global_emergency_counter = 0
+        self._global_debounce_threshold = 1
+        self._global_no_debounce_threshold = 3
         
     def _initialize_sensor_positions(self) -> Dict[str, Tuple[float, float, str]]:
         """Initialize sensor positions (x, y, lane_id) every 100m over 0.5km"""
@@ -276,6 +292,123 @@ class SensorNetwork:
             summary['queue_lengths'][lane] = self.get_queue_length(lane)
         
         return summary
+    
+    def initialize_central_pole(self):
+        """Initialize a central pole in the SUMO simulation."""
+        try:
+            import traci
+            # Define the position of the central pole and draw a circular marker
+            self.central_pole_id = "central_pole"
+            # place the pole at y=530 as requested
+            self.central_pole_position = (750, 530)
+
+            # Create a circular polygon approximation (32 points) for a smooth circle
+            import math
+            cx, cy = self.central_pole_position
+            radius = 8  # pixels/meters depending on SUMO view scale; tweak if needed
+            points = []
+            steps = 32
+            for i in range(steps):
+                theta = 2 * math.pi * i / steps
+                x = cx + radius * math.cos(theta)
+                y = cy + radius * math.sin(theta)
+                points.append((x, y))
+
+            # Add the circular polygon to SUMO GUI
+            traci.polygon.add(self.central_pole_id, shape=points, color=(0, 255, 0, 255))
+            print("Central pole initialized at position:", self.central_pole_position)
+            # reset debounce counters/state
+            self.central_pole_state = 'green'
+            self._emergency_counter = 0
+            self._no_emergency_counter = 0
+        except ImportError:
+            print("traci module not available. Ensure SUMO is properly configured.")
+        except Exception as e:
+            print("Error initializing central pole:", e)
+
+    def update_central_pole_color(self, is_emergency_detected: bool):
+        """Update the color of the central pole based on emergency detection."""
+        # Deprecated boolean API kept for compatibility
+        try:
+            import traci
+            print("Attempting to update central pole color...")
+            # allow callers to pass a state string directly
+            if isinstance(is_emergency_detected, str):
+                state = is_emergency_detected
+            else:
+                state = 'blue' if is_emergency_detected else 'green'
+
+            if state == 'blue':
+                traci.polygon.setColor(self.central_pole_id, (0, 0, 255, 255))
+                print("Central pole color set to blue.")
+            elif state == 'black':
+                # black (in-network emergency)
+                traci.polygon.setColor(self.central_pole_id, (0, 0, 0, 255))
+                print("Central pole color set to black.")
+            else:
+                traci.polygon.setColor(self.central_pole_id, (0, 255, 0, 255))
+                print("Central pole color set to green.")
+        except ImportError:
+            print("traci module not available. Ensure SUMO is properly configured.")
+        except Exception as e:
+            print("Error updating central pole color:", e)
+            print("Debug: state=", is_emergency_detected)
+
+    def detect_emergency_vehicles_and_update_pole(self) -> List[VehicleDetection]:
+        """Detect emergency vehicles and update the central pole color."""
+        emergency_vehicles = self.detect_emergency_vehicles()
+
+        # Any emergency anywhere (global/in-network)
+        any_emergency = len(emergency_vehicles) > 0
+
+        # Filter emergency detections by proximity to intersection/pole
+        close_emergencies = [e for e in emergency_vehicles if getattr(e, 'distance_from_intersection', float('inf')) <= self._pole_detection_distance]
+
+        # Update global counters
+        if any_emergency:
+            print(f"Emergency anywhere in network: {[v.vehicle_id for v in emergency_vehicles]}")
+            self._global_emergency_counter += 1
+            self._no_global_emergency_counter = 0
+        else:
+            self._no_global_emergency_counter += 1
+            self._global_emergency_counter = 0
+
+        # Update close-emergency counters
+        if close_emergencies:
+            print(f"Emergency vehicles close: {[v.vehicle_id for v in close_emergencies]}")
+            self._emergency_counter += 1
+            self._no_emergency_counter = 0
+        else:
+            print("No emergency vehicles detected.")
+            self._no_emergency_counter += 1
+            self._emergency_counter = 0
+
+        # Decide desired state, priority: blue (close) > black (in-network) > green
+        desired_state = self.central_pole_state
+
+        if self._emergency_counter >= self._emergency_debounce_threshold:
+            desired_state = 'blue'
+        elif self._global_emergency_counter >= self._global_debounce_threshold:
+            desired_state = 'black'
+        elif self._no_emergency_counter >= self._no_emergency_debounce_threshold and self._no_global_emergency_counter >= self._global_no_debounce_threshold:
+            desired_state = 'green'
+
+        # Apply state change if different
+        if desired_state != self.central_pole_state:
+            self.central_pole_state = desired_state
+            try:
+                self.update_central_pole_color(desired_state)
+            except Exception:
+                pass
+            print(f"Central pole color updated to {desired_state}.")
+        else:
+            # Keep traci state consistent each step
+            try:
+                self.update_central_pole_color(self.central_pole_state)
+            except Exception:
+                pass
+
+        return emergency_vehicles
 
 # Example usage and testing
 if __name__ == "__main__":
@@ -299,3 +432,10 @@ if __name__ == "__main__":
     # Get summary
     summary = sensor_network.get_sensor_data_summary()
     print("Summary:", json.dumps(summary, indent=2))
+    
+    # Initialize central pole in SUMO
+    sensor_network.initialize_central_pole()
+    
+    # Detect emergency vehicles and update pole color
+    emergency_detections = sensor_network.detect_emergency_vehicles_and_update_pole()
+    print("Emergency Detections:", emergency_detections)

@@ -86,6 +86,12 @@ class AdaptiveTrafficController:
                 traci.start(["sumo-gui", "-c", "simulation.sumocfg"])
             print("Connected to SUMO simulation")
             self._initialize_intersections()
+            # Initialize central pole visualization in SUMO (if available)
+            try:
+                self.sensor_network.initialize_central_pole()
+            except Exception:
+                # Non-fatal: continue even if visualization can't be created
+                pass
             return True
         except Exception as e:
             print(f"Failed to connect to SUMO: {e}")
@@ -304,6 +310,13 @@ class AdaptiveTrafficController:
             
             # Update sensor data every step
             self.update_sensor_data()
+
+            # Update central pole visualization based on emergency detection
+            try:
+                self.sensor_network.detect_emergency_vehicles_and_update_pole()
+            except Exception:
+                # Don't break simulation if visualization update fails
+                pass
             
             # Control intersections every second
             if self.simulation_step % 1 == 0:
@@ -402,6 +415,11 @@ class AdaptiveTrafficController:
                     print(f"Error updating sensor data: {e}")
                     break
 
+                # Update central pole visualization based on emergency detection
+                try:
+                    self.sensor_network.detect_emergency_vehicles_and_update_pole()
+                except Exception:
+                    pass
                 # Apply RL control
                 try:
                     rl_metrics = rl_controller.step()
