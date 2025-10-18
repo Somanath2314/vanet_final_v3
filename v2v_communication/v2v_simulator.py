@@ -66,6 +66,39 @@ class V2VSimulator:
             }
 
             logger.info("Registered vehicle", extra={'extra': {'vehicle_id': vehicle_id, 'certificate_hash': cert.certificate_hash[:16]}})
+
+            # Persist verification entry for WiMAX (shared store used by SUMO-side WiMAX listener)
+            try:
+                # Determine shared store path under backend updated_logs
+                repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+                wimax_dir = os.path.join(repo_root, '..', 'backend', 'updated_logs', 'wimax')
+                os.makedirs(wimax_dir, exist_ok=True)
+                store_path = os.path.join(wimax_dir, 'verified_vehicles.json')
+
+                entry = {
+                    'vehicle_id': vehicle_id,
+                    'certificate_hash': cert.certificate_hash,
+                    'registered_at': time.time()
+                }
+
+                # Load existing store and append/replace
+                try:
+                    if os.path.exists(store_path):
+                        with open(store_path, 'r') as sf:
+                            data = json.load(sf)
+                    else:
+                        data = {}
+                except Exception:
+                    data = {}
+
+                data[vehicle_id] = entry
+
+                with open(store_path, 'w') as sf:
+                    json.dump(data, sf)
+
+                logger.info("Persisted verified vehicle for WiMAX", extra={'extra': {'vehicle_id': vehicle_id}})
+            except Exception as e:
+                logger.warning(f"Failed to persist WiMAX verification entry: {e}")
             return True
 
         except Exception as e:

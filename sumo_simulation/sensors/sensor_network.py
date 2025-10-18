@@ -9,6 +9,19 @@ import json
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
 from enum import Enum
+import os
+import sys
+import logging
+
+# Make sure repo root is on path so we can import utils.logging_config
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+
+from utils.logging_config import setup_logging
+
+# WiMAX logger (writes to backend/updated_logs/wimax/wimax.log)
+wimax_logger = setup_logging('wimax')
 
 class SensorType(Enum):
     RADAR = "radar"
@@ -61,6 +74,8 @@ class SensorNetwork:
         self._no_global_emergency_counter = 0
         self._global_debounce_threshold = 1
         self._global_no_debounce_threshold = 3
+        # cache of verified vehicle_ids to avoid re-verification within a session
+        self._verified_cache = set()
         
     def _initialize_sensor_positions(self) -> Dict[str, Tuple[float, float, str]]:
         """Initialize sensor positions (x, y, lane_id) every 100m over 0.5km"""
@@ -269,6 +284,45 @@ class SensorNetwork:
             if emergency.vehicle_id not in seen_ids:
                 seen_ids.add(emergency.vehicle_id)
                 unique_emergencies.append(emergency)
+
+        # WiMAX verification: check persisted verified store and update logs
+        try:
+            repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+            wimax_dir = os.path.join(repo_root, 'backend', 'updated_logs', 'wimax')
+            store_path = os.path.join(wimax_dir, 'verified_vehicles.json')
+
+            verified_store = {}
+            if os.path.exists(store_path):
+                try:
+                    with open(store_path, 'r') as sf:
+                        verified_store = json.load(sf)
+                except Exception:
+                    verified_store = {}
+
+            for det in unique_emergencies:
+                vid = det.vehicle_id
+                if vid in self._verified_cache:
+                    continue
+
+                if vid in verified_store:
+                    wimax_logger.info("Verified vehicle detected", extra={'extra': {'vehicle_id': vid, 'status': 'verified_store'}})
+                    self._verified_cache.add(vid)
+                else:
+                    # heuristic: if ID contains 'emergency' treat as ambulance and auto-register
+                    if 'emergency' in vid.lower() or 'ambulance' in vid.lower():
+                        wimax_logger.warning("Unverified emergency id seen; auto-registering in store", extra={'extra': {'vehicle_id': vid}})
+                        try:
+                            os.makedirs(wimax_dir, exist_ok=True)
+                            verified_store[vid] = {'vehicle_id': vid, 'registered_at': time.time(), 'note': 'auto_registered_by_wimax'}
+                            with open(store_path, 'w') as sf:
+                                json.dump(verified_store, sf)
+                            self._verified_cache.add(vid)
+                        except Exception as e:
+                            wimax_logger.error("Failed to auto-register vehicle", extra={'extra': {'vehicle_id': vid, 'error': str(e)}})
+                    else:
+                        wimax_logger.warning("Suspicious vehicle signal (not verified)", extra={'extra': {'vehicle_id': vid}})
+        except Exception as e:
+            wimax_logger.error("WiMAX verification failure", extra={'extra': {'error': str(e)}})
 
         return unique_emergencies
     
