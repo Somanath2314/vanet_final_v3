@@ -12,8 +12,7 @@ __pycache__/
 
 # SUMO Output
 sumo_simulation/output/*.xml
-sumo_simulation/output/*.log
-*.log
+sumo_simulation/output/*.log 
 
 # RL Models
 rl_module/models/*.pth
