@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2025-10-16 22:33:34 by Eclipse SUMO GUI Version 1.18.0
-<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+<!-- generated on 2025-10-18 11:49:06 by Eclipse SUMO GUI Version 1.22.0
+<sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
 
     <input>
-        <net-file value="/home/mahesh/Desktop/capstone/vanet_final_v3/sumo_simulation/maps/simple_network.net.xml"/>
-        <route-files value="/home/mahesh/Desktop/capstone/vanet_final_v3/sumo_simulation/maps/routes.rou.xml"/>
+        <net-file value="maps/simple_network.net.xml"/>
+        <route-files value="maps/routes.rou.xml"/>
     </input>
 
     <output>
-        <summary-output value="/home/mahesh/Desktop/capstone/vanet_final_v3/sumo_simulation/output/summary.xml"/>
-        <tripinfo-output value="/home/mahesh/Desktop/capstone/vanet_final_v3/sumo_simulation/output/tripinfo.xml"/>
+        <summary-output value="output/summary.xml"/>
+        <tripinfo-output value="output/tripinfo.xml"/>
     </output>
 
     <time>
@@ -24,16 +24,16 @@
     </processing>
 
     <traci_server>
-        <remote-port value="56855"/>
+        <remote-port value="62904"/>
     </traci_server>
 
     <gui_only>
-        <gui-settings-file value="/home/mahesh/Desktop/capstone/vanet_final_v3/sumo_simulation/maps/gui-settings.cfg"/>
+        <gui-settings-file value="maps/gui-settings.cfg"/>
         <quit-on-end value="false"/>
         <start value="true"/>
     </gui_only>
 
-</configuration>
+</sumoConfiguration>
 -->
 
 <tripinfos xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/tripinfo_file.xsd">

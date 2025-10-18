@@ -10,12 +10,17 @@ import threading
 from typing import Dict, List, Optional, Tuple
 import traci
 from collections import defaultdict
+import logging
+import os
+import sys
+from utils.logging_config import setup_logging
 
 # Import V2V security module
-import sys
-import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'v2v_communication'))
 from v2v_security import RSASecurityManager, V2VCommunicationManager, VehicleIdentity
+
+# Logger
+logger = setup_logging('v2v')
 
 
 class V2VSimulator:
@@ -60,11 +65,11 @@ class V2VSimulator:
                 'last_update': time.time()
             }
 
-            print(f"Registered vehicle {vehicle_id} with certificate {cert.certificate_hash[:16]}...")
+            logger.info("Registered vehicle", extra={'extra': {'vehicle_id': vehicle_id, 'certificate_hash': cert.certificate_hash[:16]}})
             return True
 
         except Exception as e:
-            print(f"Failed to register vehicle {vehicle_id}: {e}")
+            logger.exception(f"Failed to register vehicle {vehicle_id}: {e}")
             return False
 
     def update_vehicle_position(self, vehicle_id: str, x: float, y: float, speed: float, lane: str):
@@ -177,17 +182,16 @@ class V2VSimulator:
     def _process_safety_message(self, vehicle_id: str, message: Dict):
         """Process received safety message"""
         # In a real implementation, this would trigger safety actions
-        print(f"Vehicle {vehicle_id} received safety message from {message.sender_id}")
+        logger.info("Vehicle received safety message", extra={'extra': {'vehicle_id': vehicle_id, 'from': message.sender_id}})
 
         if message.payload.get('emergency'):
-            print(f"  EMERGENCY ALERT from {message.sender_id}!")
+            logger.warning("EMERGENCY ALERT", extra={'extra': {'vehicle_id': vehicle_id, 'from': message.sender_id}})
 
     def _process_traffic_info(self, vehicle_id: str, message: Dict):
         """Process received traffic information"""
         # In a real implementation, this would update route planning
-        print(f"Vehicle {vehicle_id} received traffic info from {message.sender_id}")
-        print(f"  Traffic condition: {message.payload.get('condition', 'unknown')}")
-        print(f"  Recommended action: {message.payload.get('action', 'unknown')}")
+        logger.info("Vehicle received traffic info", extra={'extra': {'vehicle_id': vehicle_id, 'from': message.sender_id}})
+        logger.debug("Traffic info payload", extra={'extra': {'condition': message.payload.get('condition', 'unknown'), 'action': message.payload.get('action', 'unknown')}})
 
     def get_communication_stats(self) -> Dict:
         """Get V2V communication statistics"""
@@ -203,14 +207,14 @@ class V2VSimulator:
         self.simulation_thread = threading.Thread(target=self._simulation_loop, args=(update_interval,))
         self.simulation_thread.daemon = True
         self.simulation_thread.start()
-        print("V2V simulation started")
+        logger.info("V2V simulation started")
 
     def stop_simulation(self):
         """Stop the V2V simulation"""
         self.running = False
         if self.simulation_thread:
             self.simulation_thread.join(timeout=2.0)
-        print("V2V simulation stopped")
+        logger.info("V2V simulation stopped")
 
     def _simulation_loop(self, update_interval: float):
         """Main simulation loop"""
@@ -219,7 +223,7 @@ class V2VSimulator:
                 # Process any pending operations
                 time.sleep(update_interval)
             except Exception as e:
-                print(f"Error in V2V simulation loop: {e}")
+                logger.exception(f"Error in V2V simulation loop: {e}")
                 break
 
     def integrate_with_sumo(self, sumo_config_path: str = None):
@@ -231,7 +235,7 @@ class V2VSimulator:
             else:
                 traci.start(["sumo-gui", "-c", "../sumo_simulation/simulation.sumocfg"])
 
-            print("Connected to SUMO for V2V integration")
+            logger.info("Connected to SUMO for V2V integration")
 
             # Register all vehicles currently in simulation
             vehicle_ids = traci.vehicle.getIDList()
@@ -261,15 +265,13 @@ class V2VSimulator:
                 # Print stats periodically
                 if step % 100 == 0:
                     stats = self.get_communication_stats()
-                    print(f"V2V Stats at step {step}: {stats['total_sent']} sent, "
-                          f"{stats['total_received']} received, "
-                          f"{stats['active_vehicles']} vehicles")
+                    logger.info("V2V Stats", extra={'extra': {'step': step, 'sent': stats['total_sent'], 'received': stats['total_received'], 'active_vehicles': stats['active_vehicles']}})
 
             traci.close()
-            print("SUMO-V2V integration completed")
+            logger.info("SUMO-V2V integration completed")
 
         except Exception as e:
-            print(f"Error in SUMO-V2V integration: {e}")
+            logger.exception(f"Error in SUMO-V2V integration: {e}")
             if 'traci' in locals():
                 traci.close()
 
@@ -296,7 +298,7 @@ if __name__ == "__main__":
         (110, 105, 45, 210, 205, 55, 155, 305, 25),
         (120, 110, 40, 220, 210, 50, 160, 310, 35)
     ]):
-        print(f"\n--- Time Step {i+1} ---")
+        logger.info(f"\n--- Time Step {i+1} ---")
 
         # Update positions
         v2v_sim.update_vehicle_position("test_vehicle_1", x1, y1, s1, "E1_0")
@@ -311,5 +313,4 @@ if __name__ == "__main__":
 
     # Print final statistics
     final_stats = v2v_sim.get_communication_stats()
-    print(f"\nFinal V2V Communication Statistics:")
-    print(json.dumps(final_stats, indent=2))
+    logger.info("Final V2V Communication Statistics", extra={'extra': final_stats})

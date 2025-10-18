@@ -8,6 +8,8 @@ import json
 import threading
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass, asdict
+import logging
+from utils.logging_config import setup_logging
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.exceptions import InvalidSignature
@@ -69,6 +71,8 @@ class RSASecurityManager:
         # Performance tracking
         self.metrics = SecurityMetrics()
         self.performance_history = deque(maxlen=1000)
+        # Logger
+        self.logger = setup_logging('v2v')
 
     def generate_vehicle_keys(self, vehicle_id: str) -> Tuple[rsa.RSAPrivateKey, rsa.RSAPublicKey]:
         """Generate RSA key pair for a vehicle"""
@@ -84,7 +88,7 @@ class RSASecurityManager:
         self.vehicle_keys[vehicle_id] = (private_key, public_key)
 
         generation_time = (time.time() - start_time) * 1000
-        print(f"Key generation for {vehicle_id} took {generation_time:.2f}ms")
+        self.logger.info(f"Key generation completed", extra={'extra': {'vehicle_id': vehicle_id, 'generation_ms': generation_time}})
 
         return private_key, public_key
 
@@ -110,6 +114,7 @@ class RSASecurityManager:
         )
 
         self.vehicle_certificates[vehicle_id] = vehicle_cert
+        self.logger.info("Registered vehicle certificate", extra={'extra': {'vehicle_id': vehicle_id, 'certificate_hash': certificate_hash[:16]}})
         return vehicle_cert
 
     def encrypt_message(self, message: bytes, recipient_public_key: rsa.RSAPublicKey) -> Tuple[bytes, float]:
@@ -140,6 +145,8 @@ class RSASecurityManager:
         self.metrics.encryption_overhead = max(self.metrics.encryption_overhead, encryption_time)
         self.metrics.total_messages_processed += 1
 
+        self.logger.debug("Message encrypted", extra={'extra': {'encryption_ms': encryption_time}})
+
         return encrypted_session_key + encrypted_payload, encryption_time
 
     def decrypt_message(self, encrypted_data: bytes, recipient_private_key: rsa.RSAPrivateKey) -> Tuple[bytes, float]:
@@ -168,6 +175,8 @@ class RSASecurityManager:
         # Update metrics
         self.metrics.decryption_overhead = max(self.metrics.decryption_overhead, decryption_time)
 
+        self.logger.debug("Message decrypted", extra={'extra': {'decryption_ms': decryption_time}})
+
         return decrypted_payload, decryption_time
 
     def sign_message(self, message: bytes, sender_private_key: rsa.RSAPrivateKey) -> Tuple[bytes, float]:
@@ -187,6 +196,8 @@ class RSASecurityManager:
 
         # Update metrics
         self.metrics.signature_generation_time = max(self.metrics.signature_generation_time, signature_time)
+
+        self.logger.debug("Signature generated", extra={'extra': {'signature_ms': signature_time}})
 
         return signature, signature_time
 
@@ -215,6 +226,8 @@ class RSASecurityManager:
         # Update metrics
         self.metrics.signature_verification_time = max(self.metrics.signature_verification_time, verification_time)
         self.metrics.message_authentication_delay = max(self.metrics.message_authentication_delay, verification_time)
+
+        self.logger.debug("Signature verification", extra={'extra': {'valid': is_valid, 'verification_ms': verification_time}})
 
         return is_valid, verification_time
 
@@ -257,7 +270,7 @@ class V2VCommunicationManager:
 
         # Authenticate sender
         if not self.security_manager.authenticate_vehicle(sender_id):
-            print(f"Authentication failed for sender {sender_id}")
+            self.security_manager.logger.warning("Authentication failed for sender", extra={'extra': {'sender_id': sender_id}})
             return None
 
         # Prepare message
@@ -283,7 +296,7 @@ class V2VCommunicationManager:
         else:
             receiver_cert = self.security_manager.vehicle_certificates.get(receiver_id)
             if not receiver_cert:
-                print(f"No certificate found for receiver {receiver_id}")
+                self.security_manager.logger.warning("No certificate for receiver", extra={'extra': {'receiver_id': receiver_id}})
                 return None
 
             encrypted_data, enc_time = self.security_manager.encrypt_message(
@@ -329,8 +342,16 @@ class V2VCommunicationManager:
         self.latency_history.append(total_time)
         self.throughput_history.append(1)  # Message count per time unit
 
-        print(f"Sent secure {message_type} message from {sender_id} to {receiver_id} "
-              f"(took {total_time:.2f}ms total, {enc_time:.2f}ms encryption)")
+        self.security_manager.logger.info(
+            "Sent secure message",
+            extra={'extra': {
+                'sender_id': sender_id,
+                'receiver_id': receiver_id,
+                'message_type': message_type,
+                'total_ms': total_time,
+                'encryption_ms': enc_time
+            }}
+        )
 
         return secure_message
 
@@ -346,6 +367,8 @@ class V2VCommunicationManager:
             if self._verify_and_decrypt_message(message, receiver_id):
                 valid_messages.append(message)
 
+        self.security_manager.logger.debug("Messages received for vehicle", extra={'extra': {'receiver_id': receiver_id, 'count': len(valid_messages)}})
+
         return valid_messages
 
     def _verify_and_decrypt_message(self, message: SecureMessage, receiver_id: str) -> bool:
@@ -356,7 +379,7 @@ class V2VCommunicationManager:
             # Verify digital signature
             sender_cert = self.security_manager.vehicle_certificates.get(message.sender_id)
             if not sender_cert:
-                print(f"No certificate found for sender {message.sender_id}")
+                self.security_manager.logger.warning("No certificate for sender", extra={'extra': {'sender_id': message.sender_id}})
                 return False
 
             # For broadcast messages, we need to reconstruct the original message data
@@ -388,7 +411,7 @@ class V2VCommunicationManager:
             )
 
             if not is_valid_sig:
-                print(f"Invalid signature for message {message.message_id}")
+                self.security_manager.logger.warning("Invalid signature", extra={'extra': {'message_id': message.message_id}})
                 return False
 
             # Decrypt message if needed
@@ -400,16 +423,16 @@ class V2VCommunicationManager:
 
                 # For encrypted messages, verify the decrypted data matches
                 if decrypted_data != message_bytes:
-                    print(f"Decryption failed for message {message.message_id}")
+                    self.security_manager.logger.warning("Decryption failed", extra={'extra': {'message_id': message.message_id}})
                     return False
 
             total_time = (time.time() - start_time) * 1000
-            print(f"Verified message {message.message_id} in {total_time:.2f}ms")
+            self.security_manager.logger.info("Verified message", extra={'extra': {'message_id': message.message_id, 'verification_ms': total_time}})
 
             return True
 
         except Exception as e:
-            print(f"Error processing message {message.message_id}: {e}")
+            self.security_manager.logger.error(f"Error processing message {message.message_id}: {e}", extra={'extra': {'exception': str(e)}})
             return False
 
     def broadcast_safety_message(self, sender_id: str, location: Dict, speed: float,
@@ -475,8 +498,8 @@ if __name__ == "__main__":
     vehicle1 = security_manager.register_vehicle("vehicle_001")
     vehicle2 = security_manager.register_vehicle("vehicle_002")
 
-    print("Vehicle 1 Certificate:", vehicle1.certificate_hash[:16] + "...")
-    print("Vehicle 2 Certificate:", vehicle2.certificate_hash[:16] + "...")
+    security_manager.logger.info("Vehicle 1 Certificate", extra={'extra': {'certificate': vehicle1.certificate_hash[:16]}})
+    security_manager.logger.info("Vehicle 2 Certificate", extra={'extra': {'certificate': vehicle2.certificate_hash[:16]}})
 
     # Initialize V2V manager
     v2v_manager = V2VCommunicationManager(security_manager)
@@ -493,12 +516,12 @@ if __name__ == "__main__":
     )
 
     if message:
-        print(f"Message sent: {message.message_id}")
+        security_manager.logger.info("Message sent", extra={'extra': {'message_id': message.message_id}})
 
         # Receive message
         received_messages = v2v_manager.receive_message("vehicle_002")
-        print(f"Received {len(received_messages)} messages")
+        security_manager.logger.info("Received messages", extra={'extra': {'count': len(received_messages)}})
 
         # Get performance metrics
         metrics = v2v_manager.get_performance_metrics()
-        print(f"Security metrics: {json.dumps(metrics, indent=2)}")
+        security_manager.logger.info("Security metrics", extra={'extra': metrics})

@@ -12,6 +12,14 @@ import os
 from datetime import datetime
 import json
 
+# Ensure repository root is on sys.path so absolute imports like `utils.*` work
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+
+from utils.logging_config import setup_logging
+logger = setup_logging('backend')
+
 # Add paths for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'sumo_simulation'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'sumo_simulation', 'sensors'))
@@ -697,8 +705,8 @@ def internal_error(error):
     return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == '__main__':
-    print("Starting VANET Traffic Management API Server...")
-    print("Available endpoints:")
+    logger.info("Starting VANET Traffic Management API Server...")
+    logger.info("Available endpoints:")
     print("  GET  /                    - API information")
     print("  GET  /api/status          - System status")
     print("  GET  /api/traffic/current - Current traffic data")
