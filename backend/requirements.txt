@@ -5,6 +5,10 @@ numpy==1.24.3
 requests==2.31.0
 python-dotenv==1.0.0
 
+# V2V Communication Security Dependencies
+cryptography==41.0.7
+pycryptodome==3.19.0
+
 # Reinforcement Learning Dependencies (install separately if needed)
 # Run: pip install gymnasium==0.28.1 ray[rllib]==2.9.0 torch pandas matplotlib scipy
 gymnasium==0.28.1

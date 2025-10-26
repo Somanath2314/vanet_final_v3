@@ -11,6 +11,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sumo_simulation.traffic_controller import AdaptiveTrafficController
+from sumo_simulation.sensors.sensor_network import SensorNetwork
 
 def main():
     """Run RL-based simulation with GUI"""
@@ -68,6 +69,10 @@ def main():
                 print()
                 print("Starting RL-based traffic control simulation...")
                 print("-" * 60)
+
+                # Initialize sensor network and central pole
+                sensor_network = SensorNetwork()
+                sensor_network.initialize_central_pole()
 
                 try:
                     # Run simulation with RL control for 1000 steps (about 16 minutes)

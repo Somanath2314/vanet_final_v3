@@ -429,9 +429,136 @@ class VANETTrafficEnv(gym.Env):
 
         return state, {}
     
+    def emergency_override(self):
+        """Override traffic lights to prioritize emergency vehicles."""
+        try:
+            all_vehicles = traci.vehicle.getIDList()
+            for veh_id in all_vehicles:
+                if 'emergency' in veh_id.lower() or 'ambulance' in veh_id.lower() or 'fire' in veh_id.lower():
+                    lane_id = traci.vehicle.getLaneID(veh_id)
+                    distance = traci.vehicle.getLanePosition(veh_id)
+                    lane_length = traci.lane.getLength(lane_id)
+                    distance_from_intersection = lane_length - distance
+
+                    if distance_from_intersection < 300:  # 300m range for emergency vehicles
+                        controlled_tls = self.get_controlled_tl_ids()
+                        for tl_id in controlled_tls:
+                            connections = traci.trafficlight.getControlledLinks(tl_id)
+                            for link_index, link in enumerate(connections):
+                                if link[0][0] == lane_id:  # Match lane to traffic light
+                                    # Find a phase that gives green to this link index
+                                    phase_index = self._find_phase_for_link(tl_id, link_index)
+                                    if phase_index is not None:
+                                        # Respect minimum green timer before forcing a new phase
+                                        timer = self.obs_tl_wait_steps.get(tl_id, {}).get('timer', 0)
+                                        if timer >= self.tl_constraint_min:
+                                            traci.trafficlight.setPhase(tl_id, phase_index)
+                                            print(f"Emergency override: Set phase {phase_index} at traffic light {tl_id} for lane {lane_id}")
+                                            return
+                                        else:
+                                            # If min green not met, still set immediately for emergencies
+                                            traci.trafficlight.setPhase(tl_id, phase_index)
+                                            print(f"Emergency override (forced): Set phase {phase_index} at traffic light {tl_id} for lane {lane_id}")
+                                            return
+        except Exception as e:
+            print(f"Error in emergency override: {e}")
+
+    def density_based_override(self):
+        """Override traffic lights based on vehicle density when no emergency vehicles are detected."""
+        try:
+            all_vehicles = traci.vehicle.getIDList()
+            emergency_detected = any(
+                'emergency' in veh_id.lower() or 'ambulance' in veh_id.lower() or 'fire' in veh_id.lower()
+                for veh_id in all_vehicles
+            )
+
+            if emergency_detected:
+                return  # Emergency override will handle this
+
+            controlled_tls = self.get_controlled_tl_ids()
+            lane_densities = {}
+
+            # Measure density for all lanes connected to traffic lights
+            for tl_id in controlled_tls:
+                connections = traci.trafficlight.getControlledLinks(tl_id)
+                for link in connections:
+                    lane_id = link[0][0]  # Get lane ID
+                    try:
+                        density = traci.lane.getLastStepOccupancy(lane_id)  # Get density
+                        lane_densities[lane_id] = density
+                    except Exception as e:
+                        print(f"Error getting density for lane {lane_id}: {e}")
+
+            # Find the lane with the highest density
+            if lane_densities:
+                max_density_lane = max(lane_densities, key=lane_densities.get)
+                max_density = lane_densities[max_density_lane]
+
+                # Set appropriate phase for the traffic light controlling the lane with the highest density
+                for tl_id in controlled_tls:
+                    connections = traci.trafficlight.getControlledLinks(tl_id)
+                    for link_index, link in enumerate(connections):
+                        if link[0][0] == max_density_lane:  # Match lane to traffic light
+                            phase_index = self._find_phase_for_link(tl_id, link_index)
+                            if phase_index is not None:
+                                # Hysteresis: only override if density sufficiently higher than current green lanes
+                                # Compute current green lanes density
+                                current_state = traci.trafficlight.getRedYellowGreenState(tl_id)
+                                green_indices = [i for i, ch in enumerate(current_state) if ch == 'G']
+                                green_density = 0.0
+                                if green_indices:
+                                    vals = []
+                                    for gi in green_indices:
+                                        try:
+                                            lane_i = connections[gi][0][0]
+                                            vals.append(traci.lane.getLastStepOccupancy(lane_i))
+                                        except Exception:
+                                            pass
+                                    if vals:
+                                        green_density = sum(vals) / len(vals)
+
+                                # Only switch if target density noticeably higher (20% more) or current green very low
+                                if max_density > max(green_density * 1.2, 0.05):
+                                    timer = self.obs_tl_wait_steps.get(tl_id, {}).get('timer', 0)
+                                    if timer >= self.tl_constraint_min:
+                                        traci.trafficlight.setPhase(tl_id, phase_index)
+                                        print(f"Density-based override: Set phase {phase_index} for lane {max_density_lane} at traffic light {tl_id} with density {max_density}")
+                                        return
+                                    else:
+                                        # defer change until min green reached
+                                        print(f"Density override skipped for {tl_id} (min green not met)")
+                                        return
+        except Exception as e:
+            print(f"Error in density-based override: {e}")
+
+    def _find_phase_for_link(self, tl_id: str, link_index: int):
+        """Find a phase index for a traffic light that gives green to the given controlled link index.
+
+        Returns None if no phase found.
+        """
+        try:
+            # Get all program logics (including phases)
+            programs = traci.trafficlight.getAllProgramLogics(tl_id)
+            if not programs:
+                return None
+            # Use the first program's phases
+            phases = programs[0].getPhases()
+            for idx, phase in enumerate(phases):
+                state = phase.getRedYellowGreenState()
+                # Ensure state length aligns with controlled links, otherwise skip
+                if link_index < len(state) and state[link_index] == 'G':
+                    return idx
+            return None
+        except Exception:
+            return None
+
     def step(self, action):
         """Execute one step in the environment."""
-        # Apply action
+        # Apply emergency override or density-based override before RL actions
+        self.emergency_override()
+        self.density_based_override()
+
+        # Apply RL actions
         self._apply_rl_actions(action)
 
         # Advance simulation

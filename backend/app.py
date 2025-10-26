@@ -12,10 +12,19 @@ import os
 from datetime import datetime
 import json
 
+# Ensure repository root is on sys.path so absolute imports like `utils.*` work
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+
+from utils.logging_config import setup_logging
+logger = setup_logging('backend')
+
 # Add paths for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'sumo_simulation'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'sumo_simulation', 'sensors'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'v2v_communication'))
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend communication
@@ -27,10 +36,20 @@ simulation_thread = None
 simulation_running = False
 rl_mode_enabled = False
 
+# V2V Communication variables
+v2v_simulator = None
+v2v_security_manager = None
+
 # In-memory storage for metrics (later replace with MongoDB)
 metrics_history = []
 current_metrics = {}
 rl_metrics_history = []
+
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
+from models.traffic_metrics import insert_traffic_metrics, is_mongodb_available
 
 @app.route('/')
 def home():
@@ -51,7 +70,12 @@ def home():
             "/api/rl/status",
             "/api/rl/enable",
             "/api/rl/disable",
-            "/api/rl/metrics"
+            "/api/rl/metrics",
+            "/api/v2v/status",
+            "/api/v2v/register",
+            "/api/v2v/send",
+            "/api/v2v/metrics",
+            "/api/v2v/security"
         ]
     })
 
@@ -233,8 +257,7 @@ def start_simulation():
         return jsonify({"message": "Simulation already running"}), 200
     
     try:
-        # Import here to avoid circular imports
-        from traffic_controller import AdaptiveTrafficController
+        from sumo_simulation.traffic_controller import AdaptiveTrafficController
         
         traffic_controller = AdaptiveTrafficController()
         
@@ -497,6 +520,198 @@ def rl_step():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/traffic/metrics/populate', methods=['POST'])
+def populate_traffic_metrics():
+    """Populate traffic metrics into MongoDB or in-memory storage."""
+    global metrics_history
+
+    if not metrics_history:
+        return jsonify({"error": "No metrics available to populate"}), 400
+
+    try:
+        success_count = 0
+        for metric in metrics_history:
+            if insert_traffic_metrics(metric):
+                success_count += 1
+
+        total_count = len(metrics_history)
+        storage_type = "MongoDB" if is_mongodb_available() else "In-memory"
+
+        return jsonify({
+            "message": f"Traffic metrics populated successfully ({success_count}/{total_count} stored in {storage_type})",
+            "storage_type": storage_type,
+            "total_metrics": total_count,
+            "successfully_stored": success_count,
+            "failed": total_count - success_count
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# V2V Communication endpoints
+@app.route('/api/v2v/status')
+def get_v2v_status():
+    """Get V2V communication status"""
+    global v2v_simulator, v2v_security_manager
+
+    return jsonify({
+        "v2v_initialized": v2v_simulator is not None,
+        "security_initialized": v2v_security_manager is not None,
+        "communication_range": v2v_simulator.communication_range if v2v_simulator else 0,
+        "active_vehicles": len(v2v_simulator.vehicles) if v2v_simulator else 0,
+        "timestamp": datetime.now().isoformat()
+    })
+
+@app.route('/api/v2v/register', methods=['POST'])
+def register_v2v_vehicle():
+    """Register a vehicle for V2V communication"""
+    global v2v_simulator, v2v_security_manager
+
+    if not v2v_simulator:
+        # Initialize V2V system if not already done
+        from v2v_communication.v2v_simulator import V2VSimulator
+        from v2v_communication.v2v_security import RSASecurityManager
+
+        v2v_security_manager = RSASecurityManager()
+        v2v_simulator = V2VSimulator()
+
+    data = request.get_json()
+    if not data or 'vehicle_id' not in data:
+        return jsonify({"error": "vehicle_id required"}), 400
+
+    vehicle_id = data['vehicle_id']
+
+    try:
+        success = v2v_simulator.register_vehicle(vehicle_id)
+        if success:
+            return jsonify({
+                "message": f"Vehicle {vehicle_id} registered successfully",
+                "vehicle_id": vehicle_id,
+                "communication_range": v2v_simulator.communication_range
+            })
+        else:
+            return jsonify({"error": f"Failed to register vehicle {vehicle_id}"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/v2v/send', methods=['POST'])
+def send_v2v_message():
+    """Send a V2V message between vehicles"""
+    global v2v_simulator
+
+    if not v2v_simulator:
+        return jsonify({"error": "V2V system not initialized"}), 400
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    sender_id = data.get('sender_id')
+    receiver_id = data.get('receiver_id')
+    message_type = data.get('message_type', 'safety')
+    payload = data.get('payload', {})
+
+    if not sender_id or not receiver_id:
+        return jsonify({"error": "sender_id and receiver_id required"}), 400
+
+    try:
+        if message_type == 'traffic_info':
+            message = v2v_simulator.v2v_manager.send_traffic_info(
+                sender_id=sender_id,
+                receiver_id=receiver_id,
+                traffic_data=payload
+            )
+        else:  # safety message
+            location = payload.get('location', {'x': 0, 'y': 0})
+            speed = payload.get('speed', 0.0)
+            emergency = payload.get('emergency', False)
+
+            message = v2v_simulator.v2v_manager.broadcast_safety_message(
+                sender_id=sender_id,
+                location=location,
+                speed=speed,
+                emergency=emergency
+            )
+
+        if message:
+            return jsonify({
+                "message": "V2V message sent successfully",
+                "message_id": message.message_id,
+                "sender_id": sender_id,
+                "receiver_id": receiver_id,
+                "message_type": message_type,
+                "timestamp": message.timestamp
+            })
+        else:
+            return jsonify({"error": "Failed to send V2V message"}), 500
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/v2v/metrics')
+def get_v2v_metrics():
+    """Get V2V communication performance metrics"""
+    global v2v_simulator
+
+    if not v2v_simulator:
+        return jsonify({"error": "V2V system not initialized"}), 400
+
+    try:
+        stats = v2v_simulator.get_communication_stats()
+        return jsonify(stats)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/v2v/security')
+def get_v2v_security_metrics():
+    """Get V2V security performance metrics"""
+    global v2v_simulator
+
+    if not v2v_simulator:
+        return jsonify({"error": "V2V system not initialized"}), 400
+
+    try:
+        security_metrics = v2v_simulator.v2v_manager.get_performance_metrics()
+        return jsonify(security_metrics)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/v2v/update', methods=['POST'])
+def update_v2v_position():
+    """Update vehicle position for V2V communication"""
+    global v2v_simulator
+
+    if not v2v_simulator:
+        return jsonify({"error": "V2V system not initialized"}), 400
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    vehicle_id = data.get('vehicle_id')
+    x = data.get('x', 0.0)
+    y = data.get('y', 0.0)
+    speed = data.get('speed', 0.0)
+    lane = data.get('lane', '')
+
+    if not vehicle_id:
+        return jsonify({"error": "vehicle_id required"}), 400
+
+    try:
+        v2v_simulator.update_vehicle_position(vehicle_id, x, y, speed, lane)
+
+        # Process received messages
+        received_messages = v2v_simulator.process_received_messages(vehicle_id)
+
+        return jsonify({
+            "message": f"Vehicle {vehicle_id} position updated",
+            "position": {"x": x, "y": y},
+            "speed": speed,
+            "lane": lane,
+            "messages_received": len(received_messages)
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # Error handlers
 @app.errorhandler(404)
 def not_found(error):
@@ -507,18 +722,18 @@ def internal_error(error):
     return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == '__main__':
-    print("Starting VANET Traffic Management API Server...")
-    print("Available endpoints:")
+    logger.info("Starting VANET Traffic Management API Server...")
+    logger.info("Available endpoints:")
     print("  GET  /                    - API information")
     print("  GET  /api/status          - System status")
     print("  GET  /api/traffic/current - Current traffic data")
-    print("  GET  /api/traffic/metrics - Traffic performance metrics")
-    print("  GET  /api/sensors/data    - Sensor network data")
-    print("  GET  /api/intersections   - Intersection status")
-    print("  GET  /api/emergency       - Emergency vehicle data")
-    print("  POST /api/control/start   - Start simulation")
-    print("  POST /api/control/stop    - Stop simulation")
-    print("  POST /api/control/override- Manual signal override")
+    print("  POST /api/traffic/metrics/populate - Populate traffic metrics")
+    print("  GET  /api/v2v/status      - V2V communication status")
+    print("  POST /api/v2v/register    - Register V2V vehicle")
+    print("  POST /api/v2v/send        - Send V2V message")
+    print("  GET  /api/v2v/metrics     - V2V communication metrics")
+    print("  GET  /api/v2v/security    - V2V security metrics")
+    print("  POST /api/v2v/update      - Update vehicle position for V2V")
     print("  GET  /api/network/metrics - Network performance metrics")
     
     app.run(debug=True, host='0.0.0.0', port=5000, threaded=True)

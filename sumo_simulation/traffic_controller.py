@@ -14,6 +14,7 @@ from enum import Enum
 
 # Add sensor network to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'sensors'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'v2v_communication'))
 from sensor_network import SensorNetwork, SensorReading
 from wimax import WiMAXConfig, WiMAXBaseStation, WiMAXMobileStation
 

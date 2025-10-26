@@ -66,3 +66,12 @@ python3 run_rl_simulation.py
 
 echo ""
 echo -e "${GREEN}✓ RL Simulation completed${NC}"
+
+# Populate traffic metrics into MongoDB
+if curl -s --head http://localhost:5000 | grep "200 OK" > /dev/null; then
+    echo -e "${YELLOW}Populating traffic metrics into MongoDB...${NC}"
+    curl -X POST http://localhost:5000/api/traffic/metrics/populate
+    echo -e "${GREEN}✓ Traffic metrics populated successfully${NC}"
+else
+    echo -e "${RED}Error: Backend server is not running. Metrics not populated.${NC}"
+fi

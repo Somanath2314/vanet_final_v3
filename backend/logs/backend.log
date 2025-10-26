@@ -1,0 +1,14 @@
+{"timestamp": "2025-10-18T05:51:26.996866Z", "level": "INFO", "logger": "root", "message": "Starting VANET Traffic Management API Server...", "module": "app", "funcName": "<module>", "line": 708}
+{"timestamp": "2025-10-18T05:51:26.997062Z", "level": "INFO", "logger": "root", "message": "Available endpoints:", "module": "app", "funcName": "<module>", "line": 709}
+{"timestamp": "2025-10-18T05:51:27.048243Z", "level": "INFO", "logger": "werkzeug", "message": "\u001b[31m\u001b[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.\u001b[0m\n * Running on all addresses (0.0.0.0)\n * Running on http://127.0.0.1:5000\n * Running on http://192.168.1.3:5000", "module": "_internal", "funcName": "_log", "line": 97}
+{"timestamp": "2025-10-18T05:51:27.048414Z", "level": "INFO", "logger": "werkzeug", "message": "\u001b[33mPress CTRL+C to quit\u001b[0m", "module": "_internal", "funcName": "_log", "line": 97}
+{"timestamp": "2025-10-18T05:51:27.049500Z", "level": "INFO", "logger": "werkzeug", "message": " * Restarting with stat", "module": "_internal", "funcName": "_log", "line": 97}
+{"timestamp": "2025-10-18T05:51:28.216139Z", "level": "INFO", "logger": "root", "message": "Starting VANET Traffic Management API Server...", "module": "app", "funcName": "<module>", "line": 708}
+{"timestamp": "2025-10-18T05:51:28.216480Z", "level": "INFO", "logger": "root", "message": "Available endpoints:", "module": "app", "funcName": "<module>", "line": 709}
+{"timestamp": "2025-10-18T05:51:28.244515Z", "level": "WARNING", "logger": "werkzeug", "message": " * Debugger is active!", "module": "_internal", "funcName": "_log", "line": 97}
+{"timestamp": "2025-10-18T05:51:28.255363Z", "level": "INFO", "logger": "werkzeug", "message": " * Debugger PIN: 827-103-329", "module": "_internal", "funcName": "_log", "line": 97}
+{"timestamp": "2025-10-18T05:53:11.344408Z", "level": "INFO", "logger": "werkzeug", "message": "127.0.0.1 - - [18/Oct/2025 11:23:11] \"HEAD / HTTP/1.1\" 200 -", "module": "_internal", "funcName": "_log", "line": 97}
+{"timestamp": "2025-10-18T05:53:11.351988Z", "level": "INFO", "logger": "werkzeug", "message": "127.0.0.1 - - [18/Oct/2025 11:23:11] \"\u001b[31m\u001b[1mPOST /api/traffic/metrics/populate HTTP/1.1\u001b[0m\" 400 -", "module": "_internal", "funcName": "_log", "line": 97}
+{"timestamp": "2025-10-18T06:00:43.668954Z", "level": "INFO", "logger": "werkzeug", "message": " * Detected change in '/Users/apple/Desktop/vanet_final_v3/utils/logging_config.py', reloading", "module": "_internal", "funcName": "_log", "line": 97}
+{"timestamp": "2025-10-18T06:00:44.097484Z", "level": "INFO", "logger": "werkzeug", "message": " * Restarting with stat", "module": "_internal", "funcName": "_log", "line": 97}
+{"timestamp": "2025-10-18T06:11:58.722006Z", "level": "INFO", "logger": "werkzeug", "message": " * Restarting with stat", "module": "_internal", "funcName": "_log", "line": 97}

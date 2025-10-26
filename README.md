@@ -1,5 +1,7 @@
 # VANET Adaptive Traffic Control System
 
+<a href="https://doi.org/10.5281/zenodo.17383886"><img src="https://zenodo.org/badge/1074749481.svg" alt="DOI"></a>
+
 ## 🚀 Quick Start
 
 ```bash
