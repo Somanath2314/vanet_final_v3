@@ -14,10 +14,10 @@ echo "=========================================="
 echo ""
 
 # Check if venv is activated
-if [[ "$VIRTUAL_ENV" == "" ]]; then
-    echo -e "${YELLOW}Activating virtual environment...${NC}"
-    source venv/bin/activate
-fi
+# if [[ "$VIRTUAL_ENV" == "" ]]; then
+#     echo -e "${YELLOW}Activating virtual environment...${NC}"
+#     source venv/bin/activate
+# fi
 
 # Kill any existing SUMO processes
 echo -e "${YELLOW}Cleaning up existing SUMO processes...${NC}"

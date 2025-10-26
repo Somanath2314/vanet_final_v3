@@ -178,6 +178,23 @@ def get_intersections():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/wimax/metrics')
+def get_wimax_metrics():
+    """Expose WiMAX BS and MS KPIs from the controller."""
+    global traffic_controller
+    if not traffic_controller:
+        return jsonify({"error": "Traffic controller not initialized"}), 400
+    try:
+        metrics = getattr(traffic_controller, 'wimax_metrics_snapshot', None)
+        if not metrics:
+            return jsonify({"message": "No WiMAX metrics available yet"})
+        return jsonify({
+            "metrics": metrics,
+            "timestamp": datetime.now().isoformat()
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/emergency')
 def get_emergency_vehicles():
     """Get emergency vehicle data"""
