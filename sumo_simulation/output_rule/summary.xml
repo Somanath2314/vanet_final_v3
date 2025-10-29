@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2025-10-29 17:13:24 by Eclipse SUMO GUI Version 1.12.0
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="/home/shreyasdk/capstone/vanet_final_v3/sumo_simulation/maps/simple_network.net.xml"/>
+        <route-files value="/home/shreyasdk/capstone/vanet_final_v3/sumo_simulation/maps/routes.rou.xml"/>
+    </input>
+
+    <output>
+        <summary-output value="./output_rule/summary.xml"/>
+        <tripinfo-output value="./output_rule/tripinfo.xml"/>
+    </output>
+
+    <time>
+        <begin value="0"/>
+        <end value="3600"/>
+        <step-length value="1"/>
+    </time>
+
+    <processing>
+        <time-to-teleport value="300"/>
+    </processing>
+
+    <traci_server>
+        <remote-port value="56541"/>
+    </traci_server>
+
+    <gui_only>
+        <gui-settings-file value="/home/shreyasdk/capstone/vanet_final_v3/sumo_simulation/maps/gui-settings.cfg"/>
+        <quit-on-end value="false"/>
+        <start value="true"/>
+        <tracker-interval value="1"/>
+    </gui_only>
+
+</configuration>
+-->
+
+<summary xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/summary_file.xsd">
+    <step time="0.00" loaded="1" inserted="0" running="0" waiting="0" ended="0" arrived="0" collisions="0" teleports="0" halting="0" stopped="0" meanWaitingTime="-1.00" meanTravelTime="-1.00" meanSpeed="-1.00" meanSpeedRelative="-1.00" duration="1761738205039"/>
+</summary>
