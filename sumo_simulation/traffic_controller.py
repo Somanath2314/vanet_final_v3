@@ -45,7 +45,7 @@ class AdaptiveTrafficController:
         self.extension_time = 5
 
     # ------------------- SUMO -------------------
-    def connect_to_sumo(self, config_path):
+    def connect_to_sumo(self, config_path, use_gui=True):
         try:
             try: traci.close()
             except: pass
@@ -53,18 +53,23 @@ class AdaptiveTrafficController:
             summary_path = os.path.join(self.output_dir, "summary.xml")
             tripinfo_path = os.path.join(self.output_dir, "tripinfo.xml")
 
+            sumo_binary = "sumo-gui" if use_gui else "sumo"
+            
             traci.start([
-                "sumo-gui",
+                sumo_binary,
                 "-c", config_path,
                 "--summary-output", summary_path,
-                "--tripinfo-output", tripinfo_path
+                "--tripinfo-output", tripinfo_path,
+                "--start"  # Auto-start simulation
             ])
-            print("Connected to SUMO.")
+            print(f"Connected to SUMO ({sumo_binary}).")
             self._initialize_intersections()
             self._initialize_wimax()
             return True
         except Exception as e:
             print(f"Failed to connect to SUMO: {e}")
+            import traceback
+            traceback.print_exc()
             return False
 
     def _initialize_intersections(self):
@@ -80,19 +85,24 @@ class AdaptiveTrafficController:
 
     # ------------------- SIMULATION -------------------
     def run_simulation_step(self):
-        traci.simulationStep()
-        self.simulation_step += 1
+        try:
+            traci.simulationStep()
+            self.simulation_step += 1
 
-        # Simple rule-based traffic light update
-        for tl_id, data in self.intersections.items():
-            data["time_in_phase"] += 1
-            if data["time_in_phase"] >= data["phase_duration"]:
-                data["current_phase"] = (data["current_phase"] + 1) % len(self.default_phases[tl_id])
-                data["time_in_phase"] = 0
-                traci.trafficlight.setRedYellowGreenState(tl_id, self.default_phases[tl_id][data["current_phase"]])
+            # Simple rule-based traffic light update
+            for tl_id, data in self.intersections.items():
+                data["time_in_phase"] += 1
+                if data["time_in_phase"] >= data["phase_duration"]:
+                    data["current_phase"] = (data["current_phase"] + 1) % len(self.default_phases[tl_id])
+                    data["time_in_phase"] = 0
+                    traci.trafficlight.setRedYellowGreenState(tl_id, self.default_phases[tl_id][data["current_phase"]])
 
-        # Update WiMAX metrics
-        self._update_wimax()
+            # Update WiMAX metrics
+            self._update_wimax()
+            return True
+        except Exception as e:
+            print(f"Error in simulation step: {e}")
+            return False
 
     def _update_wimax(self):
         # Basic snapshot of attached mobiles

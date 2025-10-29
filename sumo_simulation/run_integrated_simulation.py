@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Integrated SUMO + NS3 Simulation
+Integrated SUMO + NS3 VANET Simulation
 Combines SUMO traffic simulation with NS3-based network simulation
-- SUMO: Vehicle movements and traffic control
+- SUMO: Vehicle movements, traffic control, RL integration
 - NS3 Bridge: WiFi (802.11p) for V2V, WiMAX for emergency V2I
+- Full RL support with trained models
 """
 
 import os
@@ -25,6 +26,7 @@ try:
     RL_AVAILABLE = True
 except ImportError:
     RL_AVAILABLE = False
+    print("⚠️  RL module not available")
 
 
 def main():
@@ -77,8 +79,8 @@ def main():
 
     print(f"📁 Using SUMO config: {config_path}")
     
-    # The traffic controller's connect_to_sumo will use GUI by default if available
-    if not traffic_controller.connect_to_sumo(config_path):
+    # Connect to SUMO with appropriate binary
+    if not traffic_controller.connect_to_sumo(config_path, use_gui=args.gui):
         print("❌ Error: Could not connect to SUMO")
         return
 
@@ -109,20 +111,31 @@ def main():
     rl_controller = None
     if args.mode == 'rl' and RL_AVAILABLE:
         print("🤖 Initializing RL controller...")
-        rl_controller = RLTrafficController(mode='inference')
-        if rl_controller.initialize(sumo_connected=True):
-            model_path = os.path.join(os.path.dirname(__file__), '..', 
-                                     'rl_module', 'models', 'dqn_traffic_model.pth')
-            if os.path.exists(model_path):
-                rl_controller.load_model(model_path)
-                print("✅ Loaded trained RL model")
+        try:
+            rl_controller = RLTrafficController(mode='inference')
+            if rl_controller.initialize(sumo_connected=True):
+                model_path = os.path.join(os.path.dirname(__file__), '..', 
+                                         'rl_module', 'models', 'dqn_traffic_model.pth')
+                if os.path.exists(model_path):
+                    rl_controller.load_model(model_path)
+                    print("✅ Loaded trained RL model from:", model_path)
+                else:
+                    print("⚠️  No trained model found at:", model_path)
+                    print("   Using random policy for exploration")
+                print("✅ RL controller ready")
             else:
-                print("⚠️  No trained model found, using random policy")
-        else:
-            print("❌ Failed to initialize RL controller, falling back to rule-based")
+                print("❌ Failed to initialize RL controller")
+                rl_controller = None
+        except Exception as e:
+            print(f"❌ RL initialization error: {e}")
             rl_controller = None
-    elif args.mode == 'rl' and not RL_AVAILABLE:
+    
+    if args.mode == 'rl' and not RL_AVAILABLE:
         print("⚠️  RL module not available, using rule-based control")
+    
+    if args.mode == 'rl' and rl_controller is None:
+        print("⚠️  Falling back to rule-based control")
+        args.mode = 'rule'
 
     print()
     print("🚀 Starting integrated simulation...")
@@ -133,29 +146,40 @@ def main():
         start_time = time.time()
         last_print_time = start_time
         
+        import traci
+        
         while step < args.steps:
-            # Advance SUMO simulation with traffic control
+            # Check if simulation should continue
+            if traci.simulation.getMinExpectedNumber() <= 0:
+                print("\n⚠️  No more vehicles in simulation")
+                break
+            
+            # Advance SUMO simulation
             if rl_controller:
                 # RL-based control
-                import traci
                 traci.simulationStep()
                 current_time = traci.simulation.getTime()
                 
-                # Update NS3 network simulation
-                ns3_bridge.step(current_time)
-                
                 # RL control logic every 10 steps
                 if step % 10 == 0:
-                    state = traffic_controller.get_state()
-                    action = rl_controller.get_action(state)
-                    traffic_controller.apply_action(action)
+                    try:
+                        # Get state from traffic controller
+                        state = rl_controller.get_state()
+                        # Get action from RL agent
+                        action = rl_controller.get_action(state)
+                        # Apply action to traffic lights
+                        rl_controller.apply_action(action)
+                    except Exception as e:
+                        print(f"⚠️  RL control error: {e}")
+                
+                # Update NS3 network simulation
+                ns3_bridge.step(current_time)
             else:
                 # Rule-based control - use traffic controller's built-in step
                 if not traffic_controller.run_simulation_step():
                     break
                 
                 # Get current simulation time
-                import traci
                 current_time = traci.simulation.getTime()
                 
                 # Update NS3 network simulation
