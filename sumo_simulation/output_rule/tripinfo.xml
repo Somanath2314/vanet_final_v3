@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<<<<<<< HEAD
 <!-- generated on 2025-10-29 19:46:13 by Eclipse SUMO GUI Version 1.12.0
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+=======
+<!-- generated on 2025-10-29 19:36:26 by Eclipse SUMO GUI Version 1.22.0
+<sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+>>>>>>> c161f24 (commented to not to add the rl module to git ignore)
 
     <input>
-        <net-file value="/home/shreyasdk/capstone/vanet_final_v3/sumo_simulation/maps/simple_network.net.xml"/>
-        <route-files value="/home/shreyasdk/capstone/vanet_final_v3/sumo_simulation/maps/routes.rou.xml"/>
+        <net-file value="/Users/apple/Desktop/vanet_29_oct/vanet_final_v3/sumo_simulation/maps/simple_network.net.xml"/>
+        <route-files value="/Users/apple/Desktop/vanet_29_oct/vanet_final_v3/sumo_simulation/maps/routes.rou.xml"/>
     </input>
 
     <output>
@@ -24,17 +29,20 @@
     </processing>
 
     <traci_server>
+<<<<<<< HEAD
         <remote-port value="39461"/>
+=======
+        <remote-port value="50290"/>
+>>>>>>> c161f24 (commented to not to add the rl module to git ignore)
     </traci_server>
 
     <gui_only>
-        <gui-settings-file value="/home/shreyasdk/capstone/vanet_final_v3/sumo_simulation/maps/gui-settings.cfg"/>
+        <gui-settings-file value="/Users/apple/Desktop/vanet_29_oct/vanet_final_v3/sumo_simulation/maps/gui-settings.cfg"/>
         <quit-on-end value="false"/>
         <start value="true"/>
-        <tracker-interval value="1"/>
     </gui_only>
 
-</configuration>
+</sumoConfiguration>
 -->
 
 <tripinfos xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/tripinfo_file.xsd">
