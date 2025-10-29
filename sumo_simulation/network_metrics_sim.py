@@ -293,7 +293,7 @@ class NetworkMetricsSimulator:
         pfile = os.path.join(self.outdir, "v2i_packets.csv")
         df.to_csv(pfile, index=False)
 
-        # metrics
+    # metrics
         total = len(df)
         succ = int(df['success'].sum()) if total>0 else 0
         pdr = succ / total if total>0 else float('nan')
@@ -349,6 +349,23 @@ class NetworkMetricsSimulator:
         print(f"Loss reasons: {loss_reasons}")
         print(f"Saved logs -> {pfile}")
         print(f"Saved metrics -> {mfile}")
+
+        # ---- Try to log to MongoDB if configured ----
+        try:
+            # local import so pymongo is optional for users who don't want DB logging
+            from mongo_logger import MongoMetricsLogger
+            mongo = MongoMetricsLogger.from_env()
+            if mongo is not None:
+                try:
+                    # insert packet DataFrame and metrics dict
+                    mongo.insert_packets(df)
+                    mongo.insert_metrics(metrics)
+                    # optional: insert RSU stats and per-step summary if desired
+                except Exception:
+                    print("[network_metrics_sim] Error writing to MongoDB")
+        except Exception:
+            # Import error or mongo client not available - skip silently but inform
+            pass
 
 # ---- CLI ----
 def cli():
