@@ -228,26 +228,6 @@ class RLTrafficController:
             return metrics
 
         except Exception as e:
-            print(f"Error in RL step: {e}")
-            import traceback
-            traceback.print_exc()
-            return {'error': str(e)}
-    
-    def get_metrics(self):
-        """Get current RL metrics."""
-        return {
-            'mode': self.mode,
-            'current_episode_reward': float(self.current_episode_reward),
-            'current_episode_length': int(self.current_episode_length),
-            'total_episodes': len(self.episode_rewards),
-            'avg_episode_reward': float(np.mean(self.episode_rewards)) if self.episode_rewards else 0,
-            'avg_episode_length': float(np.mean(self.episode_lengths)) if self.episode_lengths else 0,
-        }
-    
-    def reset(self):
-        """Reset the RL controller."""
-        if self.env:
-            reset_result = self.env.reset()
             if len(reset_result) == 2:
                 # Gymnasium API
                 self.current_state, _ = reset_result
@@ -256,6 +236,51 @@ class RLTrafficController:
                 self.current_state = reset_result
             self.current_episode_reward = 0
             self.current_episode_length = 0
+    
+    def get_state(self):
+        """
+        Get the current state of the environment.
+        
+        Returns
+        -------
+        np.array
+            Current state observation
+        """
+        if self.env is None:
+            raise RuntimeError("Environment not initialized")
+            
+        # Get the current state from the environment
+        if hasattr(self.env, 'get_state'):
+            return self.env.get_state()
+        elif hasattr(self.env, 'state'):
+            return self.env.state
+        else:
+            # Fallback: return a zero state
+            return np.zeros(self.env.observation_space.shape)
+    
+    def apply_action(self, action):
+        """
+        Apply an action to the traffic lights.
+        
+        Parameters
+        ----------
+        action : int or np.array
+            Action to apply
+        """
+        if self.env is None:
+            raise RuntimeError("Environment not initialized")
+            
+        # Convert action to the appropriate format if needed
+        if isinstance(action, np.ndarray) and action.size == 1:
+            action = action.item()
+            
+        # Apply the action to the environment
+        if hasattr(self.env, 'apply_action'):
+            return self.env.apply_action(action)
+        else:
+            # Fallback: use the step method
+            self.env.step(action)
+            return True
     
     def run_simulation(self, config_path=None, max_steps=3600):
         """
