@@ -84,22 +84,103 @@ class AdaptiveTrafficController:
                 self.wimax_base_stations[tl] = WiMAXBaseStation(tl, x, y, self.wimax_config)
 
     # ------------------- SIMULATION -------------------
-    def run_simulation_step(self):
+    def update_traffic_lights(self):
+        """
+        Update traffic lights based on rule-based control logic.
+        Does NOT call traci.simulationStep() - that's done by caller.
+        """
         try:
-            traci.simulationStep()
             self.simulation_step += 1
 
             # Simple rule-based traffic light update
             for tl_id, data in self.intersections.items():
+                # Get controlled lanes (incoming lanes to junction)
+                try:
+                    controlled_lanes = traci.trafficlight.getControlledLanes(tl_id)
+                    
+                    # Calculate queue lengths by counting halting vehicles
+                    # For J2: E5 (south->north), E6 (north->south), E2 (east->west), E4 (west->east)
+                    # For J3: E7 (south->north), E8 (north->south), E3 (continuing from E2), ...
+                    queue_lengths = {"N": 0, "S": 0, "E": 0, "W": 0}
+                    for lane in controlled_lanes:
+                        halting = traci.lane.getLastStepHaltingNumber(lane)
+                        
+                        # Determine direction based on edge name (not lane index)
+                        if "E5" in lane or "E7" in lane:  # South approach (vehicles heading north)
+                            queue_lengths["N"] += halting
+                        elif "E6" in lane or "E8" in lane:  # North approach (vehicles heading south)
+                            queue_lengths["S"] += halting
+                        elif "E4" in lane:  # West approach (vehicles heading east)
+                            queue_lengths["E"] += halting
+                        elif "E2" in lane or "E3" in lane:  # East approach (vehicles heading west)
+                            queue_lengths["W"] += halting
+                    
+                    data["queue_lengths"] = queue_lengths
+                except Exception as e:
+                    # Fallback: set zero queue lengths
+                    data["queue_lengths"] = {"N": 0, "S": 0, "E": 0, "W": 0}
+                
+                # Density-based phase control for each junction INDEPENDENTLY
                 data["time_in_phase"] += 1
+                
+                # Check if it's time to consider switching phase
                 if data["time_in_phase"] >= data["phase_duration"]:
-                    data["current_phase"] = (data["current_phase"] + 1) % len(self.default_phases[tl_id])
-                    data["time_in_phase"] = 0
-                    traci.trafficlight.setRedYellowGreenState(tl_id, self.default_phases[tl_id][data["current_phase"]])
+                    current_phase_idx = data["current_phase"]
+                    current_phase = self.default_phases[tl_id][current_phase_idx]
+                    
+                    # ALWAYS advance through yellow phases
+                    if current_phase_idx in [1, 3]:  # Yellow phases
+                        data["current_phase"] = (data["current_phase"] + 1) % len(self.default_phases[tl_id])
+                        data["time_in_phase"] = 0
+                        traci.trafficlight.setRedYellowGreenState(tl_id, self.default_phases[tl_id][data["current_phase"]])
+                    else:
+                        # Green phases: Density-based decision with improved thresholds
+                        ns_demand = queue_lengths["N"] + queue_lengths["S"]
+                        ew_demand = queue_lengths["E"] + queue_lengths["W"]
+                        
+                        # Require SIGNIFICANT demand difference before switching (prevents oscillation)
+                        # Threshold of 4 vehicles ensures we only switch when really needed
+                        SWITCH_THRESHOLD = 4
+                        
+                        # Decide which direction SHOULD be green
+                        should_be_ns = ns_demand > ew_demand + SWITCH_THRESHOLD  # NS significantly more traffic
+                        should_be_ew = ew_demand > ns_demand + SWITCH_THRESHOLD  # EW significantly more traffic
+                        
+                        if current_phase_idx == 0:  # Currently EW green
+                            if should_be_ns:
+                                # NS needs green (significant queue buildup), switch to yellow then NS
+                                data["current_phase"] = 1  # EW yellow
+                                data["time_in_phase"] = 0
+                                traci.trafficlight.setRedYellowGreenState(tl_id, self.default_phases[tl_id][1])
+                            else:
+                                # EW still has demand or balanced, keep EW green but reset timer
+                                data["time_in_phase"] = 0
+                        
+                        elif current_phase_idx == 2:  # Currently NS green
+                            if should_be_ew:
+                                # EW needs green (significant queue buildup), switch to yellow then EW
+                                data["current_phase"] = 3  # NS yellow
+                                data["time_in_phase"] = 0
+                                traci.trafficlight.setRedYellowGreenState(tl_id, self.default_phases[tl_id][3])
+                            else:
+                                # NS still has demand or balanced, keep NS green but reset timer
+                                data["time_in_phase"] = 0
 
             # Update WiMAX metrics
             self._update_wimax()
             return True
+        except Exception as e:
+            print(f"Error updating traffic lights: {e}")
+            return False
+    
+    def run_simulation_step(self):
+        """
+        Full simulation step including SUMO step and traffic light update.
+        Use this for standalone traffic controller.
+        """
+        try:
+            traci.simulationStep()
+            return self.update_traffic_lights()
         except Exception as e:
             print(f"Error in simulation step: {e}")
             return False

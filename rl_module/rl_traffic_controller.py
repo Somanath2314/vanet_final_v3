@@ -17,6 +17,13 @@ import torch.nn as nn
 
 from vanet_env import VANETTrafficEnv
 
+# Try to import ambulance environment (will use if ambulance model detected)
+try:
+    from vanet_env_ambulance import AmbulanceAwareVANETEnv
+    AMBULANCE_ENV_AVAILABLE = True
+except ImportError:
+    AMBULANCE_ENV_AVAILABLE = False
+
 
 class RLTrafficController:
     """
@@ -46,14 +53,26 @@ class RLTrafficController:
         self.agent = None
         self.current_state = None
         
+        # Model type flag (set when model is loaded)
+        self.is_ambulance_model = False
+        
         # Metrics tracking
         self.episode_rewards = []
         self.episode_lengths = []
         self.current_episode_reward = 0
         self.current_episode_length = 0
         
-    def initialize(self, sumo_connected=True):
-        """Initialize the RL controller after SUMO is connected."""
+    def initialize(self, sumo_connected=True, use_ambulance_env=False):
+        """
+        Initialize the RL controller after SUMO is connected.
+        
+        Parameters
+        ----------
+        sumo_connected : bool
+            Whether SUMO is already connected
+        use_ambulance_env : bool
+            Whether to use ambulance-aware environment (auto-detected if loading ambulance model)
+        """
         if not sumo_connected:
             print("Warning: SUMO not connected. RL controller initialization skipped.")
             return False
@@ -96,8 +115,12 @@ class RLTrafficController:
             if 'algorithm' not in self.config:
                 self.config['algorithm'] = 'DQN'
             
-            # Create environment
-            self.env = VANETTrafficEnv(config=self.config)
+            # Create environment - use ambulance env if requested AND available
+            if use_ambulance_env and AMBULANCE_ENV_AVAILABLE:
+                print("🚑 Using ambulance-aware environment")
+                self.env = AmbulanceAwareVANETEnv(config=self.config)
+            else:
+                self.env = VANETTrafficEnv(config=self.config)
             
             print(f"RL Controller initialized with {len(action_spec)} traffic lights")
             print(f"Action space: {self.env.action_space}")
@@ -151,20 +174,76 @@ class RLTrafficController:
 
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-            # Define a compatible network architecture (matches train_simple/train_working)
-            class DQNNetwork(nn.Module):
-                def __init__(self, state_dim, action_dim, hidden_dim=128):
-                    super(DQNNetwork, self).__init__()
-                    self.network = nn.Sequential(
-                        nn.Linear(state_dim, hidden_dim),
-                        nn.ReLU(),
-                        nn.Linear(hidden_dim, hidden_dim),
-                        nn.ReLU(),
-                        nn.Linear(hidden_dim, action_dim)
-                    )
+            # Try to detect model architecture from checkpoint
+            checkpoint = torch.load(path, map_location=device)
+            
+            # Check if it's ambulance model (has 'policy_net' key and 103-dim input)
+            is_ambulance_model = False
+            if isinstance(checkpoint, dict) and 'policy_net' in checkpoint:
+                try:
+                    first_layer_weight = checkpoint['policy_net'].get('network.0.weight')
+                    if first_layer_weight is not None:
+                        input_dim = first_layer_weight.shape[1]  # Input dimension
+                        hidden_dim = first_layer_weight.shape[0]  # Hidden dimension
+                        
+                        # Ambulance model: 103 input dim, 256 hidden
+                        if input_dim == 103 and hidden_dim == 256:
+                            is_ambulance_model = True
+                            print("🚑 Detected ambulance-aware model (103→256→256→128→36)")
+                            
+                            # Reinitialize with ambulance environment if not already using it
+                            if not isinstance(self.env, AmbulanceAwareVANETEnv) if AMBULANCE_ENV_AVAILABLE else True:
+                                print("🔄 Switching to ambulance-aware environment...")
+                                if AMBULANCE_ENV_AVAILABLE:
+                                    # Use same beta as training (beta=10 gives 103-dim obs)
+                                    amb_config = self.config.copy()
+                                    amb_config['beta'] = 10  # Match training config
+                                    self.env = AmbulanceAwareVANETEnv(config=amb_config)
+                                    self.config = amb_config  # Update stored config
+                                    print(f"✅ Environment switched (obs_dim={self.env.observation_space.shape[0]}, beta=10)")
+                                    # Update dimensions after env switch
+                                    state_dim = int(self.env.observation_space.shape[0])
+                                    action_dim = int(self.env.action_space.n)
+                                else:
+                                    print("⚠️  Ambulance environment not available, loading will fail")
+                except Exception as e:
+                    print(f"⚠️  Model detection error: {e}")
 
-                def forward(self, x):
-                    return self.network(x)
+            # Define network architecture based on model type
+            if is_ambulance_model:
+                # Ambulance model: 256→256→128→action_dim with dropout (trained with train_ambulance_agent.py)
+                class DQNNetwork(nn.Module):
+                    def __init__(self, state_dim, action_dim, hidden_dim=256):
+                        super(DQNNetwork, self).__init__()
+                        self.network = nn.Sequential(
+                            nn.Linear(state_dim, hidden_dim),
+                            nn.ReLU(),
+                            nn.Dropout(0.2),
+                            nn.Linear(hidden_dim, hidden_dim),
+                            nn.ReLU(),
+                            nn.Dropout(0.2),
+                            nn.Linear(hidden_dim, hidden_dim // 2),
+                            nn.ReLU(),
+                            nn.Linear(hidden_dim // 2, action_dim)
+                        )
+
+                    def forward(self, x):
+                        return self.network(x)
+            else:
+                # Standard model: 128→128 (trained with train_simple/train_working)
+                class DQNNetwork(nn.Module):
+                    def __init__(self, state_dim, action_dim, hidden_dim=128):
+                        super(DQNNetwork, self).__init__()
+                        self.network = nn.Sequential(
+                            nn.Linear(state_dim, hidden_dim),
+                            nn.ReLU(),
+                            nn.Linear(hidden_dim, hidden_dim),
+                            nn.ReLU(),
+                            nn.Linear(hidden_dim, action_dim)
+                        )
+
+                    def forward(self, x):
+                        return self.network(x)
 
             # Wrapper that provides compute_action(state) used by controller
             class LoadedAgent:
@@ -179,25 +258,32 @@ class RLTrafficController:
                         q = self.policy_net(s)
                         return int(q.argmax(dim=1).item())
 
-            # Instantiate network and load checkpoint
+            # Instantiate network with correct architecture
             net = DQNNetwork(state_dim, action_dim).to(device)
 
-            checkpoint = torch.load(path, map_location=device)
-
-            # Check for common checkpoint structures
+            # Load checkpoint weights
             if isinstance(checkpoint, dict) and 'policy_net' in checkpoint:
                 net.load_state_dict(checkpoint['policy_net'])
+                print(f"✅ Loaded model weights from checkpoint")
             else:
                 # Try loading assuming the file is a state_dict
                 try:
                     net.load_state_dict(checkpoint)
+                    print(f"✅ Loaded model weights (state_dict format)")
                 except Exception as e:
                     print(f"Failed to load checkpoint into network: {e}")
                     return False
 
+            # Store model type flag
+            self.is_ambulance_model = is_ambulance_model
+            
             # Create loaded agent wrapper and attach
             self.agent = LoadedAgent(net, device)
-            print(f"Model loaded and agent created (state_dim={state_dim}, action_dim={action_dim})")
+            print(f"✅ Model ready for inference (state_dim={state_dim}, action_dim={action_dim})")
+            
+            if is_ambulance_model:
+                print("   🚑 Ambulance-aware features enabled")
+            
             return True
         except Exception as e:
             print(f"Error loading model: {e}")
@@ -358,6 +444,103 @@ class RLTrafficController:
             # Fallback: use the step method
             self.env.step(action)
             return True
+    
+    def get_ambulance_state(self, ambulance_id=None):
+        """
+        Extract ambulance state from SUMO for ambulance-aware RL models.
+        
+        Real-world logic:
+        - Fog nodes detect emergency vehicles via V2V beacons
+        - This method extracts the ambulance's current state from SUMO
+        - Returns structured data that matches training observation space
+        
+        Parameters
+        ----------
+        ambulance_id : str, optional
+            ID of the ambulance vehicle. If None, searches for emergency vehicles.
+            
+        Returns
+        -------
+        dict
+            Ambulance state containing:
+            - present: bool (ambulance exists)
+            - position: (x, y) coordinates
+            - speed: current speed in m/s
+            - heading: direction angle
+            - target: destination coordinates (if known)
+            - lane_id: current lane
+        """
+        import traci
+        
+        try:
+            # Find ambulance if not specified
+            if ambulance_id is None:
+                # Search for emergency vehicles
+                all_vehicles = traci.vehicle.getIDList()
+                emergency_vehicles = [v for v in all_vehicles if 'emergency' in v.lower() or 'ambulance' in v.lower()]
+                
+                if not emergency_vehicles:
+                    return {
+                        'present': False,
+                        'position': (0.0, 0.0),
+                        'speed': 0.0,
+                        'heading': 0.0,
+                        'target': (0.0, 0.0),
+                        'lane_id': ''
+                    }
+                
+                ambulance_id = emergency_vehicles[0]  # Use first emergency vehicle
+            
+            # Check if vehicle still exists
+            if ambulance_id not in traci.vehicle.getIDList():
+                return {
+                    'present': False,
+                    'position': (0.0, 0.0),
+                    'speed': 0.0,
+                    'heading': 0.0,
+                    'target': (0.0, 0.0),
+                    'lane_id': ''
+                }
+            
+            # Extract ambulance state
+            x, y = traci.vehicle.getPosition(ambulance_id)
+            speed = traci.vehicle.getSpeed(ambulance_id)
+            angle = traci.vehicle.getAngle(ambulance_id)
+            lane_id = traci.vehicle.getLaneID(ambulance_id)
+            
+            # Get route/target if available
+            try:
+                route = traci.vehicle.getRoute(ambulance_id)
+                if route:
+                    # Get position of last edge in route as target
+                    last_edge = route[-1]
+                    edge_shape = traci.lane.getShape(f"{last_edge}_0")
+                    target_x, target_y = edge_shape[-1]  # End of last edge
+                else:
+                    target_x, target_y = x, y
+            except:
+                target_x, target_y = x, y
+            
+            return {
+                'present': True,
+                'position': (float(x), float(y)),
+                'speed': float(speed),
+                'heading': float(angle),
+                'target': (float(target_x), float(target_y)),
+                'lane_id': str(lane_id),
+                'vehicle_id': str(ambulance_id)
+            }
+            
+        except Exception as e:
+            print(f"⚠️  Error extracting ambulance state: {e}")
+            return {
+                'present': False,
+                'position': (0.0, 0.0),
+                'speed': 0.0,
+                'heading': 0.0,
+                'target': (0.0, 0.0),
+                'lane_id': ''
+            }
     
     def run_simulation(self, config_path=None, max_steps=3600):
         """

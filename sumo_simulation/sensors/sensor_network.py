@@ -1,13 +1,15 @@
 """
 Sensor Detection System for VANET Traffic Management
 Simulates radar/LIDAR sensors placed every 100m over 0.5km approaches
+Enhanced with RL-based traffic control for emergency vehicle preemption
 """
 
 import random
 import time
 import json
+import requests
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 from enum import Enum
 import os
 import sys
@@ -22,6 +24,15 @@ from utils.logging_config import setup_logging
 
 # WiMAX logger (writes to backend/updated_logs/wimax/wimax.log)
 wimax_logger = setup_logging('wimax')
+
+# Try to import RL controller for fog-based inference
+try:
+    sys.path.insert(0, os.path.join(REPO_ROOT, 'rl_module'))
+    from rl_traffic_controller import RLTrafficController
+    RL_AVAILABLE = True
+except ImportError:
+    RL_AVAILABLE = False
+    wimax_logger.warning("RL controller not available for fog inference")
 
 class SensorType(Enum):
     RADAR = "radar"
@@ -54,28 +65,36 @@ class SensorReading:
 class SensorNetwork:
     """Manages a network of sensors for vehicle detection"""
     
-    def __init__(self):
+    def __init__(self, enable_rl=False, backend_url="http://localhost:8000"):
         self.sensors: Dict[str, SensorReading] = {}
         self.detection_history: List[VehicleDetection] = []
         self.sensor_positions = self._initialize_sensor_positions()
+        
         # Central pole / visualization state and debounce counters
         self.central_pole_id = None
         self.central_pole_position = None
         # central_pole_state: 'green', 'black' (in-network), 'blue' (near)
         self.central_pole_state = 'green'
+        
         # debounce counters for 'blue' (close) detection
         self._emergency_counter = 0
         self._no_emergency_counter = 0
         self._emergency_debounce_threshold = 3  # steps required to switch to blue
         self._no_emergency_debounce_threshold = 5  # steps required to switch back to green from blue
         self._pole_detection_distance = 150.0  # meters for pole-triggering events
+        
         # counters for global (in-network) emergency presence -> 'black' state
         self._global_emergency_counter = 0
         self._no_global_emergency_counter = 0
         self._global_debounce_threshold = 1
         self._global_no_debounce_threshold = 3
+        
         # cache of verified vehicle_ids to avoid re-verification within a session
         self._verified_cache = set()
+        
+        # RL support (disabled by default - fog_server.py handles RL)
+        self.enable_rl = enable_rl
+        self.backend_url = backend_url
         
     def _initialize_sensor_positions(self) -> Dict[str, Tuple[float, float, str]]:
         """Initialize sensor positions (x, y, lane_id) every 100m over 0.5km"""
@@ -201,6 +220,156 @@ class SensorNetwork:
             return float(distance_str)
         except:
             return 100.0
+    
+    def _initialize_rl_controller(self):
+        """Initialize RL controller for fog-based inference"""
+        try:
+            if not RL_AVAILABLE:
+                wimax_logger.warning("RL controller not available")
+                return False
+            
+            self.rl_controller = RLTrafficController(mode='inference')
+            
+            # Load ambulance-aware model
+            model_path = os.path.join(REPO_ROOT, 'rl_module', 'models', 'ambulance_dqn_final.pth')
+            if os.path.exists(model_path):
+                # Note: We don't initialize with SUMO here - fog node queries via API
+                wimax_logger.info(f"🚑 Loaded ambulance-aware RL model: {model_path}")
+                return True
+            else:
+                wimax_logger.warning(f"RL model not found: {model_path}")
+                return False
+        except Exception as e:
+            wimax_logger.error(f"Error initializing RL controller: {e}")
+            return False
+    
+    def _query_backend_signal_data(self, x: float, y: float, radius: float = 1000) -> Optional[dict]:
+        """
+        Query backend for junction signal data.
+        Fog node calls GET /api/wimax/getSignalData
+        """
+        try:
+            response = requests.get(
+                f"{self.backend_url}/api/wimax/getSignalData",
+                params={"x": x, "y": y, "radius": radius},
+                timeout=2
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                wimax_logger.info(f"📡 Queried backend: {len(data.get('junctions', []))} junctions, "
+                                f"ambulance={'detected' if data.get('ambulance', {}).get('detected') else 'none'}")
+                return data
+            else:
+                wimax_logger.warning(f"Backend query failed: {response.status_code}")
+                return None
+        except requests.exceptions.RequestException as e:
+            wimax_logger.error(f"Backend connection error: {e}")
+            return None
+    
+    def _send_override_command(self, pole_id: str, action: int, vehicle_id: str, duration_s: int = 25) -> bool:
+        """
+        Send traffic light override command to backend.
+        Fog node calls POST /api/control/override
+        """
+        try:
+            payload = {
+                "poleId": pole_id,
+                "action": action,
+                "duration_s": duration_s,
+                "vehicle_id": vehicle_id,
+                "priority": 1  # Emergency priority
+            }
+            
+            response = requests.post(
+                f"{self.backend_url}/api/control/override",
+                json=payload,
+                timeout=2
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                wimax_logger.info(f"🚦 Override applied: {pole_id} → Phase {data.get('new_phase')} for {vehicle_id}")
+                return True
+            else:
+                wimax_logger.warning(f"Override failed: {response.status_code} - {response.json()}")
+                return False
+        except requests.exceptions.RequestException as e:
+            wimax_logger.error(f"Override command error: {e}")
+            return False
+    
+    def _run_rl_inference_and_override(self, emergency_vehicle: VehicleDetection):
+        """
+        Core fog computing logic:
+        1. Detect emergency vehicle
+        2. Query backend for junction states
+        3. Run RL inference locally
+        4. Send override command
+        """
+        current_time = time.time()
+        
+        # Cooldown check to avoid flooding
+        if current_time - self.last_rl_override_time < self.rl_override_cooldown:
+            return
+        
+        if not self.rl_controller:
+            return
+        
+        wimax_logger.info(f"🚑 Emergency detected: {emergency_vehicle.vehicle_id} at distance {emergency_vehicle.distance_from_intersection:.1f}m")
+        
+        # Step 1: Query backend for junction states near emergency vehicle
+        # Use emergency vehicle position (approximated from sensor)
+        query_x = 500  # Central position - can be improved with actual vehicle position
+        query_y = 500
+        
+        signal_data = self._query_backend_signal_data(query_x, query_y, radius=1000)
+        if not signal_data:
+            wimax_logger.warning("Failed to get signal data from backend")
+            return
+        
+        junctions = signal_data.get('junctions', [])
+        ambulance = signal_data.get('ambulance', {})
+        
+        if not junctions:
+            wimax_logger.warning("No junctions found in range")
+            return
+        
+        # Step 2: Find nearest junction to emergency vehicle
+        # Sort by distance to emergency vehicle's lane
+        nearest_junction = junctions[0]  # For now, use first junction
+        
+        wimax_logger.info(f"🎯 Target junction: {nearest_junction['poleId']} at distance {nearest_junction.get('distance_from_query', 0):.1f}m")
+        
+        # Step 3: TODO - Run RL inference 
+        # For now, use simple rule: give green to emergency vehicle direction
+        # This is a placeholder - in Phase 4 we'll add proper RL inference with observation building
+        
+        # Determine best action based on emergency vehicle lane
+        target_action = 0  # Default green for main direction
+        
+        # Simple heuristic: if ambulance heading east/west use phase 0, north/south use phase 2
+        if ambulance.get('detected'):
+            direction = ambulance.get('direction', 'east')
+            if direction in ['east', 'west']:
+                target_action = 0  # EW green
+            else:
+                target_action = 2  # NS green
+        
+        wimax_logger.info(f"🤖 RL Decision: Action {target_action} for direction {ambulance.get('direction', 'unknown')}")
+        
+        # Step 4: Send override command
+        success = self._send_override_command(
+            pole_id=nearest_junction['poleId'],
+            action=target_action,
+            vehicle_id=emergency_vehicle.vehicle_id,
+            duration_s=25
+        )
+        
+        if success:
+            self.last_rl_override_time = current_time
+            wimax_logger.info(f"✅ Emergency preemption activated for {emergency_vehicle.vehicle_id}")
+        else:
+            wimax_logger.error(f"❌ Failed to apply emergency preemption")
     
     def get_traffic_density(self, lane_id: str) -> Tuple[str, float]:
         """Calculate traffic density for a lane"""
@@ -409,7 +578,12 @@ class SensorNetwork:
             print("Debug: state=", is_emergency_detected)
 
     def detect_emergency_vehicles_and_update_pole(self) -> List[VehicleDetection]:
-        """Detect emergency vehicles and update the central pole color."""
+        """
+        Detect emergency vehicles and update pole color.
+        
+        Note: RL-based preemption is handled by separate fog_server.py
+        This just handles detection and visualization.
+        """
         emergency_vehicles = self.detect_emergency_vehicles()
 
         # Any emergency anywhere (global/in-network)

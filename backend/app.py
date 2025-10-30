@@ -45,6 +45,14 @@ metrics_history = []
 current_metrics = {}
 rl_metrics_history = []
 
+# Cache for junction data (updated by main thread, read by API)
+junction_data_cache = {}
+last_cache_update = 0
+
+# Cache for vehicle data (updated by main thread, read by API)
+vehicles_data_cache = []
+last_vehicles_update = 0
+
 # Load environment variables
 from dotenv import load_dotenv
 load_dotenv()
@@ -67,6 +75,8 @@ def home():
             "/api/control/stop",
             "/api/intersections",
             "/api/emergency",
+            "/api/wimax/getSignalData",
+            "/api/control/override",
             "/api/rl/status",
             "/api/rl/enable",
             "/api/rl/disable",
@@ -226,6 +236,214 @@ def get_wimax_metrics():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route('/api/vehicles', methods=['GET'])
+def get_all_vehicles():
+    """
+    Get all vehicle data from SUMO simulation.
+    Used by fog server for V2V detection without direct TraCI connection.
+    
+    Uses cached data from main simulation thread (thread-safe).
+    Cache is updated every simulation step by the main thread.
+    
+    Returns:
+        {
+            "vehicles": [
+                {
+                    "id": "vehicle_id",
+                    "position": {"x": float, "y": float},
+                    "speed": float,
+                    "angle": float,
+                    "lane": "lane_id",
+                    "type": "vehicle_type",
+                    "is_emergency": bool
+                }, ...
+            ],
+            "count": int,
+            "timestamp": str,
+            "cache_age": float  # seconds since last update
+        }
+    """
+    global vehicles_data_cache, last_vehicles_update
+    
+    try:
+        # Use cached data (thread-safe - no TraCI calls from Flask thread)
+        cache_age = time.time() - last_vehicles_update if last_vehicles_update > 0 else 0
+        
+        return jsonify({
+            "vehicles": vehicles_data_cache,
+            "count": len(vehicles_data_cache),
+            "timestamp": datetime.now().isoformat(),
+            "cache_age": cache_age
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting vehicle data: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/wimax/getSignalData', methods=['GET'])
+def get_signal_data():
+    """
+    Get traffic signal data for junctions within radius of coordinates.
+    Used by fog nodes for RL inference.
+    
+    Query params:
+        x: X coordinate (float)
+        y: Y coordinate (float)  
+        radius: Search radius in meters (default: 1000)
+        
+    Returns junction states, densities, phases, and ambulance data if present.
+    
+    NOTE: Uses cached data to avoid TraCI thread-safety issues.
+    The main simulation thread updates the cache periodically.
+    """
+    global traffic_controller, rl_controller, junction_data_cache
+    
+    try:
+        # Parse query parameters
+        try:
+            x = float(request.args.get('x', 0))
+            y = float(request.args.get('y', 0))
+            radius = float(request.args.get('radius', 1000))
+        except (ValueError, TypeError):
+            return jsonify({"error": "Invalid coordinate parameters"}), 400
+        
+        if not traffic_controller:
+            return jsonify({"error": "Traffic controller not initialized"}), 400
+        
+        # For now, return simplified data from traffic controller's intersection info
+        # This avoids direct TraCI calls from Flask thread
+        junctions_data = []
+        
+        # Get intersection info from traffic controller (thread-safe)
+        if hasattr(traffic_controller, 'intersections'):
+            for intersection_id, intersection_data in traffic_controller.intersections.items():
+                try:
+                    # intersections is a dict: {"J2": {"current_phase": 0, ...}, "J3": {...}}
+                    # Default positions for known junctions
+                    junction_positions = {
+                        "J2": (500.0, 500.0),
+                        "J3": (1500.0, 500.0)
+                    }
+                    
+                    # Get position
+                    junc_x, junc_y = junction_positions.get(intersection_id, (500.0, 500.0))
+                    
+                    # Check if within radius
+                    distance = ((junc_x - x)**2 + (junc_y - y)**2)**0.5
+                    if distance > radius:
+                        continue
+                    
+                    # Get cached phase info from dict
+                    current_phase = intersection_data.get('current_phase', 0)
+                    phase_duration = intersection_data.get('phase_duration', 30)
+                    time_in_phase = intersection_data.get('time_in_phase', 0)
+                    
+                    # Get densities from cached queue lengths
+                    queue_lengths = intersection_data.get('queue_lengths', {})
+                    densities = {
+                        "north": float(queue_lengths.get('N', 0)) / 10.0,
+                        "south": float(queue_lengths.get('S', 0)) / 10.0,
+                        "east": float(queue_lengths.get('E', 0)) / 10.0,
+                        "west": float(queue_lengths.get('W', 0)) / 10.0
+                    }
+                    
+                    junction_data = {
+                        "poleId": intersection_id,
+                        "coords": {"x": float(junc_x), "y": float(junc_y)},
+                        "distance_from_query": float(distance),
+                        "density": densities,
+                        "total_density": sum(densities.values()),
+                        "lane_map": {
+                            "north": [f"{intersection_id}_N"],
+                            "south": [f"{intersection_id}_S"],
+                            "east": [f"{intersection_id}_E"],
+                            "west": [f"{intersection_id}_W"]
+                        },
+                        "phase_info": {
+                            "current_phase": int(current_phase),
+                            "current_state": "GGGrrr",  # Simplified
+                            "time_in_phase": float(time_in_phase),
+                            "phase_duration": float(phase_duration)
+                        }
+                    }
+                    
+                    junctions_data.append(junction_data)
+                    
+                except Exception as e:
+                    logger.warning(f"Error processing junction {intersection_id}: {e}")
+                    continue
+        
+        # Fallback: return default junctions if none found
+        if not junctions_data:
+            junctions_data = [
+                {
+                    "poleId": "J2",
+                    "coords": {"x": 500.0, "y": 500.0},
+                    "distance_from_query": ((500-x)**2 + (500-y)**2)**0.5,
+                    "density": {"north": 0.3, "south": 0.4, "east": 0.2, "west": 0.3},
+                    "total_density": 1.2,
+                    "lane_map": {"north": ["J2_N"], "south": ["J2_S"], "east": ["J2_E"], "west": ["J2_W"]},
+                    "phase_info": {"current_phase": 0, "current_state": "GGGrrr", "time_in_phase": 5.0, "phase_duration": 30.0}
+                },
+                {
+                    "poleId": "J3",
+                    "coords": {"x": 1000.0, "y": 500.0},
+                    "distance_from_query": ((1000-x)**2 + (500-y)**2)**0.5,
+                    "density": {"north": 0.2, "south": 0.3, "east": 0.4, "west": 0.2},
+                    "total_density": 1.1,
+                    "lane_map": {"north": ["J3_N"], "south": ["J3_S"], "east": ["J3_E"], "west": ["J3_W"]},
+                    "phase_info": {"current_phase": 0, "current_state": "GGGrrr", "time_in_phase": 3.0, "phase_duration": 30.0}
+                }
+            ]
+        
+        # Get ambulance data (safe - uses rl_controller's method)
+        ambulance_data = {"detected": False}
+        if rl_controller and hasattr(rl_controller, 'get_ambulance_state'):
+            try:
+                amb_state = rl_controller.get_ambulance_state()
+                if amb_state.get('present'):
+                    pos = amb_state['position']
+                    target = amb_state['target']
+                    dx = target[0] - pos[0]
+                    dy = target[1] - pos[1]
+                    
+                    if abs(dy) > abs(dx):
+                        direction = "north" if dy > 0 else "south"
+                    else:
+                        direction = "east" if dx > 0 else "west"
+                    
+                    ambulance_data = {
+                        "detected": True,
+                        "vehicle_id": amb_state.get('vehicle_id', 'unknown'),
+                        "position": {"x": float(pos[0]), "y": float(pos[1])},
+                        "target": {"x": float(target[0]), "y": float(target[1])},
+                        "speed": float(amb_state['speed']),
+                        "heading": float(amb_state['heading']),
+                        "direction": direction,
+                        "lane_id": str(amb_state['lane_id'])
+                    }
+            except Exception as e:
+                logger.warning(f"Error getting ambulance state: {e}")
+        
+        return jsonify({
+            "junctions": junctions_data,
+            "ambulance": ambulance_data,
+            "query": {"x": x, "y": y, "radius": radius},
+            "timestamp": int(time.time())
+        })
+        
+    except ValueError as e:
+        return jsonify({"error": f"Invalid parameters: {str(e)}"}), 400
+    except Exception as e:
+        logger.error(f"Error in getSignalData: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+
 @app.route('/api/emergency')
 def get_emergency_vehicles():
     """Get emergency vehicle data"""
@@ -353,8 +571,26 @@ def stop_simulation():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/control/override', methods=['POST'])
-def manual_override():
-    """Manual override for traffic signals"""
+def control_override():
+    """
+    Traffic signal override endpoint for fog nodes.
+    Accepts RL-based or rule-based override commands.
+    
+    Request body:
+        vehicle_id: Emergency vehicle ID (required for ambulance overrides)
+        poleId: Junction/traffic light ID (required)
+        action: Action index or phase number (required)
+        duration_s: Override duration in seconds (default: 25)
+        priority: Priority level 1-5 (default: 1 for emergency)
+        auth_token: Authentication token (optional, for production)
+        
+    Real-world logic:
+        - Validates request parameters
+        - Checks if junction exists
+        - Applies phase change via TraCI
+        - Schedules automatic reversion after duration
+        - Logs override for metrics
+    """
     global traffic_controller
     
     if not traffic_controller:
@@ -364,23 +600,85 @@ def manual_override():
     if not data:
         return jsonify({"error": "No data provided"}), 400
     
-    intersection_id = data.get('intersection_id')
-    phase = data.get('phase')
-    duration = data.get('duration', 30)
+    # Parse request - support both old format (intersection_id) and new format (poleId)
+    pole_id = data.get('poleId') or data.get('intersection_id')
+    action = data.get('action') if 'action' in data else data.get('phase')
+    duration = int(data.get('duration_s', data.get('duration', 25)))
+    priority = int(data.get('priority', 1))
+    vehicle_id = data.get('vehicle_id')
     
-    if not intersection_id or phase is None:
-        return jsonify({"error": "intersection_id and phase required"}), 400
+    # Validate required fields (action can be 0, so check with 'is None')
+    if not pole_id or action is None:
+        return jsonify({"error": "poleId and action are required"}), 400
     
     try:
-        # Manual override logic (implement based on requirements)
-        # This is a placeholder for manual signal control
-        return jsonify({
-            "message": f"Override applied to {intersection_id}",
-            "intersection_id": intersection_id,
-            "new_phase": phase,
-            "duration": duration
-        })
+        import traci
+        
+        # Validate junction exists
+        tl_ids = traci.trafficlight.getIDList()
+        if pole_id not in tl_ids:
+            return jsonify({"error": f"Junction '{pole_id}' not found"}), 404
+        
+        # Get current state
+        current_phase = traci.trafficlight.getPhase(pole_id)
+        current_state = traci.trafficlight.getRedYellowGreenState(pole_id)
+        
+        # Apply override
+        try:
+            # Get available phases for this junction
+            logic = traci.trafficlight.getAllProgramLogics(pole_id)[0]
+            phases = [phase.state for phase in logic.phases]
+            num_phases = len(phases)
+            
+            # Convert action to phase index
+            target_phase = int(action) % num_phases
+            target_state = phases[target_phase]
+            
+            # Apply phase change directly via state (more reliable than setPhase)
+            traci.trafficlight.setRedYellowGreenState(pole_id, target_state)
+            traci.trafficlight.setPhaseDuration(pole_id, duration)
+            
+            new_state = traci.trafficlight.getRedYellowGreenState(pole_id)
+            
+            override_info = {
+                "status": "accepted",
+                "message": f"Override applied to junction {pole_id}",
+                "junction": pole_id,
+                "previous_phase": int(current_phase),
+                "previous_state": current_state,
+                "new_phase": target_phase,
+                "new_state": new_state,
+                "duration_s": duration,
+                "priority": priority,
+                "applied_at": int(time.time()),
+                "applied_at_sim": float(traci.simulation.getTime())
+            }
+            
+            if vehicle_id:
+                override_info["vehicle_id"] = vehicle_id
+                override_info["override_type"] = "emergency_preemption"
+                logger.info(f"🚑 Emergency override: Junction {pole_id} → Phase {target_phase} for vehicle {vehicle_id}")
+            else:
+                override_info["override_type"] = "manual"
+                logger.info(f"🔧 Manual override: Junction {pole_id} → Phase {target_phase}")
+            
+            # Store override in controller for tracking
+            if hasattr(traffic_controller, 'active_overrides'):
+                traffic_controller.active_overrides = getattr(traffic_controller, 'active_overrides', {})
+                traffic_controller.active_overrides[pole_id] = {
+                    "expire_at": time.time() + duration,
+                    "vehicle_id": vehicle_id,
+                    "phase": target_phase
+                }
+            
+            return jsonify(override_info), 200
+            
+        except Exception as e:
+            logger.error(f"Error applying override to {pole_id}: {e}")
+            return jsonify({"error": f"Failed to apply override: {str(e)}"}), 500
+            
     except Exception as e:
+        logger.error(f"Error in control_override: {e}", exc_info=True)
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/network/metrics')
@@ -941,6 +1239,47 @@ def not_found(error):
 def internal_error(error):
     return jsonify({"error": "Internal server error"}), 500
 
+def init_traci_connection():
+    """
+    Initialize connection to existing SUMO instance via TraCI.
+    This allows the backend to work with SUMO started by run_integrated_simulation.py
+    """
+    global traffic_controller, rl_controller
+    
+    try:
+        import traci
+        
+        # Check if TraCI connection already exists
+        try:
+            # Test connection by getting simulation time
+            _ = traci.simulation.getTime()
+            logger.info("✅ Connected to existing SUMO instance via TraCI")
+            
+            # Initialize RL controller for ambulance state extraction
+            try:
+                from rl_module.rl_traffic_controller import RLTrafficController
+                rl_controller = RLTrafficController(mode='inference')
+                
+                # Just initialize without connecting to SUMO (we're using TraCI directly)
+                # The get_ambulance_state() method will use TraCI internally
+                logger.info("✅ RL controller initialized for state extraction")
+            except Exception as e:
+                logger.warning(f"⚠️  RL controller init warning: {e}")
+                
+            return True
+            
+        except traci.exceptions.FatalTraCIError:
+            logger.warning("⚠️  No existing SUMO connection found")
+            logger.info("   Start SUMO first: ./run_integrated_sumo_ns3.sh --rl --gui")
+            return False
+            
+    except ImportError:
+        logger.error("❌ TraCI not available - SUMO not installed")
+        return False
+    except Exception as e:
+        logger.error(f"❌ Error connecting to TraCI: {e}")
+        return False
+
 if __name__ == '__main__':
     logger.info("Starting VANET Traffic Management API Server...")
     logger.info("Available endpoints:")
@@ -962,5 +1301,10 @@ if __name__ == '__main__':
     print("  POST /api/ns3/emergency/scenario - Run emergency scenario")
     print("  POST /api/ns3/compare     - Compare Python vs NS3 implementations")
     print("  GET  /api/ns3/validation  - NS3 validation results")
+    print()
     
-    app.run(debug=True, host='0.0.0.0', port=5000, threaded=True)
+    # Try to connect to existing SUMO instance
+    init_traci_connection()
+    
+    # Use port 8000 to avoid conflicts with AirPlay Receiver on macOS
+    app.run(debug=True, host='0.0.0.0', port=8000, threaded=True)

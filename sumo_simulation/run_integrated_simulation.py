@@ -5,6 +5,7 @@ Combines SUMO traffic simulation with NS3-based network simulation
 - SUMO: Vehicle movements, traffic control, RL integration
 - NS3 Bridge: WiFi (802.11p) for V2V, WiMAX for emergency V2I
 - Full RL support with trained models
+- Backend API server embedded for fog node communication
 """
 
 import os
@@ -12,6 +13,7 @@ import sys
 import time
 import argparse
 import traceback
+import threading
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -29,6 +31,69 @@ except ImportError:
     print("⚠️  RL module not available")
 
 
+def update_vehicle_cache():
+    """
+    Update vehicle data cache for backend API (thread-safe).
+    Called by main simulation thread to avoid TraCI thread-safety issues.
+    """
+    import backend.app as backend_app
+    import traci
+    
+    vehicle_ids = traci.vehicle.getIDList()
+    vehicles_data = []
+    
+    for vehicle_id in vehicle_ids:
+        try:
+            pos = traci.vehicle.getPosition(vehicle_id)
+            speed = traci.vehicle.getSpeed(vehicle_id)
+            angle = traci.vehicle.getAngle(vehicle_id)
+            lane = traci.vehicle.getLaneID(vehicle_id)
+            vtype = traci.vehicle.getTypeID(vehicle_id)
+            
+            # Determine if emergency vehicle
+            is_emergency = vehicle_id.startswith('emergency') or 'ambulance' in vehicle_id.lower()
+            
+            vehicles_data.append({
+                "id": vehicle_id,
+                "position": {"x": pos[0], "y": pos[1]},
+                "speed": speed,
+                "angle": angle,
+                "lane": lane,
+                "type": vtype,
+                "is_emergency": is_emergency
+            })
+        except Exception:
+            continue  # Vehicle left simulation
+    
+    # Update cache atomically
+    backend_app.vehicles_data_cache = vehicles_data
+    backend_app.last_vehicles_update = time.time()
+
+
+def start_backend_server(traffic_controller, rl_controller):
+    """
+    Start Flask backend server in separate thread.
+    Provides REST APIs for fog nodes to query state and send overrides.
+    """
+    # Import Flask app
+    backend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'backend')
+    sys.path.insert(0, backend_dir)
+    
+    import backend.app as backend_app
+    
+    # Inject traffic_controller and rl_controller into backend's global scope
+    backend_app.traffic_controller = traffic_controller
+    backend_app.rl_controller = rl_controller
+    backend_app.simulation_running = True
+    
+    print("🌐 Starting Backend API Server on http://localhost:8000...")
+    print("   Fog nodes can now query: GET /api/wimax/getSignalData")
+    print("   Fog nodes can send overrides: POST /api/control/override")
+    
+    # Run Flask server (disable debug mode to avoid reloader in thread)
+    backend_app.app.run(host='0.0.0.0', port=8000, debug=False, use_reloader=False, threaded=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description='Integrated SUMO + NS3 VANET Simulation')
     parser.add_argument('--mode', choices=['rule', 'rl'], default='rule',
@@ -39,6 +104,8 @@ def main():
                        help='Use SUMO-GUI instead of SUMO')
     parser.add_argument('--output', default='./output',
                        help='Output directory for results')
+    parser.add_argument('--no-backend', action='store_true',
+                       help='Disable backend API server')
     args = parser.parse_args()
 
     # Create output directory
@@ -114,26 +181,38 @@ def main():
         try:
             rl_controller = RLTrafficController(mode='inference')
             if rl_controller.initialize(sumo_connected=True):
-                # Prefer final checkpoint if available, else fallback to canonical name
+                # Priority order: ambulance model > general traffic models
                 repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
                 models_dir = os.path.join(repo_root, 'rl_module', 'models')
+                
+                # Model candidates in priority order
                 candidates = [
-                    os.path.join(models_dir, 'dqn_traffic_final.pth'),
-                    os.path.join(models_dir, 'dqn_traffic_model.pth')
+                    # Ambulance-aware models (highest priority)
+                    (os.path.join(models_dir, 'ambulance_dqn_final.pth'), 'Ambulance-aware'),
+                    (os.path.join(models_dir, 'ambulance_dqn_ep100.pth'), 'Ambulance-aware'),
+                    (os.path.join(models_dir, 'ambulance_dqn_ep50.pth'), 'Ambulance-aware'),
+                    # General traffic models (fallback)
+                    (os.path.join(models_dir, 'dqn_traffic_final.pth'), 'General traffic'),
+                    (os.path.join(models_dir, 'dqn_traffic_model.pth'), 'General traffic')
                 ]
 
                 loaded = False
-                for model_path in candidates:
+                for model_path, model_type in candidates:
                     if os.path.exists(model_path):
+                        print(f"🔍 Found {model_type} model: {os.path.basename(model_path)}")
                         if rl_controller.load_model(model_path):
-                            print("✅ Loaded trained RL model from:", model_path)
+                            print(f"✅ Loaded {model_type} RL model")
                             loaded = True
                             break
                         else:
-                            print(f"⚠️ Failed to load model at {model_path}")
+                            print(f"⚠️  Failed to load model, trying next...")
 
                 if not loaded:
-                    print("⚠️  No trained model found in rl_module/models/; using random policy for exploration")
+                    print("⚠️  No trained model found in rl_module/models/")
+                    print("   Available models should be:")
+                    print("   - ambulance_dqn_final.pth (ambulance-aware)")
+                    print("   - dqn_traffic_final.pth (general traffic)")
+                    print("   Using random policy for exploration")
                 print("✅ RL controller ready")
             else:
                 print("❌ Failed to initialize RL controller")
@@ -148,6 +227,21 @@ def main():
     if args.mode == 'rl' and rl_controller is None:
         print("⚠️  Falling back to rule-based control")
         args.mode = 'rule'
+
+    # Start backend API server in separate thread (unless disabled)
+    backend_thread = None
+    backend_started = False
+    if not args.no_backend:
+        print()
+        backend_thread = threading.Thread(
+            target=start_backend_server,
+            args=(traffic_controller, rl_controller),
+            daemon=True
+        )
+        backend_thread.start()
+        time.sleep(2)  # Give server time to start
+        print("✅ Backend API server started on http://localhost:8000")
+        backend_started = True
 
     print()
     print("🚀 Starting integrated simulation...")
@@ -166,48 +260,36 @@ def main():
                 print("\n⚠️  No more vehicles in simulation")
                 break
             
-            # Advance SUMO simulation
-            if rl_controller:
-                # RL-based control
-                traci.simulationStep()
-                current_time = traci.simulation.getTime()
-                
-                # RL control logic every 10 steps
-                if step % 10 == 0:
-                    try:
-                        # Get state from traffic controller
-                        state = rl_controller.get_state()
-                        # Get action from RL agent
-                        action = rl_controller.get_action(state)
-                        # Apply action to traffic lights
-                        rl_controller.apply_action(action)
-                    except Exception as e:
-                        print(f"⚠️  RL control error: {e}")
-                
-                # Update NS3 network simulation
-                ns3_bridge.step(current_time)
+            # Advance SUMO one step
+            traci.simulationStep()
+            
+            # Get current simulation time
+            current_time = traci.simulation.getTime()
+            
+            # Edge Node Architecture: Each junction operates INDEPENDENTLY
+            # - Each edge node uses LOCAL density sensors (N, S, E, W queue lengths)
+            # - Makes INDEPENDENT decisions (no synchronization between J2 and J3)
+            # - Only overridden by FOG node during emergencies via REST API
+            
+            # Local density-based control for EACH junction independently
+            if not traffic_controller.update_traffic_lights():
+                break
+            
+            # Update NS3 network simulation
+            ns3_bridge.step(current_time)
 
-                # Update sensor network (detect emergencies and update central pole color)
+            # Update sensor network (detect emergencies and update central pole color)
+            try:
+                sensor_network.detect_emergency_vehicles_and_update_pole()
+            except Exception as e:
+                print(f"⚠️  Sensor network update error: {e}")
+            
+            # Update vehicle cache for backend API (thread-safe)
+            if backend_started:
                 try:
-                    sensor_network.detect_emergency_vehicles_and_update_pole()
+                    update_vehicle_cache()
                 except Exception as e:
-                    print(f"⚠️  Sensor network update error: {e}")
-            else:
-                # Rule-based control - use traffic controller's built-in step
-                if not traffic_controller.run_simulation_step():
-                    break
-                
-                # Get current simulation time
-                current_time = traci.simulation.getTime()
-                
-                # Update NS3 network simulation
-                ns3_bridge.step(current_time)
-
-                # Update sensor network (detect emergencies and update central pole color)
-                try:
-                    sensor_network.detect_emergency_vehicles_and_update_pole()
-                except Exception as e:
-                    print(f"⚠️  Sensor network update error: {e}")
+                    pass  # Silently ignore cache update errors
             
             # Print progress every 5 seconds
             if time.time() - last_print_time >= 5.0:

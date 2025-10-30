@@ -268,6 +268,13 @@ class VANETTrafficEnv(gym.Env):
 
         return new_state
     
+    def apply_action(self, rl_actions):
+        """
+        Apply RL actions to traffic lights WITHOUT stepping the simulation.
+        Use this when the main simulation loop handles stepping separately.
+        """
+        return self._apply_rl_actions(rl_actions)
+    
     def _apply_rl_actions(self, rl_actions):
         """Apply RL actions to traffic lights."""
         if not self.action_spec:
