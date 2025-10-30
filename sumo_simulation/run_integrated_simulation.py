@@ -114,14 +114,26 @@ def main():
         try:
             rl_controller = RLTrafficController(mode='inference')
             if rl_controller.initialize(sumo_connected=True):
-                model_path = os.path.join(os.path.dirname(__file__), '..', 
-                                         'rl_module', 'models', 'dqn_traffic_model.pth')
-                if os.path.exists(model_path):
-                    rl_controller.load_model(model_path)
-                    print("✅ Loaded trained RL model from:", model_path)
-                else:
-                    print("⚠️  No trained model found at:", model_path)
-                    print("   Using random policy for exploration")
+                # Prefer final checkpoint if available, else fallback to canonical name
+                repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+                models_dir = os.path.join(repo_root, 'rl_module', 'models')
+                candidates = [
+                    os.path.join(models_dir, 'dqn_traffic_final.pth'),
+                    os.path.join(models_dir, 'dqn_traffic_model.pth')
+                ]
+
+                loaded = False
+                for model_path in candidates:
+                    if os.path.exists(model_path):
+                        if rl_controller.load_model(model_path):
+                            print("✅ Loaded trained RL model from:", model_path)
+                            loaded = True
+                            break
+                        else:
+                            print(f"⚠️ Failed to load model at {model_path}")
+
+                if not loaded:
+                    print("⚠️  No trained model found in rl_module/models/; using random policy for exploration")
                 print("✅ RL controller ready")
             else:
                 print("❌ Failed to initialize RL controller")
@@ -145,9 +157,9 @@ def main():
         step = 0
         start_time = time.time()
         last_print_time = start_time
-        
+
         import traci
-        
+
         while step < args.steps:
             # Check if simulation should continue
             if traci.simulation.getMinExpectedNumber() <= 0:
@@ -174,6 +186,12 @@ def main():
                 
                 # Update NS3 network simulation
                 ns3_bridge.step(current_time)
+
+                # Update sensor network (detect emergencies and update central pole color)
+                try:
+                    sensor_network.detect_emergency_vehicles_and_update_pole()
+                except Exception as e:
+                    print(f"⚠️  Sensor network update error: {e}")
             else:
                 # Rule-based control - use traffic controller's built-in step
                 if not traffic_controller.run_simulation_step():
@@ -184,6 +202,12 @@ def main():
                 
                 # Update NS3 network simulation
                 ns3_bridge.step(current_time)
+
+                # Update sensor network (detect emergencies and update central pole color)
+                try:
+                    sensor_network.detect_emergency_vehicles_and_update_pole()
+                except Exception as e:
+                    print(f"⚠️  Sensor network update error: {e}")
             
             # Print progress every 5 seconds
             if time.time() - last_print_time >= 5.0:

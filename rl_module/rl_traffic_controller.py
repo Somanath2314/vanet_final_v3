@@ -12,6 +12,9 @@ from collections import OrderedDict
 # Add parent directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
+import torch
+import torch.nn as nn
+
 from vanet_env import VANETTrafficEnv
 
 
@@ -117,10 +120,84 @@ class RLTrafficController:
             return False
         
         try:
-            # TODO: Implement model loading based on algorithm
-            # This will depend on whether using Ray RLlib, stable-baselines3, etc.
+            # Prefer absolute path
+            path = os.path.abspath(path)
+
             print(f"Loading model from {path}")
-            # self.agent = load_trained_agent(path)
+
+            if not os.path.exists(path):
+                print(f"Model file not found: {path}")
+                return False
+
+            # Ensure environment is initialized so we can infer shapes
+            if self.env is None:
+                print("Environment not initialized; cannot infer model shapes")
+                return False
+
+            # Determine observation and action dimensions
+            try:
+                obs_shape = self.env.observation_space.shape
+                state_dim = int(obs_shape[0])
+            except Exception:
+                # Fallback: try flattened observation
+                state_dim = int(self.env.observation_space.shape[0])
+
+            # Support only discrete action space for now
+            if hasattr(self.env.action_space, 'n'):
+                action_dim = int(self.env.action_space.n)
+            else:
+                print("Unsupported action space for loader (only Discrete supported)")
+                return False
+
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+            # Define a compatible network architecture (matches train_simple/train_working)
+            class DQNNetwork(nn.Module):
+                def __init__(self, state_dim, action_dim, hidden_dim=128):
+                    super(DQNNetwork, self).__init__()
+                    self.network = nn.Sequential(
+                        nn.Linear(state_dim, hidden_dim),
+                        nn.ReLU(),
+                        nn.Linear(hidden_dim, hidden_dim),
+                        nn.ReLU(),
+                        nn.Linear(hidden_dim, action_dim)
+                    )
+
+                def forward(self, x):
+                    return self.network(x)
+
+            # Wrapper that provides compute_action(state) used by controller
+            class LoadedAgent:
+                def __init__(self, policy_net, device):
+                    self.policy_net = policy_net.to(device)
+                    self.device = device
+                    self.policy_net.eval()
+
+                def compute_action(self, state):
+                    with torch.no_grad():
+                        s = torch.FloatTensor(state).unsqueeze(0).to(self.device)
+                        q = self.policy_net(s)
+                        return int(q.argmax(dim=1).item())
+
+            # Instantiate network and load checkpoint
+            net = DQNNetwork(state_dim, action_dim).to(device)
+
+            checkpoint = torch.load(path, map_location=device)
+
+            # Check for common checkpoint structures
+            if isinstance(checkpoint, dict) and 'policy_net' in checkpoint:
+                net.load_state_dict(checkpoint['policy_net'])
+            else:
+                # Try loading assuming the file is a state_dict
+                try:
+                    net.load_state_dict(checkpoint)
+                except Exception as e:
+                    print(f"Failed to load checkpoint into network: {e}")
+                    return False
+
+            # Create loaded agent wrapper and attach
+            self.agent = LoadedAgent(net, device)
+            print(f"Model loaded and agent created (state_dim={state_dim}, action_dim={action_dim})")
             return True
         except Exception as e:
             print(f"Error loading model: {e}")
