@@ -14,6 +14,8 @@ Usage:
     python fog_server.py --backend http://localhost:8000
 """
 
+# code is working finaly
+
 import sys
 import os
 import time

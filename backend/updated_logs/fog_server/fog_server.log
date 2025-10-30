@@ -8416,3 +8416,16 @@
 {"timestamp": "2025-10-30T12:33:35.016311Z", "level": "INFO", "logger": "root", "message": "📡 Backend query: 1 junctions, ambulance=No", "module": "fog_server", "funcName": "query_junction_states", "line": 328}
 {"timestamp": "2025-10-30T12:33:35.016547Z", "level": "INFO", "logger": "root", "message": "   J3: N=0.00, S=0.00, E=0.00, W=0.00", "module": "fog_server", "funcName": "query_junction_states", "line": 334}
 {"timestamp": "2025-10-30T12:33:41.997661Z", "level": "INFO", "logger": "root", "message": "\n\n🛑 Fog server stopped by user", "module": "fog_server", "funcName": "run", "line": 666}
+{"timestamp": "2025-10-30T12:34:38.717512Z", "level": "INFO", "logger": "root", "message": "✅ Sensor network initialized for V2V detection", "module": "fog_server", "funcName": "__init__", "line": 77}
+{"timestamp": "2025-10-30T12:34:38.719882Z", "level": "INFO", "logger": "root", "message": "🚑 Loading RL model: /Users/apple/Desktop/vanet_29_oct/vanet_final_v3/rl_module/models/ambulance_dqn_final.pth", "module": "fog_server", "funcName": "_initialize_rl_controller", "line": 135}
+{"timestamp": "2025-10-30T12:34:38.722358Z", "level": "INFO", "logger": "root", "message": "✅ RL controller and model loaded successfully", "module": "fog_server", "funcName": "_initialize_rl_controller", "line": 137}
+{"timestamp": "2025-10-30T12:34:38.722468Z", "level": "INFO", "logger": "root", "message": "🌐 Fog Server initialized", "module": "fog_server", "funcName": "__init__", "line": 91}
+{"timestamp": "2025-10-30T12:34:38.722545Z", "level": "INFO", "logger": "root", "message": "   Backend: http://localhost:8000", "module": "fog_server", "funcName": "__init__", "line": 92}
+{"timestamp": "2025-10-30T12:34:38.722615Z", "level": "INFO", "logger": "root", "message": "   RL Enabled: True", "module": "fog_server", "funcName": "__init__", "line": 93}
+{"timestamp": "2025-10-30T12:34:38.722674Z", "level": "INFO", "logger": "root", "message": "\n======================================================================", "module": "fog_server", "funcName": "run", "line": 642}
+{"timestamp": "2025-10-30T12:34:38.722739Z", "level": "INFO", "logger": "root", "message": "🌐 FOG SERVER STARTED", "module": "fog_server", "funcName": "run", "line": 643}
+{"timestamp": "2025-10-30T12:34:38.722799Z", "level": "INFO", "logger": "root", "message": "======================================================================", "module": "fog_server", "funcName": "run", "line": 644}
+{"timestamp": "2025-10-30T12:34:38.722855Z", "level": "INFO", "logger": "root", "message": "Monitoring for emergency vehicles...", "module": "fog_server", "funcName": "run", "line": 645}
+{"timestamp": "2025-10-30T12:34:38.722907Z", "level": "INFO", "logger": "root", "message": "Press Ctrl+C to stop\n", "module": "fog_server", "funcName": "run", "line": 646}
+{"timestamp": "2025-10-30T12:34:38.728325Z", "level": "ERROR", "logger": "root", "message": "❌ Cannot connect to backend - start with ./run_integrated_sumo_ns3.sh first", "module": "fog_server", "funcName": "connect_to_sumo", "line": 180}
+{"timestamp": "2025-10-30T12:34:38.728444Z", "level": "ERROR", "logger": "root", "message": "Cannot start without SUMO connection", "module": "fog_server", "funcName": "run", "line": 650}
