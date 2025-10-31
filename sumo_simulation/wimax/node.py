@@ -1,12 +1,13 @@
 import time
 from dataclasses import dataclass
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from .config import WiMAXConfig
 from .phy import WiMAXPhy
 from .mac import WiMAXMac
 import json
-from typing import Dict, Any, Optional
-from ..security.crypto import RSACrypto, HybridCrypto, EncryptedMessage
+
+# Note: Encryption is now handled by SecureWiMAXBaseStation wrapper
+# Legacy crypto imports removed - use secure_wimax.py for encrypted communications
 
 
 @dataclass

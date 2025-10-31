@@ -42,6 +42,8 @@ def main():
                        help='Use SUMO-GUI instead of SUMO')
     parser.add_argument('--output', default='./output',
                        help='Output directory for results')
+    parser.add_argument('--security', action='store_true',
+                       help='Enable RSA encryption for V2V/V2I (slower startup)')
     args = parser.parse_args()
 
     # Create output directory
@@ -58,23 +60,26 @@ def main():
     print("="*70)
     print()
 
-    # Initialize components
+    # Initialize components FIRST (without security)
     print("🔧 Initializing simulation components...")
-    traffic_controller = AdaptiveTrafficController()
+    # Pass security flag to avoid confusing "disabled" message
+    traffic_controller = AdaptiveTrafficController(
+        security_managers=None,
+        security_pending=args.security  # Indicate security will be enabled later
+    )
     sensor_network = SensorNetwork()
     ns3_bridge = SUMONS3Bridge()
     
     # Initialize RSUs at intersection positions
-    # These are typical intersection positions in the SUMO network
     rsu_positions = [
-        (500.0, 500.0),   # Intersection 1
-        (1500.0, 500.0),  # Intersection 2
-        (500.0, 1500.0),  # Intersection 3
-        (1500.0, 1500.0)  # Intersection 4
+        (500.0, 500.0),   # J2 intersection
+        (1000.0, 500.0),  # J3 intersection
+        (500.0, 1000.0),  # Intersection 3
+        (1000.0, 1000.0)  # Intersection 4
     ]
     ns3_bridge.initialize_rsus(rsu_positions)
     
-    # Connect to SUMO
+    # Connect to SUMO FIRST (before security initialization to avoid timeout)
     config_path = os.path.join(os.path.dirname(__file__), "simulation.sumocfg")
     if not os.path.exists(config_path):
         print(f"❌ Error: SUMO config not found: {config_path}")
@@ -88,6 +93,49 @@ def main():
         return
 
     print("✅ Connected to SUMO successfully")
+    
+    # NOW initialize security AFTER SUMO is connected
+    ca = None
+    rsu_managers = {}
+    vehicle_managers = {}
+    
+    if args.security:
+        print()
+        print("🔐 Initializing VANET Security Infrastructure...")
+        print("  - Certificate Authority (CA)")
+        print("  - RSU key managers")
+        print("  - Vehicle key managers")
+        print("  ⏳ Generating keys (this takes 30-60 seconds)...")
+        print("  💡 SUMO is paused during key generation")
+        
+        # Get number of RSUs from positions
+        rsu_ids = ["RSU_J2", "RSU_J3", "RSU_Intersection1", "RSU_Intersection2"]
+        
+        # Initialize with small number initially for faster startup
+        ca, rsu_managers, vehicle_managers = initialize_vanet_security(
+            rsu_ids=rsu_ids,
+            num_vehicles=5  # Reduced from 20 for faster startup, will add more dynamically
+        )
+        
+        print(f"  ✅ CA initialized: {ca.ca_id}")
+        print(f"  ✅ RSU managers: {len(rsu_managers)}")
+        print(f"  ✅ Vehicle managers: {len(vehicle_managers)} (more added dynamically)")
+        
+        # NOW update traffic controller with security
+        traffic_controller.ca = ca
+        traffic_controller.rsu_managers = rsu_managers
+        traffic_controller.vehicle_managers = vehicle_managers
+        traffic_controller.security_enabled = True
+        
+        # Re-initialize WiMAX with security
+        print("  🔄 Re-initializing RSUs with encryption...")
+        traffic_controller._initialize_wimax()
+        
+        print("  ✅ Security enabled: RSA encryption + CA authentication")
+        print()
+    else:
+        print("⚠️  Security disabled (use --security flag to enable RSA encryption)")
+        print()
     
     # Initialize sensor network after SUMO connection
     try:
@@ -152,11 +200,6 @@ def main():
         import traci
         
         while step < args.steps:
-            # Check if simulation should continue
-            if traci.simulation.getMinExpectedNumber() <= 0:
-                print("\n⚠️  No more vehicles in simulation")
-                break
-            
             # Advance SUMO simulation
             if rl_controller:
                 # RL-based control
@@ -187,6 +230,11 @@ def main():
                 
                 # Update NS3 network simulation
                 ns3_bridge.step(current_time)
+            
+            # Check if simulation should continue (AFTER step, not before)
+            if traci.simulation.getMinExpectedNumber() <= 0:
+                print("\n⚠️  No more vehicles in simulation")
+                break
             
             # Print progress every 5 seconds
             if time.time() - last_print_time >= 5.0:

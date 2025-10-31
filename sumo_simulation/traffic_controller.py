@@ -20,15 +20,29 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'v2v_communication
 from sensor_network import SensorNetwork, SensorReading
 
 from wimax import WiMAXConfig, WiMAXBaseStation, WiMAXMobileStation
+from wimax.secure_wimax import SecureWiMAXBaseStation, SecureWiMAXMobileStation
 
 class AdaptiveTrafficController:
-    def __init__(self, output_dir="./output_rule", mode="rule"):
+    def __init__(self, output_dir="./output_rule", mode="rule", security_managers=None, security_pending=False):
         self.sensor_network = SensorNetwork()
         self.intersections = {}
         self.running = False
         self.simulation_step = 0
         self.output_dir = output_dir
         self.mode = mode
+        
+        # Security infrastructure
+        if security_managers:
+            self.ca, self.rsu_managers, self.vehicle_managers = security_managers
+            self.security_enabled = True
+            print("🔐 Security enabled: RSA encryption + CA authentication")
+        else:
+            self.ca = None
+            self.rsu_managers = {}
+            self.vehicle_managers = {}
+            self.security_enabled = False
+            if not security_pending:
+                print("⚠️  Security disabled: Running without encryption")
         
         # Initialize DataFrames for metrics and packets
         self.packets_df = pd.DataFrame(columns=["timestamp", "bs_id", "vehicle_id", "packet_type", "size_bytes"])
@@ -39,6 +53,7 @@ class AdaptiveTrafficController:
         # WiMAX setup
         self.wimax_config = WiMAXConfig()
         self.wimax_base_stations: Dict[str, WiMAXBaseStation] = {}
+        self.wimax_mobile_stations: Dict[str, WiMAXMobileStation] = {}  # Track vehicles
         self.wimax_last_beacon_step = 0
         self.wimax_metrics_snapshot: Dict = {}
 
@@ -93,7 +108,154 @@ class AdaptiveTrafficController:
         coords = {"J2": (500,500), "J3": (1000,500)}
         for tl, (x,y) in coords.items():
             if tl in self.intersections:
-                self.wimax_base_stations[tl] = WiMAXBaseStation(tl, x, y, self.wimax_config)
+                # Use secure WiMAX if security is enabled
+                if self.security_enabled:
+                    rsu_id = f"RSU_{tl}"
+                    if rsu_id in self.rsu_managers:
+                        self.wimax_base_stations[tl] = SecureWiMAXBaseStation(
+                            bs_id=rsu_id,  # Changed from station_id to bs_id
+                            x=x,
+                            y=y,
+                            config=self.wimax_config,
+                            key_manager=self.rsu_managers[rsu_id]
+                        )
+                        print(f"  🔐 Secure RSU initialized: {rsu_id} at ({x}, {y})")
+                    else:
+                        print(f"  ⚠️  No key manager for {rsu_id}, using insecure WiMAX")
+                        self.wimax_base_stations[tl] = WiMAXBaseStation(tl, x, y, self.wimax_config)
+                else:
+                    self.wimax_base_stations[tl] = WiMAXBaseStation(tl, x, y, self.wimax_config)
+
+    def _register_new_vehicles(self):
+        """Dynamically register new vehicles that appear in simulation"""
+        if not self.security_enabled:
+            return
+        
+        # Get all current vehicles
+        all_vehicle_ids = traci.vehicle.getIDList()
+        
+        for vehicle_id in all_vehicle_ids:
+            # Skip if already registered
+            if vehicle_id in self.vehicle_managers:
+                continue
+            
+            # Create new key manager for this vehicle
+            from v2v_communication.key_management import KeyManager
+            
+            # Determine vehicle type (check if emergency)
+            try:
+                vehicle_type = traci.vehicle.getTypeID(vehicle_id)
+                entity_type = "emergency_vehicle" if "ambulance" in vehicle_type.lower() or "emergency" in vehicle_type.lower() else "vehicle"
+            except:
+                entity_type = "vehicle"
+            
+            # Create key manager
+            vehicle_mgr = KeyManager(vehicle_id, entity_type=entity_type, ca=self.ca)
+            self.vehicle_managers[vehicle_id] = vehicle_mgr
+            
+            # Exchange keys with all RSUs
+            for rsu_id, rsu_mgr in self.rsu_managers.items():
+                # Vehicle registers RSU
+                vehicle_cert = rsu_mgr.get_certificate()
+                vehicle_mgr.register_peer(rsu_id, vehicle_cert)
+                
+                # RSU registers vehicle
+                rsu_cert = vehicle_mgr.get_certificate()
+                rsu_mgr.register_peer(vehicle_id, rsu_cert)
+            
+            # Create secure mobile station
+            self.wimax_mobile_stations[vehicle_id] = SecureWiMAXMobileStation(
+                station_id=vehicle_id,
+                key_manager=vehicle_mgr
+            )
+            
+            if entity_type == "emergency_vehicle":
+                print(f"  🚑 Emergency vehicle registered: {vehicle_id} (encrypted)")
+            # else:
+            #     print(f"  🚗 Vehicle registered: {vehicle_id} (encrypted)")
+
+    def _handle_emergency_vehicles(self):
+        """Detect emergency vehicles and send encrypted priority requests to nearby RSUs"""
+        if not self.security_enabled:
+            return
+        
+        # Get all vehicles
+        all_vehicles = traci.vehicle.getIDList()
+        current_time = traci.simulation.getTime()
+        
+        for vehicle_id in all_vehicles:
+            # Check if this is an emergency vehicle
+            try:
+                vehicle_type = traci.vehicle.getTypeID(vehicle_id)
+                is_emergency = "ambulance" in vehicle_type.lower() or "emergency" in vehicle_type.lower()
+                
+                if not is_emergency:
+                    continue
+                
+                # Get vehicle position
+                x, y = traci.vehicle.getPosition(vehicle_id)
+                speed = traci.vehicle.getSpeed(vehicle_id)
+                
+                # Get vehicle manager
+                if vehicle_id not in self.vehicle_managers:
+                    continue  # Vehicle not yet registered
+                
+                vehicle_mgr = self.vehicle_managers[vehicle_id]
+                
+                # Find nearest RSU and send encrypted emergency message
+                for tl_id, bs in self.wimax_base_stations.items():
+                    # Get RSU position
+                    coords = {"J2": (500, 500), "J3": (1000, 500)}
+                    if tl_id not in coords:
+                        continue
+                    
+                    rsu_x, rsu_y = coords[tl_id]
+                    distance = ((x - rsu_x)**2 + (y - rsu_y)**2)**0.5
+                    
+                    # If within range, send encrypted emergency request
+                    if distance < 200.0:  # 200m range
+                        rsu_id = f"RSU_{tl_id}"
+                        
+                        # Create emergency message
+                        emergency_data = {
+                            "type": "emergency_request",
+                            "priority": "HIGH",
+                            "vehicle_id": vehicle_id,
+                            "location": {"x": x, "y": y},
+                            "speed": speed,
+                            "timestamp": current_time,
+                            "request": "clear_path"
+                        }
+                        
+                        # Encrypt and send via secure WiMAX
+                        if isinstance(bs, SecureWiMAXBaseStation):
+                            encrypted_msg = vehicle_mgr.handler.encrypt_message(
+                                rsu_id,
+                                emergency_data,
+                                message_type="emergency"
+                            )
+                            
+                            if encrypted_msg:
+                                # Log encrypted packet
+                                self._log_packet(
+                                    bs_id=tl_id,
+                                    vehicle_id=vehicle_id,
+                                    packet_type="emergency_encrypted",
+                                    size_bytes=len(encrypted_msg.encrypted_data) + len(encrypted_msg.signature)
+                                )
+                                
+                                # Simulate RSU receiving and decrypting (for demo)
+                                rsu_mgr = self.rsu_managers.get(rsu_id)
+                                if rsu_mgr:
+                                    decrypted = rsu_mgr.handler.decrypt_message(encrypted_msg)
+                                    if decrypted:
+                                        # RSU successfully received emergency request
+                                        # In real system, this would trigger traffic light priority
+                                        pass  # Traffic light adjustment happens in rule-based logic
+                
+            except Exception as e:
+                # Silently handle errors (vehicle may have left simulation)
+                pass
 
     # ------------------- SIMULATION -------------------
     def run_simulation_step(self):
@@ -113,6 +275,10 @@ class AdaptiveTrafficController:
                     data["time_in_phase"] = 0
                     traci.trafficlight.setRedYellowGreenState(tl_id, self.default_phases[tl_id][data["current_phase"]])
 
+            # Check for emergency vehicles and send encrypted messages
+            if self.security_enabled:
+                self._handle_emergency_vehicles()
+
             # Update WiMAX metrics
             self._update_wimax()
             return True
@@ -131,6 +297,10 @@ class AdaptiveTrafficController:
 
     def _update_wimax(self):
         current_time = traci.simulation.getTime()
+        
+        # Register new vehicles dynamically if security is enabled
+        if self.security_enabled:
+            self._register_new_vehicles()
         
         # Update base stations
         for bs_id, bs in self.wimax_base_stations.items():
