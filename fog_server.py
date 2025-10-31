@@ -39,7 +39,7 @@ wimax_logger = setup_logging('wimax')
 
 # Import sensor network for V2V detection
 try:
-    from sensor_network import SensorNetwork
+    from sumo_simulation.sensors.sensor_network import SensorNetwork
     SENSOR_AVAILABLE = True
 except ImportError:
     SENSOR_AVAILABLE = False
@@ -47,7 +47,7 @@ except ImportError:
 
 # Import RL controller for local inference
 try:
-    from rl_traffic_controller import RLTrafficController
+    from rl_module.rl_traffic_controller import RLTrafficController
     RL_AVAILABLE = True
 except ImportError:
     RL_AVAILABLE = False
@@ -89,9 +89,10 @@ class FogServer:
         self.detected_ambulances = {}  # vehicle_id -> last_seen_time
         self.vehicle_positions = {}  # vehicle_id -> (x, y, timestamp) for direction calculation
         self.triggered_overrides = set()  # (vehicle_id, junction_id) pairs to prevent re-triggers
-        
+        self.sent_suggestions = set()     # (vehicle_id, junction_id) suggestions already sent
+
         fog_logger.info(f"🌐 Fog Server initialized")
-        fog_logger.info(f"   Backend: {backend_url}")
+        fog_logger.info(f"   Backend: {self.backend_url}")
         fog_logger.info(f"   RL Enabled: {self.enable_rl}")
     
     def _initialize_rl_controller(self):
@@ -115,13 +116,10 @@ class FogServer:
             try:
                 from gymnasium.spaces import Discrete, Box
             except ImportError:
-                try:
-                    from gym.spaces import Discrete, Box
-                except ImportError:
-                    fog_logger.error("❌ Neither gymnasium nor gym is installed")
-                    fog_logger.error("   Please run: pip install gymnasium")
-                    self.enable_rl = False
-                    return
+                fog_logger.error("❌ gymnasium is not installed")
+                fog_logger.error("   Please run: pip install gymnasium")
+                self.enable_rl = False
+                return
             import numpy as np
             
             class MinimalEnv:
@@ -523,6 +521,29 @@ class FogServer:
         except requests.exceptions.RequestException as e:
             fog_logger.error(f"❌ Override command error: {e}")
             return False
+
+    def send_suggestion(self, junction_id: str, direction: str, vehicle_id: str, priority: int = 1, ttl: int = 30) -> bool:
+        """
+        Send density-bias suggestion to backend.
+        POST /api/control/suggest
+        """
+        try:
+            payload = {
+                "poleId": junction_id,
+                "direction": direction,
+                "priority": priority,
+                "ttl": ttl,
+                "vehicle_id": vehicle_id
+            }
+            fog_logger.info(f"📤 Sending suggestion: {junction_id} → keep {direction} low (prio {priority}, ttl {ttl}s) for {vehicle_id}")
+            response = requests.post(f"{self.backend_url}/api/control/suggest", json=payload, timeout=2)
+            if response.status_code == 200:
+                return True
+            fog_logger.warning(f"Suggestion failed: {response.status_code} - {response.text}")
+            return False
+        except requests.exceptions.RequestException as e:
+            fog_logger.error(f"❌ Suggestion error: {e}")
+            return False
     
     def process_emergency_vehicle(self, emergency_vehicle: Dict):
         """
@@ -607,28 +628,32 @@ class FogServer:
         fog_logger.info(f"   Distance to junction: {distance:.1f}m")
         fog_logger.info(f"   Direction: {emergency_vehicle['direction']}, Speed: {emergency_vehicle['speed']:.1f} m/s")
         
-        # Step 3: Run RL inference
-        decision = self.run_rl_inference(signal_data, emergency_vehicle)
-        if not decision:
-            fog_logger.error("❌ RL inference failed")
-            return
-        
-        fog_logger.info(f"💡 Decision: {decision['reasoning']}")
-        
-        # Step 4: Send override command with optimal duration
-        success = self.send_override_command(
-            junction_id=decision['junction_id'],
-            action=decision['action'],
-            vehicle_id=vehicle_id,
-            duration_s=10  # Balanced: enough time for ambulance approach + crossing
-        )
-        
-        if success:
-            self.last_override_time = current_time
-            fog_logger.info(f"✅ Emergency preemption completed for {vehicle_id}")
-            fog_logger.info(f"{'='*70}\n")
+        # Decide: Suggest vs local preemption
+        # If ambulance far (>150m), send suggestion only (bias lanes via density)
+        # If within local threshold, edge RSU will preempt automatically; no override from fog
+        local_threshold = 150.0
+        if distance > local_threshold:
+            decision = self.run_rl_inference(signal_data, emergency_vehicle)
+            if not decision:
+                fog_logger.error("❌ RL inference failed")
+                return
+            fog_logger.info(f"💡 Decision: {decision['reasoning']}")
+            junction_id = decision['junction_id']
+            # Map action to direction hint for density bias
+            direction = emergency_vehicle.get('direction', 'east')
+            # Avoid duplicate suggestions per vehicle/junction
+            key = (vehicle_id, junction_id)
+            if key not in self.sent_suggestions:
+                if self.send_suggestion(junction_id, direction=direction, vehicle_id=vehicle_id, priority=2, ttl=30):
+                    self.sent_suggestions.add(key)
+                    fog_logger.info(f"✅ Suggestion accepted for {vehicle_id} at {junction_id}")
+                    self.last_override_time = current_time
+            else:
+                fog_logger.debug(f"Suggestion already sent for {vehicle_id} at {junction_id}")
         else:
-            fog_logger.error(f"❌ Failed to apply preemption for {vehicle_id}")
+            fog_logger.info("🔵 Within local preemption range; RSU/controller will handle immediate green. No override sent.")
+            # Optionally, we could refresh suggestion TTL to keep traffic light biased until pass
+            # but keep it simple for now.
     
     def run(self, update_interval=1.0):
         """
@@ -647,10 +672,10 @@ class FogServer:
         fog_logger.info("Monitoring for emergency vehicles...")
         fog_logger.info("Press Ctrl+C to stop\n")
         
-        # Connect to SUMO
-        if not self.connect_to_sumo():
-            fog_logger.error("Cannot start without SUMO connection")
-            return
+        # Ensure backend is reachable; don't exit if it's not ready yet
+        while not self.connect_to_sumo():
+            fog_logger.warning("Backend not ready yet. Retrying in 2s…")
+            time.sleep(2.0)
         
         try:
             while True:

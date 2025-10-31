@@ -87,8 +87,9 @@ def start_backend_server(traffic_controller, rl_controller):
     backend_app.simulation_running = True
     
     print("🌐 Starting Backend API Server on http://localhost:8000...")
-    print("   Fog nodes can now query: GET /api/wimax/getSignalData")
-    print("   Fog nodes can send overrides: POST /api/control/override")
+    print("   Fog nodes can now query: GET  /api/wimax/getSignalData")
+    print("   Fog nodes can send:      POST /api/control/suggest (bias)")
+    print("                             POST /api/control/override (force)")
     
     # Run Flask server (disable debug mode to avoid reloader in thread)
     backend_app.app.run(host='0.0.0.0', port=8000, debug=False, use_reloader=False, threaded=True)
@@ -106,6 +107,8 @@ def main():
                        help='Output directory for results')
     parser.add_argument('--no-backend', action='store_true',
                        help='Disable backend API server')
+    parser.add_argument('--auto-start', action='store_true',
+                       help='Start stepping immediately (GUI still opens). If omitted, waits for Enter to begin.')
     args = parser.parse_args()
 
     # Create output directory
@@ -166,6 +169,12 @@ def main():
         print("  Space: Play/Pause")
         print("  +/-: Speed up/slow down")
         print("  Ctrl+C: Stop simulation")
+        if not args.auto_start:
+            print("\n⏸️  Simulation is paused. Start your fog server now in another terminal, then press Enter here to begin stepping...")
+            try:
+                input()
+            except EOFError:
+                pass
     
     print()
     print("🌐 Network Simulation:")

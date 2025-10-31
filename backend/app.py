@@ -122,7 +122,14 @@ def get_current_traffic():
         return jsonify({"error": "Traffic controller not initialized"}), 400
     
     try:
-        metrics = traffic_controller.get_metrics()
+        # Traffic controller may expose get_metrics(); else provide minimal info
+        if hasattr(traffic_controller, 'get_metrics'):
+            metrics = traffic_controller.get_metrics()
+        else:
+            metrics = {
+                "simulation_step": getattr(traffic_controller, 'simulation_step', 0),
+                "intersections": getattr(traffic_controller, 'intersections', {})
+            }
         return jsonify(metrics)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -680,6 +687,57 @@ def control_override():
     except Exception as e:
         logger.error(f"Error in control_override: {e}", exc_info=True)
         return jsonify({"error": str(e)}), 500
+
+@app.route('/api/control/suggest', methods=['POST'])
+def control_suggest():
+    """
+    Suggestion endpoint for fog nodes.
+    Purpose: Bias the density controller to keep a lane group low density ahead of an ambulance.
+
+    Request body:
+        poleId: Junction/traffic light ID (required)
+        direction: one of 'north','south','east','west' (required)
+        priority: integer 1..5 (optional, default 1)
+        ttl: seconds the suggestion should remain active (optional, default 30)
+        vehicle_id: ambulance id (optional)
+    """
+    global traffic_controller
+
+    if not traffic_controller:
+        return jsonify({"error": "Traffic controller not initialized"}), 400
+
+    data = request.get_json() or {}
+    pole_id = data.get('poleId') or data.get('intersection_id')
+    direction = (data.get('direction') or '').lower()
+    priority = int(data.get('priority', 1))
+    ttl = int(data.get('ttl', 30))
+    vehicle_id = data.get('vehicle_id')
+
+    if not pole_id or direction not in ['north','south','east','west']:
+        return jsonify({"error": "poleId and valid direction are required"}), 400
+
+    try:
+        import traci
+        # Validate junction exists
+        if pole_id not in traci.trafficlight.getIDList():
+            return jsonify({"error": f"Junction '{pole_id}' not found"}), 404
+    except Exception:
+        # If TraCI not ready, still accept and store suggestion
+        pass
+
+    # Store suggestion in controller
+    if hasattr(traffic_controller, 'receive_suggestion'):
+        result = traffic_controller.receive_suggestion(pole_id, direction, priority, ttl, vehicle_id)
+    else:
+        # Fallback: attach to intersections dict
+        expire_at = time.time() + ttl
+        if not hasattr(traffic_controller, 'suggestions'):
+            traffic_controller.suggestions = {}
+        traffic_controller.suggestions[pole_id] = {"direction": direction, "priority": priority, "expire_at": expire_at, "vehicle_id": vehicle_id}
+        result = {"status": "accepted", "poleId": pole_id, "direction": direction, "priority": priority, "expire_at": int(expire_at)}
+
+    logger.info(f"🛈 Suggestion for {pole_id}: keep {direction} low (priority {priority}, ttl {ttl}s){' from '+vehicle_id if vehicle_id else ''}")
+    return jsonify(result), 200
 
 @app.route('/api/network/metrics')
 def get_network_metrics():

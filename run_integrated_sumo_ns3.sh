@@ -48,7 +48,8 @@ echo ""
 # Parse arguments
 MODE="rule"
 STEPS=1000
-GUI_FLAG=""
+# Default: start SUMO-GUI in paused state (handled by Python by omitting --start)
+GUI_FLAG="--gui"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -58,6 +59,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --gui)
             GUI_FLAG="--gui"
+            shift
+            ;;
+        --no-gui)
+            GUI_FLAG=""
             shift
             ;;
         --steps)
@@ -75,7 +80,7 @@ done
 echo -e "${BLUE}📋 Configuration${NC}"
 echo "  Mode: $MODE"
 echo "  Steps: $STEPS"
-echo "  GUI: $([ -n "$GUI_FLAG" ] && echo 'Yes' || echo 'No')"
+echo "  GUI: $([ -n "$GUI_FLAG" ] && echo 'Yes (paused)' || echo 'No')"
 echo ""
 
 # Navigate to sumo_simulation directory
