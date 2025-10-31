@@ -57,15 +57,20 @@ class AdaptiveTrafficController:
         self.wimax_last_beacon_step = 0
         self.wimax_metrics_snapshot: Dict = {}
 
-        # Traffic light program
+        # Traffic light program - OPTIMIZED
         self.default_phases = {
             "J2": ["rrrGGG", "rrryyy", "GGGrrr", "yyyrrr"],
             "J3": ["rrrGGG", "rrryyy", "GGGrrr", "yyyrrr"]
         }
-        self.min_green_time = 15
-        self.max_green_time = 60
-        self.yellow_time = 5
-        self.extension_time = 5
+        # Optimized timing parameters for better flow
+        self.min_green_time = 10      # Reduced from 15 (faster response)
+        self.max_green_time = 45      # Reduced from 60 (prevent starvation)
+        self.yellow_time = 3          # Reduced from 5 (standard timing)
+        self.extension_time = 3       # Reduced from 5 (quicker adaptation)
+        
+        # Density thresholds for adaptive control
+        self.low_density_threshold = 3    # vehicles
+        self.high_density_threshold = 10  # vehicles
 
     # ------------------- SUMO -------------------
     def connect_to_sumo(self, config_path, use_gui=True):
@@ -102,7 +107,41 @@ class AdaptiveTrafficController:
     def _initialize_intersections(self):
         tl_ids = traci.trafficlight.getIDList()
         for tl in tl_ids:
-            self.intersections[tl] = {"current_phase": 0, "time_in_phase": 0, "phase_duration": 30}
+            self.intersections[tl] = {
+                "current_phase": 0, 
+                "time_in_phase": 0,
+                "lanes": traci.trafficlight.getControlledLanes(tl)
+            }
+    
+    def _get_lane_density(self, tl_id, phase_index):
+        """Get vehicle density on lanes with green light in current phase"""
+        try:
+            if tl_id not in self.intersections:
+                return 0
+            
+            phase_state = self.default_phases[tl_id][phase_index]
+            controlled_lanes = self.intersections[tl_id]["lanes"]
+            
+            total_vehicles = 0
+            green_lanes = 0
+            
+            # Count vehicles on lanes that have green ('G') in current phase
+            for i, signal in enumerate(phase_state):
+                if signal == 'G' and i < len(controlled_lanes):
+                    lane = controlled_lanes[i]
+                    # Count vehicles on this lane
+                    vehicles = traci.lane.getLastStepVehicleNumber(lane)
+                    # Also consider waiting/halting vehicles (queue length)
+                    halting = traci.lane.getLastStepHaltingNumber(lane)
+                    total_vehicles += vehicles + (halting * 0.5)  # Weight halting vehicles more
+                    green_lanes += 1
+            
+            # Return average density across green lanes
+            return total_vehicles / max(green_lanes, 1)
+            
+        except Exception as e:
+            # If error getting density, return medium value
+            return 5
 
     def _initialize_wimax(self):
         coords = {"J2": (500,500), "J3": (1000,500)}
@@ -267,13 +306,46 @@ class AdaptiveTrafficController:
             traci.simulationStep()
             self.simulation_step += 1
 
-            # Simple rule-based traffic light update
+            # OPTIMIZED: Adaptive rule-based traffic light control
             for tl_id, data in self.intersections.items():
                 data["time_in_phase"] += 1
-                if data["time_in_phase"] >= data["phase_duration"]:
-                    data["current_phase"] = (data["current_phase"] + 1) % len(self.default_phases[tl_id])
-                    data["time_in_phase"] = 0
-                    traci.trafficlight.setRedYellowGreenState(tl_id, self.default_phases[tl_id][data["current_phase"]])
+                current_phase = data["current_phase"]
+                phase_state = self.default_phases[tl_id][current_phase]
+                
+                # Check if in green phase (contains 'G')
+                if 'G' in phase_state:
+                    # Get traffic density on current green lanes
+                    density = self._get_lane_density(tl_id, current_phase)
+                    
+                    # Adaptive duration based on density
+                    if density >= self.high_density_threshold:
+                        # High traffic: extend green up to max
+                        target_duration = self.max_green_time
+                    elif density <= self.low_density_threshold:
+                        # Low traffic: reduce green to min
+                        target_duration = self.min_green_time
+                    else:
+                        # Medium traffic: scale between min and max
+                        scale = (density - self.low_density_threshold) / \
+                                (self.high_density_threshold - self.low_density_threshold)
+                        target_duration = int(self.min_green_time + 
+                                            scale * (self.max_green_time - self.min_green_time))
+                    
+                    # Switch to yellow if minimum time met and other direction has queue
+                    if data["time_in_phase"] >= target_duration:
+                        # Move to yellow phase
+                        data["current_phase"] = (current_phase + 1) % len(self.default_phases[tl_id])
+                        data["time_in_phase"] = 0
+                        traci.trafficlight.setRedYellowGreenState(
+                            tl_id, self.default_phases[tl_id][data["current_phase"]])
+                
+                elif 'y' in phase_state:
+                    # Yellow phase: fixed duration
+                    if data["time_in_phase"] >= self.yellow_time:
+                        data["current_phase"] = (current_phase + 1) % len(self.default_phases[tl_id])
+                        data["time_in_phase"] = 0
+                        traci.trafficlight.setRedYellowGreenState(
+                            tl_id, self.default_phases[tl_id][data["current_phase"]])
 
             # Check for emergency vehicles and send encrypted messages
             if self.security_enabled:
