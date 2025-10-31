@@ -1,0 +1,11 @@
+ray[rllib]==2.5.1
+torch==2.0.1
+torchvision==0.15.2
+torchaudio==2.0.2
+numpy>=1.19.0,<2.0.0
+pandas>=1.3.0,<2.0.0
+gymnasium==0.26.3
+sumo-rl>=1.2.0
+pyyaml>=5.4.1
+matplotlib>=3.4.3,<4.0.0
+tensorboardX>=2.6.0

@@ -20,6 +20,9 @@ from sumo_simulation.traffic_controller import AdaptiveTrafficController
 from sumo_simulation.sensors.sensor_network import SensorNetwork
 from sumo_simulation.sumo_ns3_bridge import SUMONS3Bridge
 
+# Security module
+from v2v_communication.key_management import initialize_vanet_security
+
 # RL module (optional)
 try:
     from rl_module.rl_traffic_controller import RLTrafficController

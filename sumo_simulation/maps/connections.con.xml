@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<connections xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/connections_file.xsd">
+    <!-- J2 connections -->
+    <!-- East to West -->
+    <connection from="E1" to="E2" fromLane="0" toLane="0"/>
+    <connection from="E1" to="E2" fromLane="1" toLane="1"/>
+    <!-- East to North -->
+    <connection from="E1" to="E5_rev" fromLane="1" toLane="1"/>
+    <!-- East to South -->
+    <connection from="E1" to="E6" fromLane="1" toLane="1"/>
+    
+    <!-- West to East -->
+    <connection from="E2_rev" to="E1_rev" fromLane="0" toLane="0"/>
+    <connection from="E2_rev" to="E1_rev" fromLane="1" toLane="1"/>
+    <!-- West to North -->
+    <connection from="E2_rev" to="E5_rev" fromLane="1" toLane="1"/>
+    <!-- West to South -->
+    <connection from="E2_rev" to="E6" fromLane="1" toLane="1"/>
+    
+    <!-- North to South -->
+    <connection from="E5" to="E6" fromLane="0" toLane="0"/>
+    <connection from="E5" to="E6" fromLane="1" toLane="1"/>
+    <!-- North to East -->
+    <connection from="E5" to="E2" fromLane="1" toLane="1"/>
+    <!-- North to West -->
+    <connection from="E5" to="E1_rev" fromLane="1" toLane="1"/>
+    
+    <!-- South to North -->
+    <connection from="E6_rev" to="E5_rev" fromLane="0" toLane="0"/>
+    <connection from="E6_rev" to="E5_rev" fromLane="1" toLane="1"/>
+    <!-- South to East -->
+    <connection from="E6_rev" to="E2" fromLane="1" toLane="1"/>
+    <!-- South to West -->
+    <connection from="E6_rev" to="E1_rev" fromLane="1" toLane="1"/>
+    
+    <!-- Similar connections for J3 -->
+    <!-- ... -->
+</connections>

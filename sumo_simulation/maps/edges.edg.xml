@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edges xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/edges_file.xsd">
+    <!-- East-West edges -->
+    <edge id="E1" from="J1" to="J2" numLanes="2" speed="13.89" />
+    <edge id="E1_rev" from="J2" to="J1" numLanes="2" speed="13.89" />
+    
+    <edge id="E2" from="J2" to="J3" numLanes="2" speed="13.89" />
+    <edge id="E2_rev" from="J3" to="J2" numLanes="2" speed="13.89" />
+    
+    <!-- North-South edges at J2 -->
+    <edge id="E5" from="N2" to="J2" numLanes="2" speed="13.89" />
+    <edge id="E5_rev" from="J2" to="N2" numLanes="2" speed="13.89" />
+    
+    <edge id="E6" from="J2" to="S2" numLanes="2" speed="13.89" />
+    <edge id="E6_rev" from="S2" to="J2" numLanes="2" speed="13.89" />
+    
+    <!-- North-South edges at J3 -->
+    <edge id="E7" from="N3" to="J3" numLanes="2" speed="13.89" />
+    <edge id="E7_rev" from="J3" to="N3" numLanes="2" speed="13.89" />
+    
+    <edge id="E8" from="J3" to="S3" numLanes="2" speed="13.89" />
+    <edge id="E8_rev" from="S3" to="J3" numLanes="2" speed="13.89" />
+</edges>

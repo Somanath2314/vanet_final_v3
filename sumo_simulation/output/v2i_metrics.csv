@@ -1,10 +1,1 @@
-total_packets,10481
-successful_packets,10210
-PDR,0.9741436885793341
-mean_latency_s,0.08546360892843036
-jitter_s,0.0728769408552195
-packet_loss_rate,0.02585631142066591
-throughput_bps,278801.06666666665
-loss_reasons,{'rx_error': 271}
-handoff_success_rate,nan
-rsu_stats_sample,"{'rsu_0': {'utilization': 0.00061303466666667, 'tx_bytes': 446464}, 'rsu_1': {'utilization': 0.0011386880000000162, 'tx_bytes': 836608}, 'rsu_2': {'utilization': 0.0008369493333333422, 'tx_bytes': 605184}, 'rsu_3': {'utilization': 0.0009120426666666773, 'tx_bytes': 674816}, 'rsu_4': {'utilization': 0.0010103466666666798, 'tx_bytes': 733184}, 'rsu_5': {'utilization': 0.0006717440000000048, 'tx_bytes': 494592}, 'rsu_6': {'utilization': 0.000731818666666673, 'tx_bytes': 534528}, 'rsu_7': {'utilization': 0.0008342186666666755, 'tx_bytes': 607232}, 'rsu_8': {'utilization': 0.0005474986666666685, 'tx_bytes': 401408}, 'rsu_9': {'utilization': 0.00031402666666666633, 'tx_bytes': 229376}}"
+timestamp,bs_id,connected_vehicles,packets_sent,packets_received

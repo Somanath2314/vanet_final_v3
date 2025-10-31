@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+    <!-- RSUs along East-West corridor -->
+    <poi id="RSU_EW_1" type="rsu" color="255,0,0" x="250.0" y="500.0"/>  <!-- Between J1 and J2 -->
+    <poi id="RSU_EW_2" type="rsu" color="255,0,0" x="750.0" y="500.0"/>  <!-- Between J2 and J3 -->
+    
+    <!-- RSUs at North-South approaches to J2 -->
+    <poi id="RSU_J2_N" type="rsu" color="255,0,0" x="500.0" y="750.0"/>  <!-- North of J2 -->
+    <poi id="RSU_J2_S" type="rsu" color="255,0,0" x="500.0" y="250.0"/>  <!-- South of J2 -->
+    
+    <!-- RSUs at North-South approaches to J3 -->
+    <poi id="RSU_J3_N" type="rsu" color="255,0,0" x="1000.0" y="750.0"/> <!-- North of J3 -->
+    <poi id="RSU_J3_S" type="rsu" color="255,0,0" x="1000.0" y="250.0"/> <!-- South of J3 -->
+</additional>
