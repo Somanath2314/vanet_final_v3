@@ -1,8 +1,8 @@
-# 🚗 Integrated SUMO + NS3 VANET System with Security
+# 🚗 Integrated SUMO + NS3 VANET System with Security & Edge Computing
 
-**Status**: ✅ FULLY OPERATIONAL | **Modes**: Rule-Based + RL | **Security**: RSA Encryption | **PDR**: 95%+
+**Status**: ✅ FULLY OPERATIONAL | **Modes**: Rule-Based + RL | **Security**: RSA Encryption | **Edge**: Smart RSUs | **PDR**: 95%+
 
-Complete Vehicular Ad-Hoc Network (VANET) simulation combining **SUMO traffic simulation** with **NS3-based network protocols** and **optional RSA encryption**.
+Complete Vehicular Ad-Hoc Network (VANET) simulation combining **SUMO traffic simulation** with **NS3-based network protocols**, **optional RSA encryption**, and **edge computing infrastructure**.
 
 ---
 
@@ -15,6 +15,7 @@ This system provides a complete VANET simulation environment with:
 - **🤖 Traffic Control**: Rule-based (density) OR Reinforcement Learning (DQN)
 - **🔐 Security**: Optional RSA-2048/4096 encryption with Certificate Authority
 - **🚑 Emergency Priority**: Automatic detection and encrypted messaging
+- **🔷 Edge Computing**: Smart RSUs with local processing, caching, and collision detection
 
 ---
 
@@ -26,6 +27,10 @@ This system provides a complete VANET simulation environment with:
 # Rule-based traffic control with GUI (OPTIMIZED - Adaptive)
 ./run_integrated_sumo_ns3.sh --gui --steps 100
 # Watch: Green lights adapt 10-45s based on traffic density!
+
+# With Edge Computing (Smart RSUs)
+./run_integrated_sumo_ns3.sh --gui --steps 100 --edge
+# Adds: Collision warnings, emergency coordination, local processing
 
 # RL-based traffic control with GUI
 ./run_integrated_sumo_ns3.sh --rl --gui --steps 100
@@ -39,6 +44,9 @@ This system provides a complete VANET simulation environment with:
 ```bash
 # Rule-based + RSA encryption (45-60s startup)
 ./run_integrated_sumo_ns3.sh --gui --steps 100 --security
+
+# Rule-based + Edge Computing + Security (Full featured)
+./run_integrated_sumo_ns3.sh --gui --steps 100 --security --edge
 
 # RL + RSA encryption
 ./run_integrated_sumo_ns3.sh --rl --gui --steps 100 --security
@@ -54,6 +62,7 @@ Options:
   --gui         Use SUMO-GUI for visualization
   --steps N     Number of simulation steps (default: 1000)
   --security    Enable RSA encryption (adds 30-60s startup time)
+  --edge        Enable edge computing with smart RSUs
 ```
 
 ---
@@ -106,6 +115,35 @@ Options:
 **Security Startup Time**: 30-60 seconds (one-time key generation)
 - CA: ~20s, RSUs: ~10s, Vehicles: ~10s, Key exchange: ~5s
 
+### 🔷 Edge Computing Features (`--edge` flag)
+
+**13 Smart RSUs with 3-Tier Architecture:**
+
+| Tier | Location | Computing Resources | Quantity | Coverage |
+|------|----------|-------------------|----------|----------|
+| **Tier 1** | Intersections | 8 cores, 16GB RAM, 100GB | 2 RSUs | High-traffic areas |
+| **Tier 2** | Road Segments | 4 cores, 8GB RAM, 50GB | 8 RSUs | Regular intervals (400m) |
+| **Tier 3** | Coverage Gaps | 2 cores, 4GB RAM, 20GB | 3 RSUs | Network holes |
+
+**Edge Services:**
+- ✅ **Collision Avoidance**: Real-time trajectory prediction, conflict detection
+- ✅ **Traffic Flow Analysis**: Congestion detection, route optimization
+- ✅ **Emergency Support**: Priority corridors, vehicle coordination
+- ✅ **Data Aggregation**: Local processing, cloud offloading
+- ✅ **Smart Caching**: Frequently requested data (maps, traffic updates)
+
+**Edge Metrics Tracked:**
+- Vehicles served per RSU (unique count)
+- Collision warnings issued (unique pairs)
+- Emergency vehicles handled (unique)
+- Computation workload
+- Cache hit rate
+- Average latency
+
+**Output Files**: `sumo_simulation/output_rule_edge/`
+- `edge_metrics.csv` - Per-RSU performance
+- `edge_summary.json` - System-wide statistics
+
 ---
 
 ## 🔧 System Architecture
@@ -132,6 +170,13 @@ Options:
 │  ┌───────────────────────────────────────────────────┐      │
 │  │  Certificate Authority → RSUs → Vehicles          │      │
 │  │  RSA Encryption → Digital Signatures → Key Mgmt   │      │
+│  └───────────────────────────────────────────────────┘      │
+│                                                               │
+│  Optional Edge Computing Layer (--edge):                     │
+│  ┌───────────────────────────────────────────────────┐      │
+│  │  13 Smart RSUs (Tier 1/2/3) → Local Processing   │      │
+│  │  Services: Collision, Traffic, Emergency, Cache  │      │
+│  │  Metrics: Vehicles, Warnings, Emergencies, Routes│      │
 │  └───────────────────────────────────────────────────┘      │
 │                                                               │
 └──────────────────────────────────────────────────────────────┘
@@ -229,8 +274,7 @@ pip install -r rl_requirements.txt
 
 ### Output Files Location
 
-All results are saved to: `sumo_simulation/output/`
-
+**Network Results**: `sumo_simulation/output/`
 ```bash
 ls -lh sumo_simulation/output/
 
@@ -240,6 +284,15 @@ ls -lh sumo_simulation/output/
 # - v2i_metrics.csv                     (WiMAX performance)
 # - tripinfo.xml                        (SUMO trip data)
 # - summary.xml                         (SUMO summary)
+```
+
+**Edge Computing Results** (if `--edge` flag used): `sumo_simulation/output_rule_edge/`
+```bash
+ls -lh sumo_simulation/output_rule_edge/
+
+# Files created:
+# - edge_metrics.csv                    (Per-RSU performance)
+# - edge_summary.json                   (System-wide statistics)
 ```
 
 ### View Network Metrics
@@ -264,6 +317,34 @@ with open('sumo_simulation/output/integrated_simulation_results.json') as f:
     print(f"Average Delay: {metrics['combined']['average_delay_ms']:.1f} ms")
     print(f"Throughput: {metrics['combined']['throughput_mbps']:.2f} Mbps")
     print(f"\nEmergency Success Rate: {metrics['emergency']['success_rate']*100:.2f}%")
+    print("="*60)
+EOF
+```
+
+### View Edge Computing Metrics
+
+```bash
+# View per-RSU performance (CSV format)
+cat sumo_simulation/output_rule_edge/edge_metrics.csv
+
+# View system summary (JSON format)
+cat sumo_simulation/output_rule_edge/edge_summary.json | python3 -m json.tool
+
+# Quick edge summary
+python3 << 'EOF'
+import json
+with open('sumo_simulation/output_rule_edge/edge_summary.json') as f:
+    data = json.load(f)
+    stats = data['summary_statistics']
+    
+    print("="*60)
+    print("EDGE COMPUTING SUMMARY")
+    print("="*60)
+    print(f"Total RSUs: {stats['total_rsus']}")
+    print(f"Vehicles Served: {stats['total_vehicles_served']}")
+    print(f"Computations: {stats['total_computations']}")
+    print(f"Computations/sec: {stats['computations_per_second']:.2f}")
+    print(f"Cache Hit Rate: {stats['cache_hit_rate']:.2%}")
     print("="*60)
 EOF
 ```
@@ -300,7 +381,17 @@ head -20 sumo_simulation/output/v2i_metrics.csv
 # Use: Visual demonstration, debugging
 ```
 
-### Example 3: RL Traffic Control with Security
+### Example 3: Edge Computing Demo
+
+```bash
+./run_integrated_sumo_ns3.sh --gui --steps 100 --edge
+
+# Time: ~10 seconds
+# Use: Demonstrate edge computing features
+# Output: edge_metrics.csv with RSU performance
+```
+
+### Example 4: RL Traffic Control with Security
 
 ```bash
 ./run_integrated_sumo_ns3.sh --rl --gui --steps 100 --security
@@ -309,12 +400,22 @@ head -20 sumo_simulation/output/v2i_metrics.csv
 # Use: Full system demonstration with encryption
 ```
 
-### Example 4: Long Simulation for Research
+### Example 5: Full System (Edge + Security)
 
 ```bash
-./run_integrated_sumo_ns3.sh --rl --steps 5000 --security
+./run_integrated_sumo_ns3.sh --gui --steps 200 --security --edge
 
-# Time: ~60s security + ~5 minutes simulation
+# Time: ~90 seconds (45s security + 45s simulation)
+# Use: Complete system with all features enabled
+# Output: Network metrics + Edge metrics + Encryption logs
+```
+
+### Example 6: Long Simulation for Research
+
+```bash
+./run_integrated_sumo_ns3.sh --rl --steps 5000 --security --edge
+
+# Time: ~60s security + ~10 minutes simulation
 # Use: Data collection, performance analysis
 ```
 

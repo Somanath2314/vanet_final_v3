@@ -50,6 +50,7 @@ MODE="rule"
 STEPS=1000
 GUI_FLAG=""
 SECURITY_FLAG=""
+EDGE_FLAG=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -69,15 +70,20 @@ while [[ $# -gt 0 ]]; do
             SECURITY_FLAG="--security"
             shift
             ;;
+        --edge)
+            EDGE_FLAG="--edge"
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--rl] [--gui] [--steps N] [--security]"
+            echo "Usage: $0 [--rl] [--gui] [--steps N] [--security] [--edge]"
             echo ""
             echo "Options:"
             echo "  --rl         Use RL-based traffic control (default: rule-based)"
             echo "  --gui        Use SUMO-GUI for visualization"
             echo "  --steps N    Number of simulation steps (default: 1000)"
             echo "  --security   Enable RSA encryption (adds 30-60s startup time)"
+            echo "  --edge       Enable edge computing RSUs (smart processing)"
             exit 1
             ;;
     esac
@@ -88,6 +94,7 @@ echo "  Mode: $MODE"
 echo "  Steps: $STEPS"
 echo "  GUI: $([ -n "$GUI_FLAG" ] && echo 'Yes' || echo 'No')"
 echo "  Security: $([ -n "$SECURITY_FLAG" ] && echo 'Enabled (RSA)' || echo 'Disabled')"
+echo "  Edge Computing: $([ -n "$EDGE_FLAG" ] && echo 'Enabled' || echo 'Disabled')"
 echo ""
 
 # Navigate to sumo_simulation directory
@@ -109,7 +116,7 @@ echo ""
 echo -e "${GREEN}🚀 Starting integrated SUMO + NS3 simulation...${NC}"
 echo ""
 
-python3 run_integrated_simulation.py --mode $MODE --steps $STEPS $GUI_FLAG $SECURITY_FLAG --output ./output
+python3 run_integrated_simulation.py --mode $MODE --steps $STEPS $GUI_FLAG $SECURITY_FLAG $EDGE_FLAG --output ./output
 
 EXIT_CODE=$?
 

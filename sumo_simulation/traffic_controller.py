@@ -17,19 +17,32 @@ from enum import Enum
 # Add sensor network to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'sensors'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'v2v_communication'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from sensor_network import SensorNetwork, SensorReading
 
 from wimax import WiMAXConfig, WiMAXBaseStation, WiMAXMobileStation
 from wimax.secure_wimax import SecureWiMAXBaseStation, SecureWiMAXMobileStation
 
+# Edge computing imports
+from edge_computing import EdgeRSU, RSUPlacementManager
+from edge_computing.metrics.edge_metrics import EdgeMetricsTracker
+
 class AdaptiveTrafficController:
-    def __init__(self, output_dir="./output_rule", mode="rule", security_managers=None, security_pending=False):
+    def __init__(self, output_dir="./output_rule", mode="rule", security_managers=None, security_pending=False, edge_computing_enabled=False):
         self.sensor_network = SensorNetwork()
         self.intersections = {}
         self.running = False
         self.simulation_step = 0
         self.output_dir = output_dir
         self.mode = mode
+        
+        # Edge computing
+        self.edge_enabled = edge_computing_enabled
+        self.edge_rsus: Dict[str, EdgeRSU] = {}
+        self.edge_metrics_tracker = None
+        if edge_computing_enabled:
+            print("🔷 Edge computing enabled: Smart RSUs with local processing")
+            self.edge_metrics_tracker = EdgeMetricsTracker(output_dir=f"{output_dir}_edge")
         
         # Security infrastructure
         if security_managers:
@@ -100,6 +113,7 @@ class AdaptiveTrafficController:
             self.sumo_connected = True
             self._initialize_intersections()
             self._initialize_wimax()
+            self._initialize_edge_rsus()
             return True
         except Exception as e:
             print(f"Failed to connect to SUMO: {e}")
@@ -167,6 +181,66 @@ class AdaptiveTrafficController:
                         self.wimax_base_stations[tl] = WiMAXBaseStation(tl, x, y, self.wimax_config)
                 else:
                     self.wimax_base_stations[tl] = WiMAXBaseStation(tl, x, y, self.wimax_config)
+
+    def _initialize_edge_rsus(self):
+        """Initialize edge computing RSUs at regular intervals"""
+        if not self.edge_enabled:
+            return
+        
+        print("\n🔷 Initializing Edge Computing Infrastructure...")
+        
+        # Define network bounds from SUMO network
+        # Based on simple_network.net.xml: X: 0-2000, Y: 0-1000
+        network_bounds = (0, 0, 2000, 1000)
+        
+        # Define junction positions (traffic light intersections)
+        junction_positions = [
+            (500, 500),   # J2
+            (1000, 500)   # J3
+        ]
+        
+        # Define edge definitions for RSU placement along roads
+        edge_definitions = [
+            {'id': 'E1', 'from_pos': (0, 500), 'to_pos': (500, 500)},      # J1 to J2
+            {'id': 'E2', 'from_pos': (500, 500), 'to_pos': (1000, 500)},   # J2 to J3
+            {'id': 'E3', 'from_pos': (1000, 500), 'to_pos': (1500, 500)},  # J3 to J4
+            {'id': 'E4', 'from_pos': (1500, 500), 'to_pos': (2000, 500)},  # J4 to J5
+            {'id': 'E5', 'from_pos': (500, 0), 'to_pos': (500, 500)},      # J6 to J2
+            {'id': 'E6', 'from_pos': (500, 500), 'to_pos': (500, 1000)},   # J2 to J7
+            {'id': 'E7', 'from_pos': (1000, 0), 'to_pos': (1000, 500)},    # J8 to J3
+            {'id': 'E8', 'from_pos': (1000, 500), 'to_pos': (1000, 1000)}  # J3 to J9
+        ]
+        
+        # Calculate RSU positions
+        placement_manager = RSUPlacementManager(interval_meters=400)
+        rsu_positions = placement_manager.calculate_rsu_positions(
+            network_bounds,
+            junction_positions,
+            edge_definitions
+        )
+        
+        # Create edge RSUs
+        for rsu_def in rsu_positions:
+            rsu_id = rsu_def['id']
+            position = rsu_def['position']
+            tier = rsu_def['tier']
+            compute_capacity = rsu_def['compute_capacity']
+            
+            # Create EdgeRSU instance
+            edge_rsu = EdgeRSU(
+                rsu_id=rsu_id,
+                position=position,
+                tier=tier,
+                compute_capacity=compute_capacity
+            )
+            
+            self.edge_rsus[rsu_id] = edge_rsu
+        
+        print(f"\n✅ Edge infrastructure ready:")
+        print(f"   - Total RSUs: {len(self.edge_rsus)}")
+        print(f"   - Tier 1 (Intersection): {sum(1 for r in self.edge_rsus.values() if r.tier == 1)}")
+        print(f"   - Tier 2 (Road): {sum(1 for r in self.edge_rsus.values() if r.tier == 2)}")
+        print(f"   - Tier 3 (Coverage): {sum(1 for r in self.edge_rsus.values() if r.tier == 3)}")
 
     def _register_new_vehicles(self):
         """Dynamically register new vehicles that appear in simulation"""
@@ -358,6 +432,10 @@ class AdaptiveTrafficController:
                         traci.trafficlight.setRedYellowGreenState(
                             tl_id, self.default_phases[tl_id][data["current_phase"]])
 
+            # Update edge RSUs with vehicle data
+            if self.edge_enabled:
+                self._update_edge_rsus()
+
             # Check for emergency vehicles and send encrypted messages
             if self.security_enabled:
                 self._handle_emergency_vehicles()
@@ -378,6 +456,81 @@ class AdaptiveTrafficController:
             print(f"Error in simulation step: {e}")
             self._save_v2i_metrics()  # Save metrics on error
             return False
+
+    def _update_edge_rsus(self):
+        """Update edge RSUs with current vehicle data and process requests"""
+        try:
+            all_vehicles = traci.vehicle.getIDList()
+            
+            for vehicle_id in all_vehicles:
+                try:
+                    # Get vehicle state
+                    position = traci.vehicle.getPosition(vehicle_id)
+                    speed = traci.vehicle.getSpeed(vehicle_id)
+                    angle = traci.vehicle.getAngle(vehicle_id)
+                    edge_id = traci.vehicle.getRoadID(vehicle_id)
+                    vehicle_type_id = traci.vehicle.getTypeID(vehicle_id)
+                    
+                    # Determine if emergency
+                    is_emergency = "ambulance" in vehicle_type_id.lower() or "emergency" in vehicle_type_id.lower()
+                    v_type = "emergency" if is_emergency else "normal"
+                    
+                    # Update all RSUs that can see this vehicle
+                    for rsu_id, edge_rsu in self.edge_rsus.items():
+                        if edge_rsu.is_vehicle_in_range(position):
+                            edge_rsu.update_vehicle(
+                                vehicle_id=vehicle_id,
+                                position=position,
+                                speed=speed,
+                                heading=angle,
+                                edge_id=edge_id,
+                                vehicle_type=v_type
+                            )
+                            # Note: Metrics are now tracked inside EdgeRSU.update_vehicle()
+                            # which only counts unique vehicles, not every update
+                
+                except Exception as e:
+                    # Vehicle may have left simulation
+                    pass
+            
+            # Process RSU requests and handle responses
+            for rsu_id, edge_rsu in self.edge_rsus.items():
+                responses = edge_rsu.process_requests()
+                
+                for response in responses:
+                    response_type = response.get('type')
+                    
+                    # Handle collision warnings
+                    if response_type == 'collision_warning':
+                        # In real system, would broadcast warning to vehicles
+                        pass
+                    
+                    # Handle traffic anomalies
+                    elif response_type == 'traffic_anomaly':
+                        # Could trigger traffic management actions
+                        pass
+                    
+                    # Handle emergency yield warnings
+                    elif response_type == 'emergency_yield_warning':
+                        # In real system, would notify vehicles to yield
+                        pass
+                    
+                    # Handle cloud uploads
+                    elif response_type == 'cloud_upload':
+                        # In real system, would upload to cloud server
+                        if self.edge_metrics_tracker:
+                            package_size = len(str(response.get('package', '')))
+                            self.edge_metrics_tracker.update_system_metrics(
+                                'total_data_uploaded', package_size
+                            )
+            
+            # Periodic cleanup (every 10 steps)
+            if self.simulation_step % 10 == 0:
+                for edge_rsu in self.edge_rsus.values():
+                    edge_rsu.cleanup()
+        
+        except Exception as e:
+            print(f"Error updating edge RSUs: {e}")
 
     def _update_wimax(self):
         current_time = traci.simulation.getTime()
@@ -567,6 +720,10 @@ class AdaptiveTrafficController:
         # Save metrics before closing
         if hasattr(self, 'sumo_connected') and self.sumo_connected:
             self._save_v2i_metrics()
+        
+        # Save edge computing metrics
+        if self.edge_enabled and self.edge_metrics_tracker:
+            self._save_edge_metrics()
             
         try: 
             traci.close()
@@ -576,3 +733,62 @@ class AdaptiveTrafficController:
             
         print("SUMO simulation closed.")
 
+    def _save_edge_metrics(self):
+        """Save edge computing performance metrics"""
+        if not self.edge_enabled or not self.edge_metrics_tracker:
+            return
+        
+        try:
+            print("\n📊 Saving edge computing metrics...")
+            
+            # Collect statistics from all RSUs
+            for rsu_id, edge_rsu in self.edge_rsus.items():
+                stats = edge_rsu.get_service_statistics()
+                
+                # Record unique vehicles served (not every update)
+                self.edge_metrics_tracker.record_rsu_activity(
+                    rsu_id, 'vehicle_served', stats['unique_vehicles_served']
+                )
+                
+                # Record computations
+                self.edge_metrics_tracker.record_rsu_activity(
+                    rsu_id, 'computation', stats['total_computations']
+                )
+                
+                # Record cache statistics
+                cache_stats = stats['cache']
+                self.edge_metrics_tracker.record_rsu_activity(
+                    rsu_id, 'cache_hit', cache_stats['hits']
+                )
+                self.edge_metrics_tracker.record_rsu_activity(
+                    rsu_id, 'cache_miss', cache_stats['misses']
+                )
+                
+                # Record service statistics (final counts from services)
+                collision_stats = stats['collision_avoidance']
+                self.edge_metrics_tracker.record_rsu_activity(
+                    rsu_id, 'warning_issued', collision_stats['warnings_issued']
+                )
+                
+                traffic_stats = stats['traffic_flow']
+                self.edge_metrics_tracker.record_rsu_activity(
+                    rsu_id, 'route_computed', traffic_stats.get('routes_computed', 0)
+                )
+                
+                emergency_stats = stats['emergency']
+                self.edge_metrics_tracker.record_rsu_activity(
+                    rsu_id, 'emergency_handled', emergency_stats['emergencies_handled']
+                )
+            
+            # Save to files
+            metrics_file = self.edge_metrics_tracker.save_metrics("edge_metrics.csv")
+            summary_file = self.edge_metrics_tracker.save_summary("edge_summary.json")
+            
+            print(f"  ✅ Saved {metrics_file}")
+            print(f"  ✅ Saved {summary_file}")
+            
+            # Print summary to console
+            self.edge_metrics_tracker.print_summary()
+            
+        except Exception as e:
+            print(f"Error saving edge metrics: {e}")

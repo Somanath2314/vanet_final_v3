@@ -44,6 +44,8 @@ def main():
                        help='Output directory for results')
     parser.add_argument('--security', action='store_true',
                        help='Enable RSA encryption for V2V/V2I (slower startup)')
+    parser.add_argument('--edge', action='store_true',
+                       help='Enable edge computing RSUs (smart processing)')
     args = parser.parse_args()
 
     # Create output directory
@@ -57,6 +59,8 @@ def main():
     print(f"Steps: {args.steps}")
     print(f"GUI: {'Yes' if args.gui else 'No'}")
     print(f"Output: {output_dir}")
+    if args.edge:
+        print("🔷 Edge Computing: ENABLED (Smart RSUs)")
     print("="*70)
     print()
 
@@ -65,7 +69,8 @@ def main():
     # Pass security flag to avoid confusing "disabled" message
     traffic_controller = AdaptiveTrafficController(
         security_managers=None,
-        security_pending=args.security  # Indicate security will be enabled later
+        security_pending=args.security,  # Indicate security will be enabled later
+        edge_computing_enabled=args.edge  # Enable edge computing if requested
     )
     sensor_network = SensorNetwork()
     ns3_bridge = SUMONS3Bridge()

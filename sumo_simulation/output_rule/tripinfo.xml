@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2025-11-05 21:05:58 by Eclipse SUMO GUI Version 1.12.0
+<!-- generated on 2025-11-05 23:43:17 by Eclipse SUMO GUI Version 1.12.0
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
 
     <input>
-        <net-file value="/home/shreyasdk/capstone/vanet_final_v3/sumo_simulation/maps/simple_network.net.xml"/>
-        <route-files value="/home/shreyasdk/capstone/vanet_final_v3/sumo_simulation/maps/routes.rou.xml"/>
+        <net-file value="/home/shreyasdk/capstone/vanet_final_v3/sumo_simulation/./maps/simple_network.net.xml"/>
+        <route-files value="/home/shreyasdk/capstone/vanet_final_v3/sumo_simulation/./maps/routes.rou.xml"/>
     </input>
 
     <output>
@@ -24,11 +24,11 @@
     </processing>
 
     <traci_server>
-        <remote-port value="49113"/>
+        <remote-port value="37039"/>
     </traci_server>
 
     <gui_only>
-        <gui-settings-file value="/home/shreyasdk/capstone/vanet_final_v3/sumo_simulation/maps/gui-settings.cfg"/>
+        <gui-settings-file value="/home/shreyasdk/capstone/vanet_final_v3/sumo_simulation/./maps/gui-settings.cfg"/>
         <quit-on-end value="false"/>
         <start value="true"/>
         <tracker-interval value="1"/>
@@ -47,7 +47,4 @@
     <tripinfo id="test_vehicle_1" depart="1.00" departLane="E1_0" departPos="5.10" departSpeed="0.00" departDelay="0.00" arrival="129.00" arrivalLane="E3_0" arrivalPos="489.60" arrivalSpeed="14.07" duration="128.00" routeLength="1494.90" waitingTime="12.00" waitingCount="1" stopTime="0.00" timeLoss="25.80" rerouteNo="0" devices="tripinfo_test_vehicle_1" vType="passenger" speedFactor="1.06" vaporized=""/>
     <tripinfo id="test_vehicle_3" depart="5.00" departLane="E1_0" departPos="5.10" departSpeed="0.00" departDelay="0.00" arrival="132.00" arrivalLane="E3_0" arrivalPos="489.60" arrivalSpeed="13.91" duration="127.00" routeLength="1494.90" waitingTime="7.00" waitingCount="1" stopTime="0.00" timeLoss="20.43" rerouteNo="0" devices="tripinfo_test_vehicle_3" vType="passenger" speedFactor="1.01" vaporized=""/>
     <tripinfo id="flow_ns_j3.2" depart="51.00" departLane="E7_0" departPos="5.10" departSpeed="16.09" departDelay="0.43" arrival="135.00" arrivalLane="E8_0" arrivalPos="496.00" arrivalSpeed="15.30" duration="84.00" routeLength="994.90" waitingTime="14.00" waitingCount="1" stopTime="0.00" timeLoss="21.46" rerouteNo="0" devices="tripinfo_flow_ns_j3.2" vType="passenger" speedFactor="1.16" vaporized=""/>
-    <tripinfo id="flow_ns_j2.3" depart="56.00" departLane="E5_1" departPos="5.10" departSpeed="14.03" departDelay="0.14" arrival="138.00" arrivalLane="E6_0" arrivalPos="496.00" arrivalSpeed="12.91" duration="82.00" routeLength="994.90" waitingTime="2.00" waitingCount="1" stopTime="0.00" timeLoss="10.61" rerouteNo="0" devices="tripinfo_flow_ns_j2.3" vType="passenger" speedFactor="1.01" vaporized=""/>
-    <tripinfo id="flow_ns_j2.2" depart="46.00" departLane="E5_1" departPos="5.10" departSpeed="12.20" departDelay="0.43" arrival="144.00" arrivalLane="E6_0" arrivalPos="496.00" arrivalSpeed="11.67" duration="98.00" routeLength="994.90" waitingTime="6.00" waitingCount="1" stopTime="0.00" timeLoss="15.61" rerouteNo="0" devices="tripinfo_flow_ns_j2.2" vType="passenger" speedFactor="0.88" vaporized=""/>
-    <tripinfo id="flow_ns_j3.3" depart="61.00" departLane="E7_1" departPos="5.10" departSpeed="12.36" departDelay="0.14" arrival="147.00" arrivalLane="E8_0" arrivalPos="496.00" arrivalSpeed="11.34" duration="86.00" routeLength="994.90" waitingTime="0.00" waitingCount="0" stopTime="0.00" timeLoss="4.70" rerouteNo="0" devices="tripinfo_flow_ns_j3.3" vType="passenger" speedFactor="0.89" vaporized=""/>
 </tripinfos>
