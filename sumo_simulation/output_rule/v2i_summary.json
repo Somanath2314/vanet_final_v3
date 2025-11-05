@@ -1,0 +1,27 @@
+{
+  "total_packets": 130,
+  "successful_packets": 130,
+  "PDR": 1.0,
+  "mean_latency_s": 0,
+  "jitter_s": 0,
+  "packet_loss_rate": 0.0,
+  "throughput_bps": 4339.645569620253,
+  "loss_reasons": {
+    "rx_error": 0
+  },
+  "handoff_success_rate": NaN,
+  "rsu_stats_sample": {
+    "rsu_J2": {
+      "utilization": 0.0,
+      "tx_bytes": 0,
+      "rx_bytes": 0,
+      "connected_vehicles": 0
+    },
+    "rsu_J3": {
+      "utilization": 0.0,
+      "tx_bytes": 0,
+      "rx_bytes": 0,
+      "connected_vehicles": 0
+    }
+  }
+}

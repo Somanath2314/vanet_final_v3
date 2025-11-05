@@ -49,6 +49,9 @@ class AdaptiveTrafficController:
         self.metrics_df = pd.DataFrame(columns=["timestamp", "bs_id", "connected_vehicles", "packets_sent", "packets_received"])
         self.last_metrics_update = 0
         self.metrics_interval = 5  # Update metrics every 5 seconds
+        
+        # Store simulation time for metrics calculation after SUMO closes
+        self.last_simulation_time = 0
 
         # WiMAX setup
         self.wimax_config = WiMAXConfig()
@@ -194,17 +197,22 @@ class AdaptiveTrafficController:
             
             # Exchange keys with all RSUs
             for rsu_id, rsu_mgr in self.rsu_managers.items():
-                # Vehicle registers RSU
-                vehicle_cert = rsu_mgr.get_certificate()
-                vehicle_mgr.register_peer(rsu_id, vehicle_cert)
+                # Vehicle registers RSU's certificate
+                rsu_cert = rsu_mgr.get_certificate()
+                if rsu_cert:
+                    vehicle_mgr.register_peer_from_certificate(rsu_cert)
                 
-                # RSU registers vehicle
-                rsu_cert = vehicle_mgr.get_certificate()
-                rsu_mgr.register_peer(vehicle_id, rsu_cert)
+                # RSU registers vehicle's certificate
+                vehicle_cert = vehicle_mgr.get_certificate()
+                if vehicle_cert:
+                    rsu_mgr.register_peer_from_certificate(vehicle_cert)
             
             # Create secure mobile station
+            position = traci.vehicle.getPosition(vehicle_id)
             self.wimax_mobile_stations[vehicle_id] = SecureWiMAXMobileStation(
-                station_id=vehicle_id,
+                ms_id=vehicle_id,
+                x=position[0],
+                y=position[1],
                 key_manager=vehicle_mgr
             )
             
@@ -305,6 +313,9 @@ class AdaptiveTrafficController:
                 
             traci.simulationStep()
             self.simulation_step += 1
+            
+            # Store current simulation time for metrics
+            self.last_simulation_time = traci.simulation.getTime()
 
             # OPTIMIZED: Adaptive rule-based traffic light control
             for tl_id, data in self.intersections.items():
@@ -356,10 +367,11 @@ class AdaptiveTrafficController:
             return True
             
         except traci.exceptions.FatalTraCIError as e:
-            # Save metrics when simulation ends
-            print("\n⚠️  SUMO simulation ended, saving metrics...")
-            self._save_v2i_metrics()
-            self.sumo_connected = False
+            # Save metrics when simulation ends (only if not already saved)
+            if hasattr(self, 'sumo_connected') and self.sumo_connected:
+                print("\n⚠️  SUMO simulation ended, saving metrics...")
+                self._save_v2i_metrics()
+                self.sumo_connected = False
             return False
             
         except Exception as e:
@@ -481,7 +493,8 @@ class AdaptiveTrafficController:
             jitter = 0
             
         # Calculate throughput (total bytes / simulation time)
-        sim_time = traci.simulation.getTime()
+        # Use stored simulation time instead of calling TraCI (which may be closed)
+        sim_time = self.last_simulation_time
         total_bytes = self.packets_df['size_bytes'].sum()
         throughput_bps = (total_bytes * 8) / sim_time if sim_time > 0 else 0
         
