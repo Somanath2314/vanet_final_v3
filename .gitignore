@@ -38,3 +38,15 @@ Thumbs.db
 # Temporary files
 *.tmp
 temp/
+
+# Private keys and certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+
+keys/
+vanet_final_v3/sumo_simulation/keys
+certificates/
