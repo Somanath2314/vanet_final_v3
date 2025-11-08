@@ -1,0 +1,12 @@
+{
+  "algorithm": "DQN",
+  "env_config": {
+    "beta": 20,
+    "action_spec": {},
+    "tl_constraint_min": 5,
+    "tl_constraint_max": 60,
+    "sim_step": 1.0,
+    "algorithm": "DQN",
+    "horizon": 1000
+  }
+}

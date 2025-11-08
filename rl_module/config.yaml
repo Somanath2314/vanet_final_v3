@@ -1,0 +1,72 @@
+# RL Training Configuration for Traffic Control
+# Integrated with Edge Computing and Security
+
+# Training Parameters
+training:
+  num_episodes: 5000              # Total training episodes
+  max_steps_per_episode: 1800     # Steps per episode (30 minutes simulation time)
+  batch_size: 64                  # Batch size for training
+  gamma: 0.99                     # Discount factor
+  learning_rate: 0.0001           # Adam optimizer learning rate
+  
+  # Epsilon-greedy exploration
+  epsilon_start: 1.0              # Initial exploration rate
+  epsilon_end: 0.01               # Minimum exploration rate
+  epsilon_decay: 0.995            # Decay per episode
+  
+  # Network updates
+  target_update_freq: 10          # Update target network every N episodes
+  
+  # Checkpointing
+  save_freq: 100                  # Save checkpoint every N episodes
+  eval_freq: 50                   # Evaluate model every N episodes
+
+# Environment Configuration
+environment:
+  sumo_config: 'sumo_simulation/simulation.sumocfg'
+  edge_computing: true            # Enable edge computing features
+  security: true                  # Enable security features
+  gui: false                      # Use GUI during training (false for faster training)
+  max_vehicles: 50                # Maximum vehicles in simulation
+
+# Network Architecture
+network:
+  hidden_layers: [256, 256, 128]  # Hidden layer sizes
+  dropout: 0.2                    # Dropout rate for regularization
+  activation: 'relu'              # Activation function
+
+# Reward Function Weights
+reward:
+  waiting_time_weight: -1.0       # Penalty for vehicle waiting time
+  throughput_weight: 0.5          # Reward for vehicles passing through
+  phase_change_penalty: -0.1      # Penalty for frequent phase changes
+  emergency_priority_bonus: 5.0   # Bonus for handling emergency vehicles efficiently
+  collision_warning_penalty: -2.0 # Penalty for collision warnings (edge computing)
+  edge_efficiency_bonus: 0.2      # Bonus for efficient edge RSU utilization
+
+# Paths
+paths:
+  model_dir: 'rl_module/models'   # Directory to save trained models
+  log_dir: 'rl_module/logs'       # Directory for training logs and plots
+  output_dir: 'sumo_simulation/output_rl_train'  # SUMO output directory
+
+# Evaluation
+evaluation:
+  num_episodes: 5                 # Episodes for evaluation
+  render: false                   # Show GUI during evaluation
+
+# Reproducibility
+seed: 42                          # Random seed for reproducibility
+
+# Performance
+device: 'auto'                    # 'auto', 'cuda', or 'cpu'
+num_workers: 4                    # Number of parallel workers (if using)
+
+# Advanced Options
+advanced:
+  replay_buffer_size: 100000      # Experience replay buffer capacity
+  min_replay_size: 1000           # Minimum samples before training starts
+  grad_clip: 1.0                  # Gradient clipping value
+  use_double_dqn: true            # Use Double DQN
+  use_dueling_dqn: false          # Use Dueling DQN architecture
+  prioritized_replay: false       # Use prioritized experience replay

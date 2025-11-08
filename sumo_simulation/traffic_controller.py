@@ -18,10 +18,22 @@ from enum import Enum
 sys.path.append(os.path.join(os.path.dirname(__file__), 'sensors'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'v2v_communication'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from sensor_network import SensorNetwork, SensorReading
+sys.path.append(os.path.join(os.path.dirname(__file__)))  # Add sumo_simulation to path
 
-from wimax import WiMAXConfig, WiMAXBaseStation, WiMAXMobileStation
-from wimax.secure_wimax import SecureWiMAXBaseStation, SecureWiMAXMobileStation
+# Try relative imports first (when run as module), fallback to direct imports (when run as script)
+try:
+    from sensor_network import SensorNetwork, SensorReading
+except ImportError:
+    from sumo_simulation.sensors.sensor_network import SensorNetwork, SensorReading
+
+# WiMAX imports
+try:
+    from sumo_simulation.wimax import WiMAXConfig, WiMAXBaseStation, WiMAXMobileStation
+    from sumo_simulation.wimax.secure_wimax import SecureWiMAXBaseStation, SecureWiMAXMobileStation
+except ImportError:
+    # Fallback for when running within sumo_simulation directory
+    from wimax import WiMAXConfig, WiMAXBaseStation, WiMAXMobileStation
+    from wimax.secure_wimax import SecureWiMAXBaseStation, SecureWiMAXMobileStation
 
 # Edge computing imports
 from edge_computing import EdgeRSU, RSUPlacementManager
@@ -391,46 +403,47 @@ class AdaptiveTrafficController:
             # Store current simulation time for metrics
             self.last_simulation_time = traci.simulation.getTime()
 
-            # OPTIMIZED: Adaptive rule-based traffic light control
-            for tl_id, data in self.intersections.items():
-                data["time_in_phase"] += 1
-                current_phase = data["current_phase"]
-                phase_state = self.default_phases[tl_id][current_phase]
-                
-                # Check if in green phase (contains 'G')
-                if 'G' in phase_state:
-                    # Get traffic density on current green lanes
-                    density = self._get_lane_density(tl_id, current_phase)
+            # OPTIMIZED: Adaptive rule-based traffic light control (skip if RL mode)
+            if self.mode != "rl":
+                for tl_id, data in self.intersections.items():
+                    data["time_in_phase"] += 1
+                    current_phase = data["current_phase"]
+                    phase_state = self.default_phases[tl_id][current_phase]
                     
-                    # Adaptive duration based on density
-                    if density >= self.high_density_threshold:
-                        # High traffic: extend green up to max
-                        target_duration = self.max_green_time
-                    elif density <= self.low_density_threshold:
-                        # Low traffic: reduce green to min
-                        target_duration = self.min_green_time
-                    else:
-                        # Medium traffic: scale between min and max
-                        scale = (density - self.low_density_threshold) / \
-                                (self.high_density_threshold - self.low_density_threshold)
-                        target_duration = int(self.min_green_time + 
-                                            scale * (self.max_green_time - self.min_green_time))
+                    # Check if in green phase (contains 'G')
+                    if 'G' in phase_state:
+                        # Get traffic density on current green lanes
+                        density = self._get_lane_density(tl_id, current_phase)
+                        
+                        # Adaptive duration based on density
+                        if density >= self.high_density_threshold:
+                            # High traffic: extend green up to max
+                            target_duration = self.max_green_time
+                        elif density <= self.low_density_threshold:
+                            # Low traffic: reduce green to min
+                            target_duration = self.min_green_time
+                        else:
+                            # Medium traffic: scale between min and max
+                            scale = (density - self.low_density_threshold) / \
+                                    (self.high_density_threshold - self.low_density_threshold)
+                            target_duration = int(self.min_green_time + 
+                                                scale * (self.max_green_time - self.min_green_time))
+                        
+                        # Switch to yellow if minimum time met and other direction has queue
+                        if data["time_in_phase"] >= target_duration:
+                            # Move to yellow phase
+                            data["current_phase"] = (current_phase + 1) % len(self.default_phases[tl_id])
+                            data["time_in_phase"] = 0
+                            traci.trafficlight.setRedYellowGreenState(
+                                tl_id, self.default_phases[tl_id][data["current_phase"]])
                     
-                    # Switch to yellow if minimum time met and other direction has queue
-                    if data["time_in_phase"] >= target_duration:
-                        # Move to yellow phase
-                        data["current_phase"] = (current_phase + 1) % len(self.default_phases[tl_id])
-                        data["time_in_phase"] = 0
-                        traci.trafficlight.setRedYellowGreenState(
-                            tl_id, self.default_phases[tl_id][data["current_phase"]])
-                
-                elif 'y' in phase_state:
-                    # Yellow phase: fixed duration
-                    if data["time_in_phase"] >= self.yellow_time:
-                        data["current_phase"] = (current_phase + 1) % len(self.default_phases[tl_id])
-                        data["time_in_phase"] = 0
-                        traci.trafficlight.setRedYellowGreenState(
-                            tl_id, self.default_phases[tl_id][data["current_phase"]])
+                    elif 'y' in phase_state:
+                        # Yellow phase: fixed duration
+                        if data["time_in_phase"] >= self.yellow_time:
+                            data["current_phase"] = (current_phase + 1) % len(self.default_phases[tl_id])
+                            data["time_in_phase"] = 0
+                            traci.trafficlight.setRedYellowGreenState(
+                                tl_id, self.default_phases[tl_id][data["current_phase"]])
 
             # Update edge RSUs with vehicle data
             if self.edge_enabled:
@@ -595,6 +608,160 @@ class AdaptiveTrafficController:
         finally:
             self._save_v2i_metrics()
             self.stop_simulation()
+    
+    def run_simulation_with_rl(self, rl_controller, steps=3600):
+        """
+        Run simulation with HYBRID control:
+        - Normal: Density-based adaptive traffic control
+        - Emergency: RL-based control with greenwave
+        
+        Parameters
+        ----------
+        rl_controller : RLTrafficController
+            The RL controller instance
+        steps : int
+            Number of simulation steps to run
+        """
+        self.running = True
+        step_count = 0
+        
+        # Control mode tracking
+        control_mode = "DENSITY"  # Start with density-based
+        emergency_active = False
+        last_emergency_check = 0
+        
+        print(f"\n🚦 Running HYBRID traffic control for {steps} steps...")
+        print("   • Normal: DENSITY-based adaptive control")
+        print("   • Emergency: RL-based control with greenwave")
+        print("=" * 70)
+        
+        try:
+            while step_count < steps and traci.simulation.getMinExpectedNumber() > 0:
+                current_time = traci.simulation.getTime()
+                
+                # Check for emergency vehicles every 5 steps
+                if step_count % 5 == 0 or step_count - last_emergency_check >= 5:
+                    last_emergency_check = step_count
+                    
+                    # Check if any emergency vehicles are active
+                    if hasattr(rl_controller.env, 'emergency_coordinator'):
+                        active_emergencies = rl_controller.env.emergency_coordinator.get_active_emergency_vehicles()
+                        
+                        if len(active_emergencies) > 0 and not emergency_active:
+                            # Switch to RL mode
+                            emergency_active = True
+                            control_mode = "RL-EMERGENCY"
+                            self.mode = "rl"
+                            print(f"\n🚨 EMERGENCY DETECTED at step {step_count}!")
+                            print(f"   Switching to RL control with greenwave...")
+                            for emerg in active_emergencies:
+                                print(f"   • {emerg.vehicle_id} detected by {emerg.detected_by_rsu}")
+                        
+                        elif len(active_emergencies) == 0 and emergency_active:
+                            # Switch back to density-based mode
+                            emergency_active = False
+                            control_mode = "DENSITY"
+                            self.mode = "rule"
+                            print(f"\n✅ EMERGENCY CLEARED at step {step_count}")
+                            print(f"   Switching back to density-based control...")
+                
+                # Execute appropriate control strategy
+                if emergency_active:
+                    # RL control during emergency
+                    rl_metrics = rl_controller.step()
+                    
+                    if 'error' in rl_metrics:
+                        print(f"\n❌ RL Error at step {step_count}: {rl_metrics['error']}")
+                        # Fall back to density-based
+                        emergency_active = False
+                        control_mode = "DENSITY"
+                        self.mode = "rule"
+                else:
+                    # Run density-based control (this happens in run_simulation_step)
+                    rl_metrics = {
+                        'reward': 0,
+                        'episode_reward': 0,
+                        'mean_speed': 0,
+                        'active_emergencies': 0
+                    }
+                
+                # Run regular traffic controller step (handles sensors, WiMAX, density control when not in RL mode)
+                self.run_simulation_step()
+                
+                # Print progress
+                if step_count % 50 == 0:
+                    print(f"\n╔══════════════════════════════════════════════════════════╗")
+                    print(f"║ Step {step_count:4d}/{steps} │ Mode: {control_mode:15s} │ Time: {current_time:.1f}s ║")
+                    print(f"╠══════════════════════════════════════════════════════════╣")
+                    
+                    if emergency_active:
+                        print(f"║ 🚨 EMERGENCY MODE                                        ║")
+                        print(f"║   Reward: {rl_metrics.get('reward', 0):6.2f}                                     ║")
+                        print(f"║   Active Emergencies: {rl_metrics.get('active_emergencies', 0):2d}                          ║")
+                        print(f"║   Greenwaves Created: {rl_metrics.get('successful_greenwaves', 0):2d}                          ║")
+                        print(f"║   Mean Speed: {rl_metrics.get('mean_speed', 0):5.2f} m/s                            ║")
+                    else:
+                        print(f"║ 🚦 DENSITY-BASED ADAPTIVE CONTROL                        ║")
+                        # Get traffic stats
+                        try:
+                            all_vehicles = traci.vehicle.getIDList()
+                            if all_vehicles:
+                                speeds = [traci.vehicle.getSpeed(v) for v in all_vehicles[:20]]
+                                avg_speed = sum(speeds) / len(speeds) if speeds else 0
+                                print(f"║   Active Vehicles: {len(all_vehicles):3d}                                 ║")
+                                print(f"║   Mean Speed: {avg_speed:5.2f} m/s                            ║")
+                                
+                                # Show traffic light states
+                                for tl_id in ['J2', 'J3']:
+                                    if tl_id in self.intersections:
+                                        phase = self.intersections[tl_id]['current_phase']
+                                        time_in_phase = self.intersections[tl_id]['time_in_phase']
+                                        density = self._get_lane_density(tl_id, phase)
+                                        print(f"║   {tl_id}: Phase {phase} ({time_in_phase:2d}s) Density: {density:4.1f}           ║")
+                        except:
+                            pass
+                    
+                    print(f"╚══════════════════════════════════════════════════════════╝")
+                
+                step_count += 1
+                time.sleep(0.01)  # Small delay for visualization
+                
+        except KeyboardInterrupt:
+            print("\n\n⚠️  Simulation stopped by user (Ctrl+C)")
+        except Exception as e:
+            print(f"\n\n❌ Simulation error: {e}")
+            import traceback
+            traceback.print_exc()
+        finally:
+            print(f"\n\n📊 Simulation Summary:")
+            print("=" * 70)
+            print(f"Total steps: {step_count}")
+            print(f"Final control mode: {control_mode}")
+            
+            # Get final RL metrics
+            final_metrics = rl_controller.get_metrics()
+            print(f"\nRL Performance (Emergency Mode):")
+            print(f"  Total episodes: {final_metrics.get('total_episodes', 0)}")
+            print(f"  Avg episode reward: {final_metrics.get('avg_episode_reward', 0):.2f}")
+            
+            # Emergency vehicle statistics
+            if hasattr(rl_controller.env, 'emergency_coordinator'):
+                emerg_stats = rl_controller.env.emergency_coordinator.get_statistics()
+                print(f"\nEmergency Vehicle Statistics:")
+                print(f"  Total detections: {emerg_stats.get('total_detections', 0)}")
+                print(f"  Successful greenwaves: {rl_controller.env.successful_greenwaves}")
+                
+                if emerg_stats.get('total_detections', 0) > 0:
+                    print(f"  ✅ Hybrid system worked: Density control + Emergency RL")
+                else:
+                    print(f"  ℹ️  No emergencies detected: Pure density-based control")
+            
+            # Save metrics
+            self._save_v2i_metrics()
+            self.stop_simulation()
+            
+            print("\n✅ HYBRID Simulation completed")
+            print("=" * 70)
 
     # ------------------- OUTPUT -------------------
     def _log_packet(self, bs_id: str, vehicle_id: str, packet_type: str, size_bytes: int):

@@ -1,0 +1,39 @@
+{
+  "system_metrics": {
+    "total_rsus": 0,
+    "active_rsus": 0,
+    "total_computations": 0,
+    "total_offloaded": 0,
+    "bandwidth_saved_mb": 0,
+    "avg_latency_ms": 0,
+    "start_time": 1762539778.77807
+  },
+  "summary_statistics": {
+    "total_rsus": 13,
+    "total_vehicles_served": 0,
+    "total_computations": 0,
+    "cache_hit_rate": 0,
+    "avg_latency_ms": 0,
+    "uptime_seconds": 1.0715358257293701,
+    "computations_per_second": 0.0
+  },
+  "service_metrics": {
+    "traffic_flow": {
+      "requests": 0,
+      "avg_response_time": 0
+    },
+    "collision_avoidance": {
+      "warnings": 0,
+      "prevented": 0
+    },
+    "emergency_support": {
+      "events": 0,
+      "response_time": 0
+    },
+    "data_aggregation": {
+      "uploads": 0,
+      "compression_ratio": 0
+    }
+  },
+  "timestamp": 1762539779.84961
+}

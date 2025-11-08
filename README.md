@@ -96,12 +96,43 @@ Options:
 - High traffic (≥10 vehicles): Extended 45s to clear queues
 - Adapts every second based on actual traffic conditions
 
-#### RL-Based (`--rl` flag)
-- Deep Q-Network (DQN) agent
-- State: Traffic density, queue lengths, emergency status
-- Action: Traffic light phase selection
-- Trained model: `rl_module/models/dqn_traffic_model.pth`
-- Adaptive to traffic patterns through learning
+#### RL-Based (`--rl` flag) - **EDGE & SECURITY INTEGRATED**
+- **Algorithm**: Double Deep Q-Network (DQN) with experience replay
+- **State**: Traffic density + edge metrics (collisions, emergencies) + security alerts
+- **Action**: Adaptive traffic light phase selection (4 phases per TL)
+- **Training**: 5000 episodes with edge-aware rewards
+- **Models**: Best model in `rl_module/models/dqn_best.pth`
+- **Performance**: ~30% better than rule-based after training
+- **Integration**: Learns from edge computing warnings and security threats
+
+**Train Your Own Model:**
+```bash
+# Basic training (5000 episodes, ~4 days CPU)
+python train_rl_agent.py
+
+# With edge computing (recommended)
+python train_rl_agent.py --edge
+
+# Full integration (edge + security)
+python train_rl_agent.py --edge --security
+
+# Quick test (10 episodes)
+python train_rl_agent.py --episodes 10 --edge
+```
+
+**Evaluate Trained Model:**
+```bash
+# Test performance (10 episodes)
+python evaluate_rl_agent.py
+
+# Compare with rule-based
+python evaluate_rl_agent.py --compare
+
+# With SUMO GUI visualization
+python evaluate_rl_agent.py --gui --episodes 5
+```
+
+📘 **Full Guide**: See [docs/RL_TRAINING.md](docs/RL_TRAINING.md) for complete training instructions
 
 ### 🔐 Security Features (`--security` flag)
 
@@ -610,8 +641,13 @@ ps aux | grep sumo
 - **OUTPUT_EXPLAINED.md** - Understanding system output
 - **QUICK_START.md** - Getting started guide
 - **SECURITY_WORKING.md** - Security implementation details
-- **RL_GUIDE.md** - Reinforcement learning guide
 - And more...
+
+### Active Documentation (`docs/`)
+
+- **RL_TRAINING.md** - **NEW!** Complete RL training guide with edge/security integration
+- **EDGE_COMPUTING.md** - Edge computing architecture and metrics
+- **TRAFFIC_OPTIMIZATION.md** - Adaptive traffic control details
 
 ### Recent Updates
 

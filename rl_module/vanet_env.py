@@ -18,6 +18,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__)))
 
 from rewards import Rewards
 from states import States
+from emergency_coordinator import EmergencyVehicleCoordinator
 
 
 class VANETTrafficEnv(gym.Env):
@@ -76,14 +77,26 @@ class VANETTrafficEnv(gym.Env):
         self.rewards = Rewards(self.action_spec)
         self.states = States(self.beta)
         
+        # Initialize emergency vehicle coordinator
+        self.emergency_coordinator = EmergencyVehicleCoordinator(rsu_range=300.0)
+        self.emergency_coordinator_initialized = False
+        
         # Initialize tracking variables
         self._init_obs_veh_acc()
         self._init_obs_veh_wait_steps()
         self._init_obs_tl_wait_steps()
         
+        # Track all vehicles ever seen (to handle disappearing vehicles)
+        self.all_seen_vehicles: set = set()
+        self.completed_vehicles: set = set()
+        
         # Episode tracking
         self.current_step = 0
         self.episode_reward = 0
+        
+        # Emergency vehicle tracking
+        self.emergency_vehicle_delays = []  # Track delays caused to emergency vehicles
+        self.successful_greenwaves = 0
         
         # Define action and observation spaces
         self._setup_spaces()
@@ -178,9 +191,20 @@ class VANETTrafficEnv(gym.Env):
         """Get the ids of all the vehicles observable by the model."""
         try:
             all_vehs = traci.vehicle.getIDList()
+            
+            # Update tracking of all vehicles
+            for veh in all_vehs:
+                if veh not in self.all_seen_vehicles:
+                    self.all_seen_vehicles.add(veh)
+            
+            # Detect completed vehicles (vehicles that were seen but are no longer in simulation)
+            current_vehs_set = set(all_vehs)
+            newly_completed = self.all_seen_vehicles - current_vehs_set - self.completed_vehicles
+            self.completed_vehicles.update(newly_completed)
+            
             # Return first beta vehicles
             return list(all_vehs)[:self.beta]
-        except:
+        except Exception as e:
             return []
     
     def get_controlled_tl_ids(self):
@@ -340,7 +364,15 @@ class VANETTrafficEnv(gym.Env):
         return state.astype(np.float32)
     
     def compute_reward(self, rl_actions):
-        """Compute reward based on traffic metrics with stronger congestion penalties."""
+        """
+        Compute reward based on traffic metrics with emphasis on emergency vehicle handling.
+        
+        Reward components:
+        1. Base reward: Traffic flow, waiting times, acceleration
+        2. Emergency bonus: HUGE reward for successfully handling emergency vehicles
+        3. Queue penalty: Penalize congestion
+        4. Greenwave bonus: Extra reward for maintaining greenwave
+        """
         min_speed = 8  # km/h (lower threshold for better flow)
         idled_max_steps = 60  # steps (reduced from 80 for more sensitivity)
         max_abs_acc = 0.1  # m/s^2 (stricter acceleration control)
@@ -353,38 +385,64 @@ class VANETTrafficEnv(gym.Env):
             self.rewards.penalize_max_acc(self.obs_veh_acc, max_abs_acc, 1, 0)
         )
 
-        # Emergency vehicle bonus - HUGE reward for prioritizing emergency vehicles
+        # ========== EMERGENCY VEHICLE REWARDS (HIGHEST PRIORITY) ==========
         emergency_bonus = 0
+        emergency_penalty = 0
+        
         try:
-            # Check for emergency vehicles in the simulation
-            emergency_vehicles = []
-            try:
-                # Try to get emergency vehicles from SUMO directly
-                all_vehicles = traci.vehicle.getIDList()
-                for veh_id in all_vehicles:
-                    if 'emergency' in veh_id.lower() or 'ambulance' in veh_id.lower() or 'fire' in veh_id.lower():
-                        try:
-                            lane_id = traci.vehicle.getLaneID(veh_id)
-                            distance = traci.vehicle.getLanePosition(veh_id)
-                            # Calculate distance from intersection (simplified)
-                            lane_length = traci.lane.getLength(lane_id)
-                            distance_from_intersection = lane_length - distance
-
-                            if distance_from_intersection < 300:  # 300m range for emergency vehicles
-                                emergency_bonus += 100  # Large bonus for handling emergency vehicles
-                                break  # Only need one emergency vehicle to trigger bonus
-                        except:
-                            continue
-            except:
-                pass
-        except:
+            # Get active emergency vehicles from coordinator
+            active_emergencies = self.emergency_coordinator.get_active_emergency_vehicles()
+            
+            if active_emergencies:
+                for emerg_veh in active_emergencies:
+                    try:
+                        # Get emergency vehicle metrics
+                        veh_id = emerg_veh.vehicle_id
+                        speed = traci.vehicle.getSpeed(veh_id)
+                        waiting_time = traci.vehicle.getWaitingTime(veh_id)
+                        
+                        # HUGE bonus for emergency vehicles moving at good speed
+                        if speed > 10.0:  # Moving faster than 10 m/s (36 km/h)
+                            emergency_bonus += 200  # Massive reward
+                            
+                        elif speed > 5.0:  # Moderate speed (18 km/h)
+                            emergency_bonus += 100  # Good reward
+                            
+                        else:  # Slow or stopped
+                            emergency_penalty -= 150  # Heavy penalty
+                        
+                        # Penalty for waiting emergency vehicles
+                        if waiting_time > 5.0:  # Waiting more than 5 seconds
+                            emergency_penalty -= 100  # Severe penalty
+                            self.emergency_vehicle_delays.append(waiting_time)
+                        
+                        # Bonus for successful greenwave
+                        if emerg_veh.greenwave_active:
+                            emergency_bonus += 50  # Reward for active greenwave
+                        
+                    except Exception as e:
+                        # Vehicle may have completed route
+                        continue
+                        
+        except Exception as e:
             pass
 
         # Queue length penalty - heavily penalize long queues
         queue_penalty = 0
         try:
             # Check queue lengths across all lanes
-            for lane_id in ['E1_0', 'E2_0', 'E5_0', 'E7_0']:
+            all_lanes = []
+            for tl_id in self.action_spec.keys():
+                try:
+                    controlled_lanes = traci.trafficlight.getControlledLanes(tl_id)
+                    all_lanes.extend(controlled_lanes)
+                except:
+                    pass
+            
+            # Remove duplicates
+            all_lanes = list(set(all_lanes))
+            
+            for lane_id in all_lanes:
                 try:
                     # Get vehicles on lane
                     vehicles_on_lane = traci.lane.getLastStepVehicleIDs(lane_id)
@@ -403,10 +461,17 @@ class VANETTrafficEnv(gym.Env):
         except:
             pass
 
-        total_reward = base_reward + emergency_bonus + queue_penalty
+        # Combine all reward components
+        total_reward = base_reward + emergency_bonus + emergency_penalty + queue_penalty
+
+        # Emergency vehicles have absolute priority - if emergency present, scale other rewards
+        active_emergencies = self.emergency_coordinator.get_active_emergency_vehicles()
+        if len(active_emergencies) > 0:
+            # Scale down base rewards when emergency is active
+            total_reward = (base_reward * 0.3) + emergency_bonus + emergency_penalty + (queue_penalty * 0.5)
 
         # Ensure minimum reward to prevent agent from giving up
-        return max(total_reward, -200)  # Lower minimum to allow more learning
+        return max(total_reward, -300)  # Allow larger negative rewards for emergencies
     
     def reset(self, seed=None, options=None):
         """Reset the environment to initial state."""
@@ -419,6 +484,14 @@ class VANETTrafficEnv(gym.Env):
         self._init_obs_veh_acc()
         self._init_obs_veh_wait_steps()
         self._init_obs_tl_wait_steps()
+        
+        # Reset vehicle tracking
+        self.all_seen_vehicles.clear()
+        self.completed_vehicles.clear()
+        
+        # Reset emergency tracking
+        self.emergency_vehicle_delays = []
+        self.successful_greenwaves = 0
 
         # Get initial state
         try:
@@ -430,38 +503,57 @@ class VANETTrafficEnv(gym.Env):
         return state, {}
     
     def emergency_override(self):
-        """Override traffic lights to prioritize emergency vehicles."""
+        """Override traffic lights to prioritize emergency vehicles using RSU-based detection."""
         try:
-            all_vehicles = traci.vehicle.getIDList()
-            for veh_id in all_vehicles:
-                if 'emergency' in veh_id.lower() or 'ambulance' in veh_id.lower() or 'fire' in veh_id.lower():
-                    lane_id = traci.vehicle.getLaneID(veh_id)
-                    distance = traci.vehicle.getLanePosition(veh_id)
-                    lane_length = traci.lane.getLength(lane_id)
-                    distance_from_intersection = lane_length - distance
-
-                    if distance_from_intersection < 300:  # 300m range for emergency vehicles
-                        controlled_tls = self.get_controlled_tl_ids()
-                        for tl_id in controlled_tls:
-                            connections = traci.trafficlight.getControlledLinks(tl_id)
-                            for link_index, link in enumerate(connections):
-                                if link[0][0] == lane_id:  # Match lane to traffic light
-                                    # Find a phase that gives green to this link index
-                                    phase_index = self._find_phase_for_link(tl_id, link_index)
-                                    if phase_index is not None:
-                                        # Respect minimum green timer before forcing a new phase
-                                        timer = self.obs_tl_wait_steps.get(tl_id, {}).get('timer', 0)
-                                        if timer >= self.tl_constraint_min:
-                                            traci.trafficlight.setPhase(tl_id, phase_index)
-                                            print(f"Emergency override: Set phase {phase_index} at traffic light {tl_id} for lane {lane_id}")
-                                            return
-                                        else:
-                                            # If min green not met, still set immediately for emergencies
-                                            traci.trafficlight.setPhase(tl_id, phase_index)
-                                            print(f"Emergency override (forced): Set phase {phase_index} at traffic light {tl_id} for lane {lane_id}")
-                                            return
+            # Initialize emergency coordinator if not already done
+            if not self.emergency_coordinator_initialized:
+                self.emergency_coordinator.initialize_network_topology()
+                self.emergency_coordinator_initialized = True
+            
+            current_time = traci.simulation.getTime()
+            
+            # Detect emergency vehicles via RSUs
+            emergency_vehicles = self.emergency_coordinator.detect_emergency_vehicles(current_time)
+            
+            if not emergency_vehicles:
+                return
+            
+            # Process each emergency vehicle
+            for emerg_veh in emergency_vehicles:
+                # Create greenwave for this emergency vehicle
+                greenwave_tls = self.emergency_coordinator.create_greenwave(emerg_veh)
+                
+                if greenwave_tls:
+                    # Apply greenwave to traffic lights
+                    for tl_id in greenwave_tls:
+                        if tl_id not in self.action_spec:
+                            continue
+                        
+                        # Get the appropriate phase for the emergency vehicle
+                        phase_idx = self.emergency_coordinator.apply_greenwave(
+                            tl_id, 
+                            emerg_veh.current_edge
+                        )
+                        
+                        if phase_idx is not None:
+                            # Check minimum green constraint (can be overridden for emergencies)
+                            timer = self.obs_tl_wait_steps.get(tl_id, {}).get('timer', 0)
+                            
+                            # For emergency vehicles, force change even if min green not met
+                            if timer >= self.tl_constraint_min or timer < 3:
+                                traci.trafficlight.setPhase(tl_id, phase_idx)
+                                self.successful_greenwaves += 1
+                                print(f"🟢 Greenwave: {tl_id} set to phase {phase_idx} for {emerg_veh.vehicle_id}")
+                            else:
+                                # Emergency override - force immediate change
+                                traci.trafficlight.setPhase(tl_id, phase_idx)
+                                self.successful_greenwaves += 1
+                                print(f"🚨 Emergency override: {tl_id} forced to phase {phase_idx} for {emerg_veh.vehicle_id}")
+                
         except Exception as e:
             print(f"Error in emergency override: {e}")
+            import traceback
+            traceback.print_exc()
 
     def density_based_override(self):
         """Override traffic lights based on vehicle density when no emergency vehicles are detected."""
@@ -594,11 +686,18 @@ class VANETTrafficEnv(gym.Env):
         terminated = self.current_step >= self.horizon
         truncated = False
 
-        # Info dict
+        # Info dict with emergency vehicle statistics
+        active_emergencies = self.emergency_coordinator.get_active_emergency_vehicles()
+        emergency_stats = self.emergency_coordinator.get_statistics()
+        
         info = {
             'episode_reward': self.episode_reward,
             'mean_speed': self.rewards.mean_speed(),
             'mean_emission': self.rewards.mean_emission(),
+            'active_emergencies': len(active_emergencies),
+            'successful_greenwaves': self.successful_greenwaves,
+            'emergency_detections': emergency_stats.get('total_detections', 0),
+            'completed_vehicles': len(self.completed_vehicles),
         }
 
         return state, reward, terminated, truncated, info

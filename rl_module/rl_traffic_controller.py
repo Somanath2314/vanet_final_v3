@@ -223,6 +223,10 @@ class RLTrafficController:
                 'mean_speed': info.get('mean_speed', 0),
                 'mean_emission': info.get('mean_emission', 0),
                 'action': int(action) if isinstance(action, (int, np.integer)) else action.tolist(),
+                'active_emergencies': info.get('active_emergencies', 0),
+                'successful_greenwaves': info.get('successful_greenwaves', 0),
+                'emergency_detections': info.get('emergency_detections', 0),
+                'completed_vehicles': info.get('completed_vehicles', 0),
             }
 
             return metrics

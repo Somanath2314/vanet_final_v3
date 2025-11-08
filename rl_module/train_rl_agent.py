@@ -10,16 +10,24 @@ import argparse
 import json
 from datetime import datetime
 
+# Add parent directory to path BEFORE importing Ray
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
+# Also add current directory
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 import ray
 from ray import tune
 from ray.rllib.algorithms.dqn import DQNConfig
 from ray.rllib.algorithms.ppo import PPOConfig
 from ray.tune.registry import register_env
 
-# Add parent directory to path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
-from rl_module.vanet_env import VANETTrafficEnv
+# Import directly without rl_module prefix since we're in that directory
+from vanet_env import VANETTrafficEnv
 
 
 def create_env(config):
@@ -98,8 +106,17 @@ def train(args):
     args : argparse.Namespace
         Training arguments
     """
-    # Initialize Ray
-    ray.init(ignore_reinit_error=True)
+    # Initialize Ray with runtime environment that includes correct paths
+    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    ray.init(
+        ignore_reinit_error=True,
+        runtime_env={
+            "env_vars": {"PYTHONPATH": f"{parent_dir}:{current_dir}"},
+            "working_dir": parent_dir,
+        }
+    )
     
     # Register environment
     register_env("vanet_traffic_env", create_env)
