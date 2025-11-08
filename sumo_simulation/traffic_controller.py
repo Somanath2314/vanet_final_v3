@@ -171,6 +171,64 @@ class AdaptiveTrafficController:
         except Exception as e:
             # If error getting density, return medium value
             return 5
+    
+    def adaptive_control_single_junction(self, tl_id):
+        """
+        Apply adaptive density-based control to a single junction.
+        Used by proximity-based hybrid control.
+        
+        Parameters
+        ----------
+        tl_id : str
+            Traffic light / junction ID
+        """
+        try:
+            if tl_id not in self.intersections:
+                return
+            
+            data = self.intersections[tl_id]
+            data["time_in_phase"] += 1
+            current_phase = data["current_phase"]
+            phase_state = self.default_phases[tl_id][current_phase]
+            
+            # Check if in green phase (contains 'G')
+            if 'G' in phase_state:
+                # Get traffic density on current green lanes
+                density = self._get_lane_density(tl_id, current_phase)
+                
+                # Adaptive duration based on density
+                if density >= self.high_density_threshold:
+                    # High traffic: extend green up to max
+                    target_duration = self.max_green_time
+                elif density <= self.low_density_threshold:
+                    # Low traffic: reduce green to min
+                    target_duration = self.min_green_time
+                else:
+                    # Medium traffic: scale between min and max
+                    scale = (density - self.low_density_threshold) / \
+                            (self.high_density_threshold - self.low_density_threshold)
+                    target_duration = int(self.min_green_time + 
+                                        scale * (self.max_green_time - self.min_green_time))
+                
+                # Switch to yellow if target duration met
+                if data["time_in_phase"] >= target_duration:
+                    # Move to yellow phase
+                    data["current_phase"] = (current_phase + 1) % len(self.default_phases[tl_id])
+                    data["time_in_phase"] = 0
+                    traci.trafficlight.setRedYellowGreenState(
+                        tl_id, self.default_phases[tl_id][data["current_phase"]])
+            
+            elif 'y' in phase_state:
+                # Yellow phase: fixed duration
+                if data["time_in_phase"] >= self.yellow_time:
+                    data["current_phase"] = (current_phase + 1) % len(self.default_phases[tl_id])
+                    data["time_in_phase"] = 0
+                    traci.trafficlight.setRedYellowGreenState(
+                        tl_id, self.default_phases[tl_id][data["current_phase"]])
+        
+        except Exception as e:
+            # Silently handle errors to avoid breaking the simulation
+            pass
 
     def _initialize_wimax(self):
         coords = {"J2": (500,500), "J3": (1000,500)}

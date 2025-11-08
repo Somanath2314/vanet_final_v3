@@ -26,6 +26,8 @@ from v2v_communication.key_management import initialize_vanet_security
 # RL module (optional)
 try:
     from rl_module.rl_traffic_controller import RLTrafficController
+    from rl_module.proximity_hybrid_controller import ProximityHybridLogic
+    from stable_baselines3 import DQN
     RL_AVAILABLE = True
 except ImportError:
     RL_AVAILABLE = False
@@ -36,6 +38,12 @@ def main():
     parser = argparse.ArgumentParser(description='Integrated SUMO + NS3 VANET Simulation')
     parser.add_argument('--mode', choices=['rule', 'rl'], default='rule',
                        help='Traffic control mode: rule-based or RL-based')
+    parser.add_argument('--hybrid', action='store_true',
+                       help='Enable proximity-based hybrid control (density + RL near emergency)')
+    parser.add_argument('--proximity', type=float, default=250.0,
+                       help='Proximity threshold in meters for hybrid mode (default: 250m)')
+    parser.add_argument('--model', type=str, default=None,
+                       help='Path to trained DQN model for RL/hybrid mode')
     parser.add_argument('--steps', type=int, default=1000,
                        help='Number of simulation steps')
     parser.add_argument('--gui', action='store_true',
@@ -56,11 +64,15 @@ def main():
     print("🚗 INTEGRATED SUMO + NS3 VANET SIMULATION")
     print("="*70)
     print(f"Mode: {args.mode.upper()}-based traffic control")
+    if args.hybrid:
+        print(f"Hybrid: Proximity-based (threshold: {args.proximity}m)")
     print(f"Steps: {args.steps}")
     print(f"GUI: {'Yes' if args.gui else 'No'}")
     print(f"Output: {output_dir}")
     if args.edge:
         print("🔷 Edge Computing: ENABLED (Smart RSUs)")
+    if args.model:
+        print(f"🤖 Model: {args.model}")
     print("="*70)
     print()
 
@@ -165,13 +177,60 @@ def main():
 
     # Initialize RL controller if needed
     rl_controller = None
-    if args.mode == 'rl' and RL_AVAILABLE:
+    dqn_model = None
+    proximity_logic = None
+    
+    # Hybrid mode with proximity-based switching
+    if args.hybrid and RL_AVAILABLE:
+        print("🤖 Initializing Proximity-Based Hybrid Controller...")
+        
+        # Load DQN model
+        if args.model and os.path.exists(args.model):
+            try:
+                dqn_model = DQN.load(args.model)
+                print(f"✅ Loaded trained DQN model from: {args.model}")
+            except Exception as e:
+                print(f"❌ Failed to load model: {e}")
+                print("   Falling back to rule-based control")
+                args.hybrid = False
+        else:
+            model_path = os.path.join(os.path.dirname(__file__), '..', 
+                                     'rl_module', 'trained_models', 'dqn_traffic_*', 'dqn_traffic_final.zip')
+            # Try to find latest model
+            import glob
+            model_files = glob.glob(model_path)
+            if model_files:
+                latest_model = sorted(model_files)[-1]
+                try:
+                    dqn_model = DQN.load(latest_model)
+                    print(f"✅ Loaded latest DQN model: {latest_model}")
+                except Exception as e:
+                    print(f"❌ Failed to load model: {e}")
+                    args.hybrid = False
+            else:
+                print(f"⚠️  No trained model found. Use --model to specify path")
+                print("   Falling back to rule-based control")
+                args.hybrid = False
+        
+        # Initialize proximity logic
+        if dqn_model:
+            proximity_logic = ProximityHybridLogic(proximity_threshold=args.proximity)
+            # Will initialize junctions after SUMO is running
+            print(f"✅ Proximity logic initialized (threshold: {args.proximity}m)")
+    
+    # Regular RL mode (global switching)
+    elif args.mode == 'rl' and RL_AVAILABLE:
         print("🤖 Initializing RL controller...")
         try:
             rl_controller = RLTrafficController(mode='inference')
             if rl_controller.initialize(sumo_connected=True):
-                model_path = os.path.join(os.path.dirname(__file__), '..', 
-                                         'rl_module', 'models', 'dqn_traffic_model.pth')
+                # Try to load model
+                if args.model and os.path.exists(args.model):
+                    model_path = args.model
+                else:
+                    model_path = os.path.join(os.path.dirname(__file__), '..', 
+                                             'rl_module', 'models', 'dqn_traffic_model.pth')
+                
                 if os.path.exists(model_path):
                     rl_controller.load_model(model_path)
                     print("✅ Loaded trained RL model from:", model_path)
@@ -189,9 +248,15 @@ def main():
     if args.mode == 'rl' and not RL_AVAILABLE:
         print("⚠️  RL module not available, using rule-based control")
     
-    if args.mode == 'rl' and rl_controller is None:
+    if args.mode == 'rl' and rl_controller is None and not args.hybrid:
         print("⚠️  Falling back to rule-based control")
         args.mode = 'rule'
+    
+    # Initialize proximity logic junctions after SUMO is connected
+    if proximity_logic:
+        print("\n🔍 Initializing junction positions...")
+        num_junctions = proximity_logic.initialize_junctions()
+        print(f"✅ Initialized {num_junctions} junctions for proximity-based control")
 
     print()
     print("🚀 Starting integrated simulation...")
@@ -205,8 +270,69 @@ def main():
         import traci
         
         while step < args.steps:
-            # Advance SUMO simulation
-            if rl_controller:
+            # Proximity-based hybrid control
+            if proximity_logic and dqn_model:
+                # Advance SUMO one step
+                traci.simulationStep()
+                current_time = traci.simulation.getTime()
+                
+                # Update junction modes based on emergency proximity
+                junction_modes = proximity_logic.update_junction_modes()
+                
+                # Apply control to each junction based on its mode
+                for junction_id, mode in junction_modes.items():
+                    if mode == "RL":
+                        # Use RL control for this junction
+                        try:
+                            # Get state for this junction
+                            # Simple state: queue lengths for controlled lanes
+                            controlled_lanes = []
+                            try:
+                                links = traci.trafficlight.getControlledLinks(junction_id)
+                                controlled_lanes = list(set([link[0][0] for link in links if link]))
+                            except:
+                                pass
+                            
+                            if controlled_lanes:
+                                # Get queue lengths
+                                queues = []
+                                for lane in controlled_lanes[:8]:  # Limit to 8 lanes
+                                    try:
+                                        queue = traci.lane.getLastStepHaltingNumber(lane)
+                                        queues.append(queue)
+                                    except:
+                                        queues.append(0)
+                                
+                                # Pad to expected size
+                                while len(queues) < 8:
+                                    queues.append(0)
+                                
+                                # Get RL action
+                                obs = np.array(queues[:8], dtype=np.float32)
+                                action, _ = dqn_model.predict(obs, deterministic=True)
+                                
+                                # Apply action (change phase if needed)
+                                try:
+                                    current_phase = traci.trafficlight.getPhase(junction_id)
+                                    if action != current_phase:
+                                        traci.trafficlight.setPhase(junction_id, int(action))
+                                except:
+                                    pass
+                        except Exception as e:
+                            # Fallback to current phase on error
+                            pass
+                    else:
+                        # Use density-based control
+                        try:
+                            traffic_controller.adaptive_control_single_junction(junction_id)
+                        except:
+                            pass
+                
+                # Update NS3 network simulation
+                ns3_bridge.step(current_time)
+            
+            # Regular RL-based control
+            elif rl_controller:
                 # RL-based control
                 traci.simulationStep()
                 current_time = traci.simulation.getTime()
@@ -225,6 +351,8 @@ def main():
                 
                 # Update NS3 network simulation
                 ns3_bridge.step(current_time)
+            
+            # Rule-based control
             else:
                 # Rule-based control - use traffic controller's built-in step
                 if not traffic_controller.run_simulation_step():
@@ -269,6 +397,10 @@ def main():
         print()
         print("-"*70)
         print(f"✅ Simulation completed in {elapsed_time:.1f} seconds")
+        
+        # Print proximity-based hybrid statistics if enabled
+        if proximity_logic:
+            proximity_logic.print_statistics()
         
         # Print network metrics summary
         ns3_bridge.print_summary()
