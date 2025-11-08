@@ -393,11 +393,19 @@ class VANETTrafficEnv(gym.Env):
             # Get active emergency vehicles from coordinator
             active_emergencies = self.emergency_coordinator.get_active_emergency_vehicles()
             
+            # Get current vehicle list to avoid querying non-existent vehicles
+            current_vehicles = set(traci.vehicle.getIDList())
+            
             if active_emergencies:
                 for emerg_veh in active_emergencies:
                     try:
                         # Get emergency vehicle metrics
                         veh_id = emerg_veh.vehicle_id
+                        
+                        # Check if vehicle still exists in simulation
+                        if veh_id not in current_vehicles:
+                            continue
+                        
                         speed = traci.vehicle.getSpeed(veh_id)
                         waiting_time = traci.vehicle.getWaitingTime(veh_id)
                         

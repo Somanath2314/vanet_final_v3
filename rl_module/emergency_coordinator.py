@@ -164,6 +164,10 @@ class EmergencyVehicleCoordinator:
                 
                 # Get vehicle information
                 try:
+                    # Check if vehicle still exists before querying
+                    if veh_id not in all_vehicles:
+                        continue
+                    
                     edge_id = traci.vehicle.getRoadID(veh_id)
                     lane_id = traci.vehicle.getLaneID(veh_id)
                     position = traci.vehicle.getLanePosition(veh_id)

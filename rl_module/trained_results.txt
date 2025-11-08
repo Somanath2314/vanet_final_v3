@@ -1,0 +1,3213 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 37ms, vehicles TOT 0 ACT 0 BUF 0)                      Step #100.00 (1ms ~= 1000.00*RT, ~36000.00UPS, TraCI: 79ms, vehicles TOT 38 ACT 36 BUF 0) Step #200.00 (2ms ~= 500.00*RT, ~30500.00UPS, TraCI: 63ms, vehicles TOT 78 ACT 61 BUF 0)  Step #300.00 (1ms ~= 1000.00*RT, ~72000.00UPS, TraCI: 40ms, vehicles TOT 116 ACT 72 BUF 0)Interrupt signal received, trying to exit gracefully.
+Step #400.00 (0ms ?*RT. ?UPS, TraCI: 34ms, vehicles TOT 154 ACT 86 BUF 0)                 Step #500.00 (2ms ~= 500.00*RT, ~50500.00UPS, TraCI: 140ms, vehicles TOT 195 ACT 101 BUF 0Another interrupt signal received, hard exit.
+================================================================================
+INITIALIZING HYBRID DQN CONTROLLER
+================================================================================
+
+Loading trained DQN model...
+  Model: trained_models/dqn_traffic_20251108_130019/dqn_traffic_final.zip
+✓ Model loaded successfully
+
+Starting SUMO simulation...
+  Config: ../sumo_simulation/simulation.sumocfg
+ Retrying in 1 seconds
+✓ SUMO started
+✓ Found 2 traffic lights: ('J2', 'J3')
+  J2: 4 phases
+  J3: 4 phases
+
+Creating environment...
+✓ Environment created
+  Observation space: (154,)
+  Action space: 16 actions
+
+Resetting environment...
+✓ Environment reset
+
+================================================================================
+✅ INITIALIZATION COMPLETE
+================================================================================
+
+================================================================================
+RUNNING HYBRID CONTROL WITH TRAINED DQN
+================================================================================
+
+Control Strategy:
+  • Normal traffic: Density-based adaptive control
+  • Emergency detected: Trained DQN model with greenwave
+
+================================================================================
+
+✓ Emergency coordinator initialized: 9 junctions
+✓ RSU network mapped: 2 RSUs
+Step    0/1000 | Mode: DENSITY         | Reward:    0.40 | Avg:    0.40 | Emergencies: 0
+🚨 Emergency vehicle detected: emergency_1 by RSU_J2
+
+🚨 EMERGENCY DETECTED at step 28!
+   • emergency_1 detected by RSU_J2
+   Switching to TRAINED DQN control...
+
+Step   50/1000 | Mode: RL-EMERGENCY    | Reward: -147.93 | Avg:   76.87 | Emergencies: 1
+🚨 Emergency vehicle detected: emergency_flow.0 by RSU_J2
+Step  100/1000 | Mode: RL-EMERGENCY    | Reward:  402.74 | Avg:  203.49 | Emergencies: 2
+Step  150/1000 | Mode: RL-EMERGENCY    | Reward:  398.27 | Avg:  267.92 | Emergencies: 2
+Step  200/1000 | Mode: RL-EMERGENCY    | Reward:  198.77 | Avg:  258.01 | Emergencies: 1
+
+✅ EMERGENCY CLEARED at step 210
+   Switching back to density-based control...
+
+Step  250/1000 | Mode: DENSITY         | Reward:  -10.88 | Avg:  211.17 | Emergencies: 0
+Step  300/1000 | Mode: DENSITY         | Reward:    0.78 | Avg:  176.09 | Emergencies: 0
+Step  350/1000 | Mode: DENSITY         | Reward:    2.51 | Avg:  150.88 | Emergencies: 0
+Step  400/1000 | Mode: DENSITY         | Reward:  -10.86 | Avg:  132.29 | Emergencies: 0
+🚨 Emergency vehicle detected: emergency_flow.1 by RSU_J2
+
+🚨 EMERGENCY DETECTED at step 428!
+   • emergency_flow.1 detected by RSU_J2
+   Switching to TRAINED DQN control...
+
+Step  450/1000 | Mode: RL-EMERGENCY    | Reward:  191.29 | Avg:  128.23 | Emergencies: 1
+Step  500/1000 | Mode: RL-EMERGENCY    | Reward:  199.26 | Avg:  135.14 | Emergencies: 1
+Step  550/1000 | Mode: RL-EMERGENCY    | Reward:  199.85 | Avg:  140.77 | Emergencies: 1
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 556, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 557, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 558, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 559, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 560, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 561, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 562, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 563, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 564, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 565, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 566, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 567, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 568, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 569, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 570, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 571, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 572, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 573, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 574, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 575, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 576, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 577, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 578, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 579, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 580, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 581, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 582, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 583, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 584, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 585, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 586, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 587, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 588, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 589, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 590, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 591, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 592, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 593, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 594, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 595, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 596, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 597, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 598, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 599, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+Step  600/1000 | Mode: RL-EMERGENCY    | Reward:  -10.00 | Avg:  129.97 | Emergencies: 1
+
+Episode ended at step 600, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 601, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 602, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 603, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 604, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 605, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 606, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 607, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 608, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 609, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 610, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 611, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 612, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 613, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 614, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 615, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 616, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 617, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 618, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 619, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 620, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 621, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 622, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 623, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 624, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 625, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 626, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 627, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 628, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 629, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 630, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 631, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 632, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 633, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 634, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 635, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 636, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 637, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 638, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 639, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 640, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 641, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 642, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 643, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 644, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 645, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 646, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 647, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 648, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 649, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+Step  650/1000 | Mode: RL-EMERGENCY    | Reward:  -10.00 | Avg:  119.22 | Emergencies: 1
+
+Episode ended at step 650, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 651, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 652, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 653, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 654, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 655, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 656, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 657, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 658, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 659, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 660, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 661, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 662, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 663, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 664, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 665, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 666, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 667, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 668, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 669, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 670, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 671, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 672, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 673, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 674, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 675, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 676, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 677, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 678, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 679, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 680, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 681, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 682, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 683, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 684, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 685, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 686, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 687, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 688, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 689, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 690, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 691, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 692, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 693, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 694, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 695, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 696, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 697, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 698, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 699, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+Step  700/1000 | Mode: RL-EMERGENCY    | Reward:  -10.00 | Avg:  110.00 | Emergencies: 1
+
+Episode ended at step 700, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 701, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 702, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 703, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 704, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 705, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 706, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 707, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 708, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 709, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 710, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 711, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 712, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 713, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 714, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 715, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 716, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 717, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 718, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 719, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 720, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 721, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 722, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 723, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 724, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 725, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 726, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 727, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 728, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 729, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 730, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 731, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 732, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 733, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 734, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 735, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 736, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 737, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 738, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 739, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 740, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 741, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 742, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 743, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 744, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 745, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 746, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 747, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 748, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 749, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+Step  750/1000 | Mode: RL-EMERGENCY    | Reward:  -10.00 | Avg:  102.02 | Emergencies: 1
+
+Episode ended at step 750, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 751, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 752, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 753, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 754, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 755, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 756, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 757, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 758, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 759, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 760, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 761, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 762, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 763, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 764, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 765, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 766, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 767, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 768, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 769, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 770, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 771, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 772, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 773, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 774, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 775, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 776, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 777, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 778, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 779, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 780, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 781, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 782, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 783, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 784, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 785, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 786, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 787, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 788, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 789, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 790, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 791, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 792, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 793, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 794, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 795, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 796, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 797, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 798, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 799, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+Step  800/1000 | Mode: RL-EMERGENCY    | Reward:  -10.00 | Avg:   95.02 | Emergencies: 1
+
+Episode ended at step 800, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 801, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 802, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 803, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 804, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 805, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 806, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 807, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 808, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 809, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 810, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 811, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 812, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 813, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 814, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 815, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 816, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 817, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 818, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 819, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 820, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 821, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 822, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 823, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 824, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 825, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 826, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 827, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 828, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 829, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 830, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 831, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 832, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 833, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 834, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 835, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 836, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 837, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 838, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 839, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 840, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 841, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 842, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 843, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 844, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 845, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 846, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 847, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 848, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 849, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+Step  850/1000 | Mode: RL-EMERGENCY    | Reward:  -10.00 | Avg:   88.85 | Emergencies: 1
+
+Episode ended at step 850, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 851, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 852, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 853, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 854, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 855, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 856, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 857, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 858, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 859, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 860, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 861, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 862, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 863, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 864, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 865, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 866, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 867, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 868, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 869, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 870, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 871, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 872, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 873, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 874, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 875, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 876, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 877, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 878, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 879, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 880, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 881, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 882, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 883, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 884, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 885, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 886, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 887, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 888, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 889, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 890, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 891, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 892, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 893, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 894, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 895, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 896, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 897, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 898, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 899, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+Step  900/1000 | Mode: RL-EMERGENCY    | Reward:  -10.00 | Avg:   83.37 | Emergencies: 1
+
+Episode ended at step 900, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 901, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 902, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 903, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 904, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 905, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 906, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 907, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 908, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 909, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 910, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 911, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 912, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 913, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 914, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 915, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 916, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 917, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 918, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 919, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 920, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 921, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 922, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 923, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 924, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 925, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 926, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 927, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 928, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 929, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 930, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 931, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 932, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 933, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 934, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 935, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 936, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 937, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 938, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 939, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 940, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 941, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 942, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 943, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 944, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 945, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 946, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 947, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 948, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 949, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+Step  950/1000 | Mode: RL-EMERGENCY    | Reward:  -10.00 | Avg:   78.46 | Emergencies: 1
+
+Episode ended at step 950, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 951, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 952, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 953, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 954, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 955, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 956, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 957, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 958, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 959, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 960, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 961, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 962, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 963, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 964, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 965, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 966, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 967, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 968, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 969, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 970, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 971, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 972, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 973, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 974, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 975, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 976, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 977, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 978, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 979, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 980, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 981, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 982, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 983, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 984, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 985, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 986, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 987, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 988, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 989, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 990, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 991, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 992, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 993, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 994, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 995, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 996, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 997, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 998, resetting...
+Error in emergency override: Connection already closed.
+Error in density-based override: Connection already closed.
+Error setting traffic light J2: Connection already closed.
+Error setting traffic light J3: Connection already closed.
+Error advancing simulation: Connection already closed.
+
+Episode ended at step 999, resetting...
+
+================================================================================
+HYBRID CONTROL SIMULATION STATISTICS
+================================================================================
+
+Total steps: 1000
+Density-based mode: 246 steps (24.6%)
+RL emergency mode: 754 steps (75.4%)
+Emergency detections: 2
+Total reward: 74123.50
+Average reward: 74.12
+
+Emergency Coordinator Statistics:
+  Total detections: 3
+  Active emergencies: 1
+  Active greenwaves: 0
+
+✅ HYBRID CONTROL WITH TRAINED DQN WORKING!
+   System successfully used trained model during emergencies
+
+================================================================================
+
+✓ SUMO connection closed
+================================================================================
+✅ SIMULATION COMPLETE
+================================================================================

@@ -1,0 +1,7 @@
+SUMO Config: ../sumo_simulation/simulation.sumocfg
+Total Timesteps: 10000
+Learning Rate: 0.0001
+Buffer Size: 50000
+Batch Size: 32
+Gamma: 0.99
+Exploration: 0.3 → 0.05
