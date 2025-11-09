@@ -50,3 +50,10 @@ temp/
 keys/
 vanet_final_v3/sumo_simulation/keys
 certificates/
+# Additional security patterns
+*.cert
+*.der
+*.cer
+**/keys/
+**/certificates/
+sumo_simulation/keys/
