@@ -25,6 +25,10 @@ from sumo_simulation.traffic_controller import AdaptiveTrafficController
 from sumo_simulation.sensors.sensor_network import SensorNetwork
 from sumo_simulation.sumo_ns3_bridge import SUMONS3Bridge
 
+# RSU Configuration (unified across all modules)
+sys.path.insert(0, os.path.join(parent_dir, 'rl_module'))
+from rsu_config import get_ns3_rsu_positions, get_rsu_ids, get_rsu_count
+
 # Security module
 from v2v_communication.key_management import initialize_vanet_security
 
@@ -298,14 +302,11 @@ Examples:
     sensor_network = SensorNetwork()
     ns3_bridge = SUMONS3Bridge()
     
-    # Initialize RSUs at intersection positions
-    rsu_positions = [
-        (500.0, 500.0),   # J2 intersection
-        (1000.0, 500.0),  # J3 intersection
-        (500.0, 1000.0),  # Intersection 3
-        (1000.0, 1000.0)  # Intersection 4
-    ]
+    # Initialize RSUs using unified configuration
+    # This ensures consistency across emergency coordinator, edge computing, and NS3
+    rsu_positions = get_ns3_rsu_positions()
     ns3_bridge.initialize_rsus(rsu_positions)
+    print(f"✓ Initialized {get_rsu_count()} RSUs from unified configuration")
     
     # Connect to SUMO
     config_path = os.path.join(os.path.dirname(__file__), "simulation.sumocfg")
@@ -327,7 +328,8 @@ Examples:
         print("🔐 Initializing VANET Security Infrastructure...")
         print("  ⏳ Generating RSA keys (30-60 seconds)...")
         
-        rsu_ids = ["RSU_J2", "RSU_J3", "RSU_Intersection1", "RSU_Intersection2"]
+        # Use unified RSU configuration
+        rsu_ids = get_rsu_ids()
         ca, rsu_managers, vehicle_managers = initialize_vanet_security(
             rsu_ids=rsu_ids,
             num_vehicles=5

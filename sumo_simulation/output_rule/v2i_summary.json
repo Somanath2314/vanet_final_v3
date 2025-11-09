@@ -1,11 +1,11 @@
 {
-  "total_packets": 213,
-  "successful_packets": 213,
+  "total_packets": 130,
+  "successful_packets": 130,
   "PDR": 1.0,
   "mean_latency_s": 0,
   "jitter_s": 0,
   "packet_loss_rate": 0.0,
-  "throughput_bps": 1977.0263620386643,
+  "throughput_bps": 3411.2636815920396,
   "loss_reasons": {
     "rx_error": 0
   },

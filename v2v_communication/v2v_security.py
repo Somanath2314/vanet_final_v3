@@ -12,12 +12,14 @@ import logging
 from utils.logging_config import setup_logging
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.exceptions import InvalidSignature
 import hashlib
 import os
 import random
 import statistics
 from collections import defaultdict, deque
+import base64
 
 
 @dataclass
@@ -118,16 +120,29 @@ class RSASecurityManager:
         return vehicle_cert
 
     def encrypt_message(self, message: bytes, recipient_public_key: rsa.RSAPublicKey) -> Tuple[bytes, float]:
-        """Encrypt message using RSA"""
+        """
+        Encrypt message using AES-GCM (AEAD) with RSA for session key exchange.
+        
+        Returns envelope format (JSON with base64 encoding for clarity):
+        {
+            "encrypted_session_key": base64(RSA encrypted 256-bit key),
+            "nonce": base64(96-bit nonce),
+            "ciphertext": base64(AES-GCM encrypted message + auth tag)
+        }
+        """
         start_time = time.time()
 
-        # Generate session key for symmetric encryption (AES)
-        session_key = os.urandom(32)  # 256-bit key
-
-        # In a real implementation, you'd use AES here
-        # For this demo, we'll simulate encryption with a simple XOR
-        # (Note: This is NOT secure - just for demonstration)
-        encrypted_payload = bytes([b ^ session_key[i % len(session_key)] for i, b in enumerate(message)])
+        # Generate 256-bit session key for AES-GCM
+        session_key = os.urandom(32)
+        
+        # Generate 96-bit nonce (recommended for AES-GCM)
+        nonce = os.urandom(12)
+        
+        # Initialize AES-GCM cipher
+        aesgcm = AESGCM(session_key)
+        
+        # Encrypt message with authenticated encryption (includes authentication tag)
+        ciphertext = aesgcm.encrypt(nonce, message, None)
 
         # Encrypt session key with RSA
         encrypted_session_key = recipient_public_key.encrypt(
@@ -139,25 +154,69 @@ class RSASecurityManager:
             )
         )
 
+        # Create JSON envelope for clarity and maintainability
+        envelope = {
+            "encrypted_session_key": base64.b64encode(encrypted_session_key).decode('utf-8'),
+            "nonce": base64.b64encode(nonce).decode('utf-8'),
+            "ciphertext": base64.b64encode(ciphertext).decode('utf-8')
+        }
+        
+        envelope_bytes = json.dumps(envelope).encode('utf-8')
+        
         encryption_time = (time.time() - start_time) * 1000
 
         # Update metrics
         self.metrics.encryption_overhead = max(self.metrics.encryption_overhead, encryption_time)
         self.metrics.total_messages_processed += 1
 
-        self.logger.debug("Message encrypted", extra={'extra': {'encryption_ms': encryption_time}})
+        self.logger.debug("Message encrypted with AES-GCM", extra={'extra': {'encryption_ms': encryption_time}})
 
-        return encrypted_session_key + encrypted_payload, encryption_time
+        return envelope_bytes, encryption_time
 
     def decrypt_message(self, encrypted_data: bytes, recipient_private_key: rsa.RSAPrivateKey) -> Tuple[bytes, float]:
-        """Decrypt message using RSA"""
+        """
+        Decrypt message using AES-GCM (AEAD) with RSA for session key decryption.
+        Expects JSON envelope with base64-encoded fields.
+        """
         start_time = time.time()
 
-        # Split encrypted session key and payload
-        encrypted_session_key = encrypted_data[:256]  # RSA-2048 encrypted key size
-        encrypted_payload = encrypted_data[256:]
+        try:
+            # Parse JSON envelope
+            envelope = json.loads(encrypted_data.decode('utf-8'))
+            
+            # Decode base64 fields
+            encrypted_session_key = base64.b64decode(envelope["encrypted_session_key"])
+            nonce = base64.b64decode(envelope["nonce"])
+            ciphertext = base64.b64decode(envelope["ciphertext"])
+            
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            # Fallback for old format (RSA key + XOR encrypted payload)
+            self.logger.warning(f"Failed to parse envelope, attempting legacy format: {e}")
+            
+            # Legacy format: first 256 bytes are encrypted session key, rest is payload
+            encrypted_session_key = encrypted_data[:256]
+            encrypted_payload = encrypted_data[256:]
+            
+            # Decrypt session key
+            session_key = recipient_private_key.decrypt(
+                encrypted_session_key,
+                padding.OAEP(
+                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                    algorithm=hashes.SHA256(),
+                    label=None
+                )
+            )
+            
+            # Legacy XOR decryption
+            decrypted_payload = bytes([b ^ session_key[i % len(session_key)] for i, b in enumerate(encrypted_payload)])
+            
+            decryption_time = (time.time() - start_time) * 1000
+            self.metrics.decryption_overhead = max(self.metrics.decryption_overhead, decryption_time)
+            self.logger.debug("Message decrypted (legacy XOR)", extra={'extra': {'decryption_ms': decryption_time}})
+            
+            return decrypted_payload, decryption_time
 
-        # Decrypt session key
+        # Decrypt session key using RSA
         session_key = recipient_private_key.decrypt(
             encrypted_session_key,
             padding.OAEP(
@@ -167,15 +226,22 @@ class RSASecurityManager:
             )
         )
 
-        # Decrypt payload (simplified XOR)
-        decrypted_payload = bytes([b ^ session_key[i % len(session_key)] for i, b in enumerate(encrypted_payload)])
+        # Initialize AES-GCM cipher with decrypted session key
+        aesgcm = AESGCM(session_key)
+        
+        # Decrypt and verify authentication tag
+        try:
+            decrypted_payload = aesgcm.decrypt(nonce, ciphertext, None)
+        except Exception as e:
+            self.logger.error(f"AES-GCM decryption failed: {e}")
+            raise ValueError("Message authentication failed - ciphertext may be tampered")
 
         decryption_time = (time.time() - start_time) * 1000
 
         # Update metrics
         self.metrics.decryption_overhead = max(self.metrics.decryption_overhead, decryption_time)
 
-        self.logger.debug("Message decrypted", extra={'extra': {'decryption_ms': decryption_time}})
+        self.logger.debug("Message decrypted with AES-GCM", extra={'extra': {'decryption_ms': decryption_time}})
 
         return decrypted_payload, decryption_time
 
@@ -273,13 +339,17 @@ class V2VCommunicationManager:
             self.security_manager.logger.warning("Authentication failed for sender", extra={'extra': {'sender_id': sender_id}})
             return None
 
+        # Create timestamp ONCE and use it consistently
+        # This fixes the "Invalid signature" bug where different timestamps were used
+        message_timestamp = time.time()
+        
         # Prepare message
         message_data = {
             'sender_id': sender_id,
             'receiver_id': receiver_id,
             'message_type': message_type,
             'payload': payload,
-            'timestamp': time.time()
+            'timestamp': message_timestamp  # Use the same timestamp
         }
 
         message_bytes = json.dumps(message_data, sort_keys=True).encode('utf-8')
@@ -304,14 +374,14 @@ class V2VCommunicationManager:
             )
             encrypted_payload = encrypted_data
 
-        # Create secure message
+        # Create secure message using the SAME timestamp that was signed
         secure_message = SecureMessage(
-            message_id=f"msg_{int(time.time()*1000)}_{random.randint(1000, 9999)}",
+            message_id=f"msg_{int(message_timestamp*1000)}_{random.randint(1000, 9999)}",
             sender_id=sender_id,
             receiver_id=receiver_id,
             message_type=message_type,
             payload=payload,
-            timestamp=time.time(),
+            timestamp=message_timestamp,  # Use the same timestamp that was in message_data
             signature=signature,
             encrypted_payload=encrypted_payload
         )

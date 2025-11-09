@@ -8,6 +8,8 @@ from typing import Dict, List, Tuple, Optional, Set
 from dataclasses import dataclass
 from collections import defaultdict
 import numpy as np
+from rsu_config import get_junction_rsus, get_rsu_positions
+
 
 
 @dataclass
@@ -66,6 +68,16 @@ class EmergencyVehicleCoordinator:
         
         # Historical data
         self.emergency_detections: List[Tuple[float, str, str]] = []  # (time, veh_id, rsu_id)
+    
+    def reset(self):
+        """
+        Reset coordinator state between episodes.
+        Clears all emergency vehicle tracking and greenwave states.
+        Does NOT reset network topology (RSU positions, junction info).
+        """
+        self.emergency_vehicles.clear()
+        self.active_greenwaves.clear()
+        self.emergency_detections.clear()
         
     def initialize_network_topology(self):
         """Initialize network topology from SUMO."""
@@ -130,11 +142,17 @@ class EmergencyVehicleCoordinator:
             
             print(f"✓ Emergency coordinator initialized: {len(self.junction_info)} junctions")
             
-            # Initialize RSU positions (at traffic lights)
-            for junc_id, junc in self.junction_info.items():
-                if junc.tl_id:
-                    rsu_id = f"RSU_{junc.tl_id}"
-                    self.rsu_positions[rsu_id] = junc.position
+            # Initialize RSU positions from unified configuration
+            # Use centralized RSU config for consistency across all modules
+            junction_rsus = get_junction_rsus()
+            for junction_id, rsu_def in junction_rsus.items():
+                self.rsu_positions[rsu_def.rsu_id] = rsu_def.position
+            
+            # Also load all RSU positions (not just junction ones) for detection
+            all_rsu_positions = get_rsu_positions()
+            for rsu_id, pos in all_rsu_positions.items():
+                if rsu_id not in self.rsu_positions:
+                    self.rsu_positions[rsu_id] = pos
             
             print(f"✓ RSU network mapped: {len(self.rsu_positions)} RSUs")
             

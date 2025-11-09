@@ -500,6 +500,10 @@ class VANETTrafficEnv(gym.Env):
         # Reset emergency tracking
         self.emergency_vehicle_delays = []
         self.successful_greenwaves = 0
+        
+        # Reset emergency coordinator state
+        if hasattr(self, 'emergency_coordinator'):
+            self.emergency_coordinator.reset()
 
         # Get initial state
         try:
