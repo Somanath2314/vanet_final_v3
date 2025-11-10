@@ -99,6 +99,14 @@ class ProximityHybridController:
         self.junction_modes = {j: 'density' for j in self.junctions}
         self.mode_steps = defaultdict(int)
         
+        # Statistics tracking - enhanced for research metrics
+        self.density_steps = 0
+        self.rl_steps = 0
+        self.switches = 0
+        self.emergency_encounters = defaultdict(int)  # Track encounters per emergency
+        self.rl_activation_history = []  # [(timestep, junction_id, emergency_id, distance)]
+        self.junction_rl_time = defaultdict(float)  # Time each junction spent in RL mode
+        
         # Stats
         self.density_steps = 0
         self.rl_steps = 0
@@ -160,26 +168,39 @@ class ProximityHybridController:
         """
         import traci
         
+        current_time = traci.simulation.getTime()
+        
         # Get junctions near emergencies
         rl_junctions = self.get_emergency_junction_proximity()
+        
+        # Track emergency encounters
+        for junc_id, (emerg_id, dist) in rl_junctions.items():
+            self.emergency_encounters[emerg_id] += 1
         
         # Update modes and track switches
         for junc_id in self.junctions:
             new_mode = 'rl' if junc_id in rl_junctions else 'density'
+            old_mode = self.junction_modes[junc_id]
             
-            if new_mode != self.junction_modes[junc_id]:
-                old_mode = self.junction_modes[junc_id]
+            # Track time in RL mode
+            if old_mode == 'rl':
+                self.junction_rl_time[junc_id] += 1.0
+            
+            if new_mode != old_mode:
                 self.junction_modes[junc_id] = new_mode
                 self.switches += 1
                 
                 # Log switch
                 if new_mode == 'rl':
                     emerg_id, dist = rl_junctions[junc_id]
-                    print(f"🚨 Step {traci.simulation.getTime():.0f}: "
-                          f"{junc_id} → RL mode ({emerg_id} at {dist:.1f}m)")
+                    print(f"🚨 Step {current_time:.0f}s: "
+                          f"{junc_id} → RL MODE (Emergency: {emerg_id} at {dist:.1f}m)")
+                    
+                    # Record activation
+                    self.rl_activation_history.append((current_time, junc_id, emerg_id, dist))
                 else:
-                    print(f"🚨 Step {traci.simulation.getTime():.0f}: "
-                          f"{junc_id} → Density mode")
+                    print(f"✅ Step {current_time:.0f}s: "
+                          f"{junc_id} → DENSITY MODE (emergency passed)")
         
         # Update stats
         rl_count = sum(1 for mode in self.junction_modes.values() if mode == 'rl')
@@ -194,25 +215,62 @@ class ProximityHybridController:
         self.traffic_controller.run_simulation_step()
     
     def print_stats(self):
-        """Print statistics"""
+        """Print comprehensive statistics for research paper"""
         total = self.density_steps + self.rl_steps
         if total == 0:
             return
         
-        print("\n" + "="*70)
+        print("\n" + "="*80)
         print("PROXIMITY-BASED HYBRID CONTROL STATISTICS")
-        print("="*70)
-        print(f"Total steps: {total}")
-        print(f"Steps with ALL junctions in DENSITY: {self.density_steps} ({self.density_steps/total*100:.1f}%)")
-        print(f"Steps with SOME junctions in RL: {self.rl_steps} ({self.rl_steps/total*100:.1f}%)")
-        print(f"Junction mode switches: {self.switches}")
-        print()
-        print("✅ PROXIMITY-BASED CONTROL ADVANTAGES:")
-        print("  • Only uses RL where needed (near emergencies)")
-        print("  • Other junctions use efficient density-based control")
-        print("  • Switches immediately when emergency passes")
-        print(f"  • Resulted in {self.switches} efficient switches")
-        print("="*70)
+        print("="*80)
+        
+        # Overall statistics
+        print(f"\n📊 OVERALL PERFORMANCE:")
+        print(f"  Total simulation steps: {total}")
+        print(f"  Steps with ALL junctions in DENSITY mode: {self.density_steps} ({self.density_steps/total*100:.1f}%)")
+        print(f"  Steps with SOME junctions in RL mode: {self.rl_steps} ({self.rl_steps/total*100:.1f}%)")
+        print(f"  Total junction mode switches: {self.switches}")
+        print(f"  Avg switches per junction: {self.switches/len(self.junctions):.1f}")
+        
+        # Emergency vehicle encounters
+        print(f"\n🚑 EMERGENCY VEHICLE HANDLING:")
+        print(f"  Unique emergency vehicles encountered: {len(self.emergency_encounters)}")
+        for emerg_id, count in sorted(self.emergency_encounters.items()):
+            print(f"    • {emerg_id}: {count} proximity activations")
+        
+        # Per-junction RL usage
+        print(f"\n🚦 PER-JUNCTION RL ACTIVATION:")
+        for junc_id in sorted(self.junctions):
+            rl_time = self.junction_rl_time.get(junc_id, 0)
+            rl_percentage = (rl_time / total * 100) if total > 0 else 0
+            print(f"    • {junc_id}: {rl_time:.0f}s in RL mode ({rl_percentage:.1f}%)")
+        
+        # Activation timeline summary
+        if self.rl_activation_history:
+            print(f"\n⏱️  RL ACTIVATION TIMELINE:")
+            print(f"  First activation: {self.rl_activation_history[0][0]:.0f}s")
+            print(f"  Last activation: {self.rl_activation_history[-1][0]:.0f}s")
+            print(f"  Total activations: {len(self.rl_activation_history)}")
+            
+            # Average distance at activation
+            avg_dist = sum(a[3] for a in self.rl_activation_history) / len(self.rl_activation_history)
+            print(f"  Average emergency distance at activation: {avg_dist:.1f}m")
+        
+        # Efficiency metrics
+        print(f"\n⚡ EFFICIENCY METRICS:")
+        density_percentage = (self.density_steps / total * 100) if total > 0 else 0
+        print(f"  Computational efficiency: {density_percentage:.1f}% steps used simple density control")
+        print(f"  RL overhead: {100-density_percentage:.1f}% steps required ML inference")
+        print(f"  Proximity threshold: {self.proximity_threshold}m")
+        
+        print(f"\n✅ HYBRID MODEL ADVANTAGES:")
+        print(f"  • Only uses RL where needed (near emergencies within {self.proximity_threshold}m)")
+        print(f"  • {density_percentage:.1f}% of time uses efficient density-based control")
+        print(f"  • Dynamic switching enables real-time adaptation to emergencies")
+        print(f"  • Resulted in {self.switches} efficient mode transitions")
+        print(f"  • Average {self.switches/total*100:.2f}% switching rate (low overhead)")
+        
+        print("="*80)
 
 
 def main():
@@ -364,6 +422,12 @@ Examples:
             model=model,
             proximity_threshold=args.proximity
         )
+        print(f"\n🔀 HYBRID MODEL CONFIGURATION:")
+        print(f"  Mode: Proximity-based RL activation")
+        print(f"  Proximity threshold: {args.proximity}m")
+        print(f"  Controlled junctions: {len(proximity_controller.junctions)}")
+        print(f"  Strategy: RL activates only near emergency vehicles")
+        print(f"  Expected emergency vehicles: ~4-6 concurrent (35 veh/hour)")
     
     if args.gui:
         print("\n🖥️  SUMO-GUI Controls:")
@@ -425,9 +489,20 @@ Examples:
             if time.time() - last_print_time >= 5.0:
                 metrics = ns3_bridge.get_metrics()
                 mode_info = ""
+                
                 if proximity_controller:
                     rl_count = sum(1 for m in proximity_controller.junction_modes.values() if m == 'rl')
-                    mode_info = f"RL Junctions: {rl_count}/{len(proximity_controller.junctions)} | "
+                    total_junc = len(proximity_controller.junctions)
+                    
+                    # Get active emergency vehicles
+                    active_emergencies = len(set(
+                        emerg_id for _, (emerg_id, _) in 
+                        proximity_controller.get_emergency_junction_proximity().items()
+                    ))
+                    
+                    mode_info = (f"🚦 RL: {rl_count}/{total_junc} junctions | "
+                               f"🚑 Active Emerg: {active_emergencies} | "
+                               f"Switches: {proximity_controller.switches} | ")
                 
                 print(f"Step {step:4d}/{args.steps} | {mode_info}"
                       f"Vehicles: {metrics['vehicles']['total']} "

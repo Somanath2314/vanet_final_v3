@@ -11,31 +11,47 @@
     <route id="route_north_south_j2" edges="E5 E6"/>
     <route id="route_north_south_j3" edges="E7 E8"/>
     
-    <!-- Individual Vehicles for Testing (sorted by departure time) -->
+    <!-- Individual Test Vehicles - depart 1-10s -->
     <vehicle id="test_vehicle_1" type="passenger" route="route_east_west_short" depart="1"/>
     <vehicle id="test_vehicle_2" type="passenger" route="route_north_south_j2" depart="3"/>
     <vehicle id="test_vehicle_3" type="passenger" route="route_east_west_short" depart="5"/>
     <vehicle id="test_vehicle_4" type="passenger" route="route_north_south_j3" depart="7"/>
-    <vehicle id="emergency_1" type="emergency" route="route_east_west_full" depart="10"/>
     
-    <!-- Vehicle Flows - Valid directions -->
-    <!-- East-West Traffic (Main flow) -->
+    <!-- Vehicle Flows - begin early for normal traffic (MUST be sorted by begin time) -->
     <flow id="flow_ew_j2" type="passenger" route="route_east_west_short" begin="15" end="3600" 
           vehsPerHour="400" departLane="best" departSpeed="max"/>
     
     <flow id="flow_ew_full" type="passenger" route="route_east_west_full" begin="20" end="3600" 
           vehsPerHour="300" departLane="best" departSpeed="max"/>
     
-    <!-- North-South Traffic at J2 -->
     <flow id="flow_ns_j2" type="passenger" route="route_north_south_j2" begin="25" end="3600" 
           vehsPerHour="350" departLane="best" departSpeed="max"/>
     
-    <!-- North-South Traffic at J3 -->
     <flow id="flow_ns_j3" type="passenger" route="route_north_south_j3" begin="30" end="3600" 
           vehsPerHour="350" departLane="best" departSpeed="max"/>
     
-    <!-- Emergency Vehicles -->
-    <flow id="emergency_flow" type="emergency" route="route_east_west_full" begin="50" end="3600" 
-          vehsPerHour="10" departLane="best" departSpeed="max"/>
+    <!-- Early emergency vehicles for demonstration (simultaneous arrivals at different junctions) -->
+    <vehicle id="emergency_1" type="emergency" route="route_east_west_full" depart="50"/>
+    <vehicle id="emergency_2" type="emergency" route="route_north_south_j2" depart="55"/>
+    <vehicle id="emergency_3" type="emergency" route="route_north_south_j3" depart="60"/>
+    
+    <!-- Additional emergency vehicles for simultaneous testing (arrive at J2 from different directions) -->
+    <vehicle id="emergency_4" type="emergency" route="route_east_west_short" depart="120"/>
+    <vehicle id="emergency_5" type="emergency" route="route_north_south_j2" depart="125"/>
+    
+    <!-- Emergency flows for continuous testing -->
+    <flow id="emergency_flow" type="emergency" route="route_east_west_full" begin="150" end="3600" 
+          vehsPerHour="20" departLane="best" departSpeed="max"/>
+    
+    <!-- More emergency vehicles spread throughout simulation -->
+    <vehicle id="emergency_6" type="emergency" route="route_east_west_full" depart="180"/>
+    <vehicle id="emergency_7" type="emergency" route="route_north_south_j2" depart="200"/>
+    
+    <flow id="emergency_flow_ns" type="emergency" route="route_north_south_j2" begin="220" end="3600" 
+          vehsPerHour="15" departLane="best" departSpeed="max"/>
+    
+    <vehicle id="emergency_8" type="emergency" route="route_north_south_j3" depart="250"/>
+    <vehicle id="emergency_9" type="emergency" route="route_east_west_short" depart="300"/>
+    <vehicle id="emergency_10" type="emergency" route="route_north_south_j2" depart="350"/>
 
 </routes>
