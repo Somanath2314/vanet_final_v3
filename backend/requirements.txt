@@ -1,18 +1,47 @@
+# ===============================
+# VANET Smart Traffic System - Fixed Requirements (Python 3.11 compatible)
+# ===============================
+
+# --- Flask Backend ---
 flask==2.3.3
 flask-cors==4.0.0
-traci==1.18.0
-numpy==1.24.3
 requests==2.31.0
 python-dotenv==1.0.0
 
-# V2V Communication Security Dependencies
-cryptography==41.0.7
-pycryptodome==3.19.0
+# --- SUMO & TraCI Communication ---
+traci==1.18.0
+sumolib==1.18.0
 
-# Reinforcement Learning Dependencies (install separately if needed)
-# Run: pip install gymnasium==0.28.1 ray[rllib]==2.9.0 torch pandas matplotlib scipy
-gymnasium==0.28.1
-ray[rllib]==2.9.0
+# --- Core Scientific Libraries ---
+numpy>=1.26,<2.0
 pandas
 matplotlib
 scipy
+
+# --- V2V Communication Security ---
+cryptography==41.0.7
+pycryptodome==3.19.0
+
+# --- Reinforcement Learning & Simulation ---
+# ✅ FIXED: These versions are actually compatible with each other
+gymnasium==0.28.1         # Required by ray[rllib]==2.9.3
+torch==2.2.2              # Stable universal wheel for macOS ARM
+ray[rllib]==2.9.3         # Compatible with gymnasium 0.28.1
+dm_tree==0.1.8            # Prebuilt wheel exists for macOS ARM
+
+# --- Optional Visualization / Debugging Tools ---
+# tqdm>=4.65.0
+# seaborn>=0.13.0
+# jupyterlab>=4.0.0
+
+# ===============================
+# Notes:
+# - Tested on Python 3.11 / macOS ARM64 (M1/M2)
+# - To install fresh:
+#     rm -rf .venv
+#     pyenv local 3.11.9
+#     python -m venv .venv
+#     source .venv/bin/activate
+#     pip install -U pip setuptools wheel
+#     pip install -r requirements.txt
+# ===============================

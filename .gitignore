@@ -11,13 +11,13 @@ __pycache__/
 .Python
 
 # SUMO Output
-sumo_simulation/output/*.xml
-sumo_simulation/output/*.log 
+# sumo_simulation/output/*.xml
+# sumo_simulation/output/*.log 
 
-# RL Models
-rl_module/models/*.pth
-rl_module/models/*.pkl
-rl_module/logs/
+# # RL Models
+# rl_module/models/*.pth
+# rl_module/models/*.pkl
+# rl_module/logs/
 
 # IDE
 .vscode/
@@ -57,3 +57,4 @@ certificates/
 **/keys/
 **/certificates/
 sumo_simulation/keys/
+*.pyc
