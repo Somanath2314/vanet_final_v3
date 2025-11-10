@@ -77,6 +77,9 @@ class AdaptiveTrafficController:
         
         # Store simulation time for metrics calculation after SUMO closes
         self.last_simulation_time = 0
+        
+        # NS3 Bridge reference for accurate V2I statistics
+        self.ns3_bridge = None
 
         # WiMAX setup
         self.wimax_config = WiMAXConfig()
@@ -132,6 +135,11 @@ class AdaptiveTrafficController:
             import traceback
             traceback.print_exc()
             return False
+    
+    def set_ns3_bridge(self, ns3_bridge):
+        """Set reference to NS3 bridge for accurate V2I statistics"""
+        self.ns3_bridge = ns3_bridge
+        print("  ✓ NS3 bridge reference set for accurate V2I metrics")
 
     def _initialize_intersections(self):
         tl_ids = traci.trafficlight.getIDList()
@@ -171,64 +179,6 @@ class AdaptiveTrafficController:
         except Exception as e:
             # If error getting density, return medium value
             return 5
-    
-    def adaptive_control_single_junction(self, tl_id):
-        """
-        Apply adaptive density-based control to a single junction.
-        Used by proximity-based hybrid control.
-        
-        Parameters
-        ----------
-        tl_id : str
-            Traffic light / junction ID
-        """
-        try:
-            if tl_id not in self.intersections:
-                return
-            
-            data = self.intersections[tl_id]
-            data["time_in_phase"] += 1
-            current_phase = data["current_phase"]
-            phase_state = self.default_phases[tl_id][current_phase]
-            
-            # Check if in green phase (contains 'G')
-            if 'G' in phase_state:
-                # Get traffic density on current green lanes
-                density = self._get_lane_density(tl_id, current_phase)
-                
-                # Adaptive duration based on density
-                if density >= self.high_density_threshold:
-                    # High traffic: extend green up to max
-                    target_duration = self.max_green_time
-                elif density <= self.low_density_threshold:
-                    # Low traffic: reduce green to min
-                    target_duration = self.min_green_time
-                else:
-                    # Medium traffic: scale between min and max
-                    scale = (density - self.low_density_threshold) / \
-                            (self.high_density_threshold - self.low_density_threshold)
-                    target_duration = int(self.min_green_time + 
-                                        scale * (self.max_green_time - self.min_green_time))
-                
-                # Switch to yellow if target duration met
-                if data["time_in_phase"] >= target_duration:
-                    # Move to yellow phase
-                    data["current_phase"] = (current_phase + 1) % len(self.default_phases[tl_id])
-                    data["time_in_phase"] = 0
-                    traci.trafficlight.setRedYellowGreenState(
-                        tl_id, self.default_phases[tl_id][data["current_phase"]])
-            
-            elif 'y' in phase_state:
-                # Yellow phase: fixed duration
-                if data["time_in_phase"] >= self.yellow_time:
-                    data["current_phase"] = (current_phase + 1) % len(self.default_phases[tl_id])
-                    data["time_in_phase"] = 0
-                    traci.trafficlight.setRedYellowGreenState(
-                        tl_id, self.default_phases[tl_id][data["current_phase"]])
-        
-        except Exception as e:
-            # Silently handle errors to avoid breaking the simulation
-            pass
 
     def _initialize_wimax(self):
         coords = {"J2": (500,500), "J3": (1000,500)}
@@ -854,6 +804,49 @@ class AdaptiveTrafficController:
 
     def _calculate_summary_stats(self):
         """Calculate summary statistics from the collected metrics"""
+        # Prioritize NS3 bridge statistics if available (actual simulation data)
+        if self.ns3_bridge is not None:
+            try:
+                ns3_metrics = self.ns3_bridge.get_metrics()
+                
+                # Extract V2I WiMAX statistics
+                v2i_data = ns3_metrics.get('v2i_wimax', {})
+                combined_data = ns3_metrics.get('combined', {})
+                emergency_data = ns3_metrics.get('emergency', {})
+                
+                # Get RSU statistics from NS3
+                rsu_stats = {}
+                for bs_id, bs in self.wimax_base_stations.items():
+                    metrics = bs.get_metrics()
+                    rsu_stats[f'rsu_{bs_id}'] = {
+                        'utilization': metrics.get('utilization', 0),
+                        'tx_bytes': metrics.get('tx_bytes', 0),
+                        'rx_bytes': metrics.get('rx_bytes', 0),
+                        'connected_vehicles': metrics.get('connected_vehicles', 0)
+                    }
+                
+                # Build summary using NS3 bridge actual data
+                return {
+                    'total_packets': v2i_data.get('packets_sent', 0),
+                    'successful_packets': v2i_data.get('packets_received', 0),
+                    'PDR': v2i_data.get('pdr', 0.0),
+                    'mean_latency_s': combined_data.get('average_delay_ms', 0.0) / 1000.0,  # Convert ms to s
+                    'jitter_s': 0.0,  # NS3 bridge doesn't track jitter yet
+                    'packet_loss_rate': 1.0 - v2i_data.get('pdr', 0.0),
+                    'throughput_bps': combined_data.get('throughput_mbps', 0.0) * 1_000_000,  # Convert Mbps to bps
+                    'loss_reasons': {'rx_error': 0},  # Placeholder
+                    'handoff_success_rate': None,  # Not tracked - broadcast model doesn't maintain connections
+                    'rsu_stats_sample': rsu_stats,
+                    'emergency_vehicles': ns3_metrics.get('vehicles', {}).get('emergency', 0),
+                    'emergency_events': emergency_data.get('total_events', 0),
+                    'emergency_success_rate': emergency_data.get('success_rate', 0.0),
+                    'data_source': 'ns3_bridge'  # Indicate this is authoritative NS3 data
+                }
+            except Exception as e:
+                print(f"  ⚠️  Failed to get NS3 bridge metrics: {e}")
+                print("     Falling back to internal tracking (may be incomplete)")
+        
+        # Fallback to internal tracking (legacy behavior - may be incomplete)
         if self.metrics_df.empty or self.packets_df.empty:
             return {}
             
@@ -899,8 +892,9 @@ class AdaptiveTrafficController:
             'packet_loss_rate': packet_loss_rate,
             'throughput_bps': throughput_bps,
             'loss_reasons': {'rx_error': 0},  # Placeholder, update if you track error types
-            'handoff_success_rate': float('nan'),  # Update if you track handoffs
-            'rsu_stats_sample': rsu_stats
+            'handoff_success_rate': None,  # Not tracked - broadcast model
+            'rsu_stats_sample': rsu_stats,
+            'data_source': 'internal_tracking'  # Indicate this is legacy incomplete data
         }
 
     def _save_v2i_metrics(self):

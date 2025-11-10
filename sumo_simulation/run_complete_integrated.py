@@ -308,6 +308,9 @@ Examples:
     ns3_bridge.initialize_rsus(rsu_positions)
     print(f"✓ Initialized {get_rsu_count()} RSUs from unified configuration")
     
+    # Connect traffic controller to NS3 bridge for accurate V2I metrics
+    traffic_controller.set_ns3_bridge(ns3_bridge)
+    
     # Connect to SUMO
     config_path = os.path.join(os.path.dirname(__file__), "simulation.sumocfg")
     if not os.path.exists(config_path):
