@@ -456,19 +456,25 @@ Examples:
         
         import traci
         
-        # Metrics tracking
-        total_wait_time = 0
-        total_queue_length = 0
-        total_speed = 0
-        metric_samples = 0
+        # Metrics tracking - FIXED VERSION
+        # Track accumulated wait time per vehicle throughout journey
+        vehicle_accumulated_wait = {}  # {vehicle_id: total_wait_time_seconds}
+        vehicle_accumulated_distance = {}  # {vehicle_id: total_distance_meters}
+        vehicle_first_seen = {}  # {vehicle_id: first_step}
         
-        # Emergency-specific metrics
-        emergency_wait_time = 0
-        emergency_speed = 0
-        emergency_samples = 0
-        normal_wait_time = 0
-        normal_speed = 0
-        normal_samples = 0
+        total_queue_length = 0
+        metric_steps = 0
+        
+        # Track vehicles between steps to detect arrivals
+        previous_vehicles = set()
+        
+        # Completed vehicle metrics (only count vehicles that finished their trip)
+        completed_vehicles_wait = []
+        completed_vehicles_speed = []
+        completed_emergency_wait = []
+        completed_emergency_speed = []
+        completed_normal_wait = []
+        completed_normal_speed = []
         
         while step < args.steps:
             # Apply control based on mode
@@ -501,38 +507,78 @@ Examples:
             
             # Collect vehicular metrics every step
             vehicles = traci.vehicle.getIDList()
+            
+            # Get list of vehicles that completed their trip this step
+            # We track this by comparing vehicle lists between steps
+            current_vehicles = set(vehicles)
+            if step > 0:
+                departed_this_step = current_vehicles - previous_vehicles
+                arrived_this_step = previous_vehicles - current_vehicles
+            else:
+                departed_this_step = set()
+                arrived_this_step = set()
+            
+            previous_vehicles = current_vehicles
+            
             if vehicles:
                 for veh_id in vehicles:
                     try:
-                        wait_time = traci.vehicle.getWaitingTime(veh_id)
+                        # Initialize if new vehicle
+                        if veh_id not in vehicle_accumulated_wait:
+                            vehicle_accumulated_wait[veh_id] = 0
+                            vehicle_accumulated_distance[veh_id] = 0
+                            vehicle_first_seen[veh_id] = step
+                        
+                        # Get current state
                         speed = traci.vehicle.getSpeed(veh_id)
                         
-                        total_wait_time += wait_time
-                        total_speed += speed
+                        # Accumulate wait time (when stopped or very slow)
+                        if speed < 0.1:  # Vehicle is stopped/waiting
+                            vehicle_accumulated_wait[veh_id] += 1.0  # 1 second per step
                         
-                        # Separate emergency and normal vehicle metrics
-                        is_emergency = 'emergency' in veh_id.lower()
-                        if is_emergency:
-                            emergency_wait_time += wait_time
-                            emergency_speed += speed
-                            emergency_samples += 1
-                        else:
-                            normal_wait_time += wait_time
-                            normal_speed += speed
-                            normal_samples += 1
+                        # Accumulate distance traveled
+                        vehicle_accumulated_distance[veh_id] += speed  # speed in m/s * 1 second
+                        
                     except:
                         pass
                 
-                # Queue lengths at each junction
+                # Track completed vehicles (reached destination)
+                for veh_id in arrived_this_step:
+                    if veh_id in vehicle_accumulated_wait:
+                        total_wait = vehicle_accumulated_wait[veh_id]
+                        trip_time = step - vehicle_first_seen[veh_id]
+                        total_distance = vehicle_accumulated_distance[veh_id]
+                        avg_speed = total_distance / max(trip_time, 1)
+                        
+                        is_emergency = 'emergency' in veh_id.lower()
+                        
+                        completed_vehicles_wait.append(total_wait)
+                        completed_vehicles_speed.append(avg_speed)
+                        
+                        if is_emergency:
+                            completed_emergency_wait.append(total_wait)
+                            completed_emergency_speed.append(avg_speed)
+                        else:
+                            completed_normal_wait.append(total_wait)
+                            completed_normal_speed.append(avg_speed)
+                        
+                        # Clean up completed vehicle
+                        del vehicle_accumulated_wait[veh_id]
+                        del vehicle_accumulated_distance[veh_id]
+                        del vehicle_first_seen[veh_id]
+                
+                # Queue lengths at each junction (per step)
+                step_queue_length = 0
                 for tl_id in traci.trafficlight.getIDList():
                     try:
                         lanes = traci.trafficlight.getControlledLanes(tl_id)
                         for lane in lanes:
-                            total_queue_length += traci.lane.getLastStepHaltingNumber(lane)
+                            step_queue_length += traci.lane.getLastStepHaltingNumber(lane)
                     except:
                         pass
                 
-                metric_samples += 1
+                total_queue_length += step_queue_length
+                metric_steps += 1
             
             # Check if simulation should continue
             if traci.simulation.getMinExpectedNumber() <= 0:
@@ -558,15 +604,19 @@ Examples:
                                f"🚑 Active Emerg: {active_emergencies} | "
                                f"Switches: {proximity_controller.switches} | ")
                 
-                # Calculate current averages
-                avg_wait = total_wait_time / max(metric_samples, 1)
-                avg_queue = total_queue_length / max(metric_samples, 1)
-                avg_speed = total_speed / max(len(vehicles) * metric_samples, 1)
+                # Calculate averages from COMPLETED vehicles
+                avg_completed_wait = sum(completed_vehicles_wait) / max(len(completed_vehicles_wait), 1) if completed_vehicles_wait else 0
+                avg_queue = total_queue_length / max(metric_steps, 1)
+                
+                avg_emerg_wait = sum(completed_emergency_wait) / max(len(completed_emergency_wait), 1) if completed_emergency_wait else 0
+                avg_normal_wait = sum(completed_normal_wait) / max(len(completed_normal_wait), 1) if completed_normal_wait else 0
                 
                 print(f"Step {step:4d}/{args.steps} | {mode_info}"
                       f"Vehicles: {metrics['vehicles']['total']} "
                       f"(Emerg: {metrics['vehicles']['emergency']}) | "
-                      f"Wait: {avg_wait:.1f}s | Queue: {avg_queue:.1f} | Speed: {avg_speed:.1f}m/s | "
+                      f"Completed: {len(completed_vehicles_wait)} | "
+                      f"Avg Wait: {avg_completed_wait:.1f}s (E:{avg_emerg_wait:.1f}s N:{avg_normal_wait:.1f}s) | "
+                      f"Queue: {avg_queue:.1f} | "
                       f"WiFi PDR: {metrics['v2v_wifi']['pdr']*100:.1f}% | "
                       f"WiMAX PDR: {metrics['v2i_wimax']['pdr']*100:.1f}%")
                 last_print_time = time.time()
@@ -589,21 +639,66 @@ Examples:
         print(f"✅ Simulation completed in {elapsed_time:.1f} seconds")
         
         # Print final vehicular metrics summary
-        if metric_samples > 0:
+        if completed_vehicles_wait:
             print()
             print("="*70)
-            print("📊 VEHICULAR METRICS SUMMARY")
+            print("📊 VEHICULAR METRICS SUMMARY (Completed Vehicles Only)")
             print("="*70)
-            avg_wait_final = total_wait_time / max(metric_samples, 1)
-            avg_queue_final = total_queue_length / max(metric_samples, 1)
-            avg_speed_final = total_speed / max(metric_samples, 1)
             
+            # Calculate final averages from COMPLETED vehicles
+            avg_wait_final = sum(completed_vehicles_wait) / len(completed_vehicles_wait)
+            avg_speed_final = sum(completed_vehicles_speed) / len(completed_vehicles_speed)
+            avg_queue_final = total_queue_length / max(metric_steps, 1)
+            
+            print(f"\n🚗 OVERALL TRAFFIC:")
             print(f"  Average Wait Time: {avg_wait_final:.2f} seconds")
+            print(f"  Average Trip Speed: {avg_speed_final:.2f} m/s")
             print(f"  Average Queue Length: {avg_queue_final:.2f} vehicles")
-            print(f"  Average Vehicle Speed: {avg_speed_final:.2f} m/s")
+            print(f"  Total Completed Vehicles: {len(completed_vehicles_wait)}")
+            
+            if completed_emergency_wait:
+                avg_emerg_wait_final = sum(completed_emergency_wait) / len(completed_emergency_wait)
+                avg_emerg_speed_final = sum(completed_emergency_speed) / len(completed_emergency_speed)
+                
+                print(f"\n🚑 EMERGENCY VEHICLES:")
+                print(f"  Average Wait Time: {avg_emerg_wait_final:.2f} seconds")
+                print(f"  Average Trip Speed: {avg_emerg_speed_final:.2f} m/s")
+                print(f"  Total Completed: {len(completed_emergency_wait)}")
+                
+                if completed_normal_wait and args.mode == 'proximity':
+                    avg_normal_wait_final = sum(completed_normal_wait) / len(completed_normal_wait)
+                    improvement = ((avg_normal_wait_final - avg_emerg_wait_final) / avg_normal_wait_final * 100)
+                    print(f"  Wait Time Reduction vs Normal: {improvement:.1f}%")
+            
+            if completed_normal_wait:
+                avg_normal_wait_final = sum(completed_normal_wait) / len(completed_normal_wait)
+                avg_normal_speed_final = sum(completed_normal_speed) / len(completed_normal_speed)
+                
+                print(f"\n🚙 NORMAL VEHICLES:")
+                print(f"  Average Wait Time: {avg_normal_wait_final:.2f} seconds")
+                print(f"  Average Trip Speed: {avg_normal_speed_final:.2f} m/s")
+                print(f"  Total Completed: {len(completed_normal_wait)}")
+            
+            # Verification check
+            if completed_emergency_wait and completed_normal_wait:
+                total_emerg_wait = sum(completed_emergency_wait)
+                total_normal_wait = sum(completed_normal_wait)
+                calculated_overall = (total_emerg_wait + total_normal_wait) / (len(completed_emergency_wait) + len(completed_normal_wait))
+                
+                print(f"\n✅ VERIFICATION:")
+                print(f"  Overall wait time (direct): {avg_wait_final:.2f}s")
+                print(f"  Overall wait time (from components): {calculated_overall:.2f}s")
+                if abs(avg_wait_final - calculated_overall) > 0.01:
+                    print(f"  ⚠️  Difference: {abs(avg_wait_final - calculated_overall):.2f}s")
+            
+            print(f"\n📈 SIMULATION STATISTICS:")
             print(f"  Total Simulation Steps: {step}")
-            print(f"  Metrics Collected: {metric_samples} samples")
+            print(f"  Steps with Vehicles: {metric_steps}")
+            print(f"  Active Vehicles (still in network): {len(vehicle_accumulated_wait)}")
+            print(f"  Emergency Priority: {'✅ ENABLED' if args.mode == 'proximity' else '❌ DISABLED'}")
             print("="*70)
+        else:
+            print("\n⚠️  No completed vehicles to analyze (simulation too short or no vehicles reached destination)")
         
         # Print proximity stats if used
         if proximity_controller:

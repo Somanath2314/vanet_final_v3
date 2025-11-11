@@ -180,10 +180,21 @@ Traffic Flow:
 - Junction switching: ~16 times per 1000 steps
 - RL activation (with proximity mode): Only within 250m of emergencies
 
+**Distance Ranges Explained:**
+Three different ranges control system behavior:
+- **250m**: RL Mode Activation (hybrid model switches from density to RL control)
+- **150m**: Emergency Priority Detection (traffic light gives green to emergency)
+- **30m**: Pass-Through Detection (IMMEDIATE return to adaptive/density control)
+
+This multi-tier approach ensures:
+- Emergency vehicles get priority when approaching
+- Normal traffic resumes quickly after emergency passes junction
+- RL is only used where actually needed (computational efficiency)
+
 **Console Output Example:**
 ```
 🚨 EMERGENCY PRIORITY: J2 → emergency_4 switching to phase 0
-✅ EMERGENCY CLEARED: emergency_4 passed through J2
+✅ EMERGENCY CLEARED: emergency_4 passed 30m mark at J2, returning to density-based control
 🚦 emergency_5 waiting at J2 (95.2m away)
 ```
 

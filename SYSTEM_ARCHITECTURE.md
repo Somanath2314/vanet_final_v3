@@ -41,7 +41,7 @@
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                          │
 │   Proximity-Based Hybrid Controller                                     │
-│   ├── Emergency Detection (RSU-based, 300m range)                       │
+│   ├── Emergency Detection (150m priority range, 30m pass-through)       │
 │   ├── Distance Calculation (per junction)                               │
 │   ├── Mode Decision (RL vs Density)                                     │
 │   │   ├── RL Mode: Distance < 250m to emergency                         │

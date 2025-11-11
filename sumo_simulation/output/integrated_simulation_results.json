@@ -2,28 +2,28 @@
   "metrics": {
     "v2v_wifi": {
       "packets_sent": 357980,
-      "packets_received": 343150,
-      "pdr": 0.9585731046427175,
+      "packets_received": 343081,
+      "pdr": 0.9583803564444942,
       "protocol": "802.11p"
     },
     "v2i_wimax": {
       "packets_sent": 24138,
-      "packets_received": 23652,
-      "pdr": 0.9798657718120806,
+      "packets_received": 23680,
+      "pdr": 0.9810257684978043,
       "protocol": "WiMAX"
     },
     "combined": {
       "total_packets_sent": 382118,
-      "total_packets_received": 366802,
-      "overall_pdr": 0.9599181404696978,
-      "average_delay_ms": 36.23452804989394,
-      "throughput_mbps": 2798.4771728515625
+      "total_packets_received": 366761,
+      "overall_pdr": 0.9598108437707724,
+      "average_delay_ms": 36.23457747616922,
+      "throughput_mbps": 2798.1643676757812
     },
     "emergency": {
       "total_events": 45395,
-      "successful_events": 44175,
-      "success_rate": 0.9731247934794581,
-      "average_delay_ms": 28.233577951576354,
+      "successful_events": 44192,
+      "success_rate": 0.9734992840621214,
+      "average_delay_ms": 28.221784519409358,
       "protocol_used": "WiMAX"
     },
     "vehicles": {
@@ -95,7 +95,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 266.7665834603754,
-      "success": true,
+      "success": false,
       "delay_ms": 46.67665834603754
     },
     {
@@ -165,7 +165,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 268.13084012166144,
-      "success": true,
+      "success": false,
       "delay_ms": 46.813084012166144
     },
     {
@@ -375,7 +375,7 @@
       "message_type": "emergency",
       "protocol": "wimax",
       "distance": 567.2196942244633,
-      "success": false,
+      "success": true,
       "delay_ms": 23.50829541336695
     },
     {
@@ -755,7 +755,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 273.1873724170218,
-      "success": true,
+      "success": false,
       "delay_ms": 47.31873724170218
     },
     {
@@ -785,7 +785,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 284.2786115940811,
-      "success": false,
+      "success": true,
       "delay_ms": 48.42786115940811
     },
     {
@@ -795,7 +795,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 275.70696220780945,
-      "success": true,
+      "success": false,
       "delay_ms": 47.570696220780945
     },
     {
@@ -905,7 +905,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 235.8593788765123,
-      "success": false,
+      "success": true,
       "delay_ms": 43.58593788765123
     },
     {
@@ -1265,7 +1265,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 280.15634565952683,
-      "success": true,
+      "success": false,
       "delay_ms": 48.01563456595268
     },
     {
@@ -1355,7 +1355,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 277.6443447947454,
-      "success": false,
+      "success": true,
       "delay_ms": 47.76443447947454
     },
     {
@@ -1365,7 +1365,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 268.86126942440677,
-      "success": true,
+      "success": false,
       "delay_ms": 46.886126942440676
     },
     {
@@ -1415,7 +1415,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 268.98034057441834,
-      "success": false,
+      "success": true,
       "delay_ms": 46.89803405744183
     },
     {
@@ -1515,7 +1515,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 292.5888220419532,
-      "success": false,
+      "success": true,
       "delay_ms": 49.25888220419532
     },
     {
@@ -1575,7 +1575,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 237.6243100116233,
-      "success": false,
+      "success": true,
       "delay_ms": 43.76243100116233
     },
     {
@@ -1685,7 +1685,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 289.3500307620925,
-      "success": true,
+      "success": false,
       "delay_ms": 48.935003076209256
     },
     {
@@ -1735,7 +1735,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 98.73193533901956,
-      "success": true,
+      "success": false,
       "delay_ms": 29.873193533901954
     },
     {
@@ -1935,7 +1935,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 268.47133513850355,
-      "success": false,
+      "success": true,
       "delay_ms": 46.84713351385035
     },
     {
@@ -2185,7 +2185,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 282.07623708362183,
-      "success": true,
+      "success": false,
       "delay_ms": 48.207623708362185
     },
     {
@@ -2355,7 +2355,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 171.31713932546444,
-      "success": true,
+      "success": false,
       "delay_ms": 37.13171393254645
     },
     {
@@ -2485,7 +2485,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 121.20312546799117,
-      "success": true,
+      "success": false,
       "delay_ms": 32.12031254679912
     },
     {
@@ -2605,7 +2605,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 299.7100695407811,
-      "success": true,
+      "success": false,
       "delay_ms": 49.971006954078106
     },
     {
@@ -2755,7 +2755,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 291.5101697941005,
-      "success": true,
+      "success": false,
       "delay_ms": 49.151016979410045
     },
     {
@@ -2775,7 +2775,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 295.19767304422663,
-      "success": false,
+      "success": true,
       "delay_ms": 49.51976730442266
     },
     {
@@ -2875,7 +2875,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 153.0820071381498,
-      "success": true,
+      "success": false,
       "delay_ms": 35.30820071381498
     },
     {
@@ -3175,7 +3175,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 195.30742538215094,
-      "success": true,
+      "success": false,
       "delay_ms": 39.530742538215094
     },
     {
@@ -3195,7 +3195,7 @@
       "message_type": "emergency",
       "protocol": "wifi",
       "distance": 180.8387602260388,
-      "success": false,
+      "success": true,
       "delay_ms": 38.08387602260388
     },
     {
@@ -3275,7 +3275,7 @@
       "message_type": "emergency",
       "protocol": "wifi",
       "distance": 189.60361074699162,
-      "success": false,
+      "success": true,
       "delay_ms": 38.960361074699165
     },
     {
@@ -3285,7 +3285,7 @@
       "message_type": "emergency",
       "protocol": "wifi",
       "distance": 258.20956906179407,
-      "success": false,
+      "success": true,
       "delay_ms": 45.820956906179404
     },
     {
@@ -3325,7 +3325,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 231.1350758419043,
-      "success": false,
+      "success": true,
       "delay_ms": 43.11350758419043
     },
     {
@@ -3425,7 +3425,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 128.0605125151982,
-      "success": false,
+      "success": true,
       "delay_ms": 32.80605125151982
     },
     {
@@ -3505,7 +3505,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 238.60680713386137,
-      "success": false,
+      "success": true,
       "delay_ms": 43.86068071338613
     },
     {
@@ -3995,7 +3995,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 225.1943817061064,
-      "success": true,
+      "success": false,
       "delay_ms": 42.51943817061064
     },
     {
@@ -4105,7 +4105,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 133.2494608624359,
-      "success": false,
+      "success": true,
       "delay_ms": 33.32494608624359
     },
     {
@@ -4115,7 +4115,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 245.33097842704518,
-      "success": true,
+      "success": false,
       "delay_ms": 44.53309784270452
     },
     {
@@ -4375,7 +4375,7 @@
       "message_type": "emergency",
       "protocol": "wimax",
       "distance": 811.6994822115834,
-      "success": true,
+      "success": false,
       "delay_ms": 27.17549223317375
     },
     {
@@ -4705,7 +4705,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 296.72681600559133,
-      "success": false,
+      "success": true,
       "delay_ms": 49.67268160055913
     },
     {
@@ -4925,7 +4925,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 273.2322674983186,
-      "success": false,
+      "success": true,
       "delay_ms": 47.32322674983186
     },
     {
@@ -4965,7 +4965,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 157.06067813979445,
-      "success": false,
+      "success": true,
       "delay_ms": 35.706067813979445
     },
     {
@@ -5025,7 +5025,7 @@
       "message_type": "emergency",
       "protocol": "wimax",
       "distance": 525.5583258150901,
-      "success": true,
+      "success": false,
       "delay_ms": 22.883374887226353
     },
     {
@@ -5065,7 +5065,7 @@
       "message_type": "emergency",
       "protocol": "wimax",
       "distance": 426.06258621292244,
-      "success": true,
+      "success": false,
       "delay_ms": 21.390938793193836
     },
     {
@@ -5165,7 +5165,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 255.67112760731803,
-      "success": true,
+      "success": false,
       "delay_ms": 45.5671127607318
     },
     {
@@ -5365,7 +5365,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 251.6201743743457,
-      "success": false,
+      "success": true,
       "delay_ms": 45.16201743743457
     },
     {
@@ -5465,7 +5465,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 255.09361447745124,
-      "success": true,
+      "success": false,
       "delay_ms": 45.50936144774512
     },
     {
@@ -5795,7 +5795,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 258.6031900222593,
-      "success": false,
+      "success": true,
       "delay_ms": 45.860319002225935
     },
     {
@@ -5915,7 +5915,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 252.1935690991467,
-      "success": true,
+      "success": false,
       "delay_ms": 45.21935690991467
     },
     {
@@ -5945,7 +5945,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 255.84880586790663,
-      "success": true,
+      "success": false,
       "delay_ms": 45.58488058679066
     },
     {
@@ -6185,7 +6185,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 106.52414528059194,
-      "success": true,
+      "success": false,
       "delay_ms": 30.652414528059197
     },
     {
@@ -6595,7 +6595,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 172.67759711026017,
-      "success": false,
+      "success": true,
       "delay_ms": 37.26775971102602
     },
     {
@@ -6875,7 +6875,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 173.09046483114048,
-      "success": true,
+      "success": false,
       "delay_ms": 37.309046483114045
     },
     {
@@ -7095,7 +7095,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 252.26319002633778,
-      "success": false,
+      "success": true,
       "delay_ms": 45.22631900263378
     },
     {
@@ -7105,7 +7105,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 207.03298646334633,
-      "success": true,
+      "success": false,
       "delay_ms": 40.70329864633463
     },
     {
@@ -7165,7 +7165,7 @@
       "message_type": "emergency",
       "protocol": "wifi",
       "distance": 191.2628780907296,
-      "success": true,
+      "success": false,
       "delay_ms": 39.12628780907296
     },
     {
@@ -7175,7 +7175,7 @@
       "message_type": "emergency",
       "protocol": "wifi",
       "distance": 189.34636549808346,
-      "success": true,
+      "success": false,
       "delay_ms": 38.934636549808346
     },
     {
@@ -7195,7 +7195,7 @@
       "message_type": "emergency",
       "protocol": "wifi",
       "distance": 192.57488540169484,
-      "success": false,
+      "success": true,
       "delay_ms": 39.25748854016948
     },
     {
@@ -7205,7 +7205,7 @@
       "message_type": "emergency",
       "protocol": "wifi",
       "distance": 194.51037575010653,
-      "success": false,
+      "success": true,
       "delay_ms": 39.45103757501065
     },
     {
@@ -7275,7 +7275,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 246.68562489595342,
-      "success": false,
+      "success": true,
       "delay_ms": 44.668562489595345
     },
     {
@@ -7285,7 +7285,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 244.90085871837525,
-      "success": true,
+      "success": false,
       "delay_ms": 44.49008587183752
     },
     {
@@ -7425,7 +7425,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 101.10318514629455,
-      "success": false,
+      "success": true,
       "delay_ms": 30.110318514629455
     },
     {
@@ -8115,7 +8115,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 173.78113607509297,
-      "success": false,
+      "success": true,
       "delay_ms": 37.3781136075093
     },
     {
@@ -8145,7 +8145,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 276.5831193570374,
-      "success": true,
+      "success": false,
       "delay_ms": 47.658311935703736
     },
     {
@@ -8185,7 +8185,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 180.87993006126368,
-      "success": false,
+      "success": true,
       "delay_ms": 38.08799300612637
     },
     {
@@ -8215,7 +8215,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 179.7165877825292,
-      "success": true,
+      "success": false,
       "delay_ms": 37.971658778252916
     },
     {
@@ -8255,7 +8255,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 233.743184654508,
-      "success": false,
+      "success": true,
       "delay_ms": 43.3743184654508
     },
     {
@@ -8375,7 +8375,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 112.01052471168394,
-      "success": false,
+      "success": true,
       "delay_ms": 31.201052471168396
     },
     {
@@ -8415,7 +8415,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 218.48450846790217,
-      "success": true,
+      "success": false,
       "delay_ms": 41.848450846790215
     },
     {
@@ -8445,7 +8445,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 218.35482772174475,
-      "success": false,
+      "success": true,
       "delay_ms": 41.83548277217447
     },
     {
@@ -8535,7 +8535,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 227.38628193043817,
-      "success": true,
+      "success": false,
       "delay_ms": 42.738628193043816
     },
     {
@@ -8555,7 +8555,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 252.61471626467969,
-      "success": true,
+      "success": false,
       "delay_ms": 45.261471626467966
     },
     {
@@ -8585,7 +8585,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 284.94433182362565,
-      "success": false,
+      "success": true,
       "delay_ms": 48.49443318236256
     },
     {
@@ -8615,7 +8615,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 246.12090204182547,
-      "success": false,
+      "success": true,
       "delay_ms": 44.61209020418255
     },
     {
@@ -8635,7 +8635,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 254.83024302252107,
-      "success": false,
+      "success": true,
       "delay_ms": 45.483024302252105
     },
     {
@@ -8675,7 +8675,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 283.3683507020874,
-      "success": false,
+      "success": true,
       "delay_ms": 48.33683507020874
     },
     {
@@ -8775,7 +8775,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 294.4688161983484,
-      "success": true,
+      "success": false,
       "delay_ms": 49.44688161983484
     },
     {
@@ -8855,7 +8855,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 295.4286340715049,
-      "success": true,
+      "success": false,
       "delay_ms": 49.54286340715049
     },
     {
@@ -8925,7 +8925,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 257.0346318049621,
-      "success": false,
+      "success": true,
       "delay_ms": 45.70346318049621
     },
     {
@@ -9105,7 +9105,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 241.74584728326843,
-      "success": true,
+      "success": false,
       "delay_ms": 44.17458472832684
     },
     {
@@ -9255,7 +9255,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 294.80047218909255,
-      "success": false,
+      "success": true,
       "delay_ms": 49.48004721890925
     },
     {
@@ -9415,7 +9415,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 245.22158380926078,
-      "success": true,
+      "success": false,
       "delay_ms": 44.52215838092608
     },
     {
@@ -9565,7 +9565,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 238.57303464368366,
-      "success": true,
+      "success": false,
       "delay_ms": 43.857303464368364
     },
     {
@@ -9595,7 +9595,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 256.0708327184881,
-      "success": true,
+      "success": false,
       "delay_ms": 45.60708327184881
     },
     {
@@ -9615,7 +9615,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 224.57128458534888,
-      "success": true,
+      "success": false,
       "delay_ms": 42.45712845853489
     },
     {
@@ -9705,7 +9705,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 296.0779118583494,
-      "success": true,
+      "success": false,
       "delay_ms": 49.60779118583494
     },
     {
@@ -9805,7 +9805,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 261.0506760691857,
-      "success": true,
+      "success": false,
       "delay_ms": 46.105067606918574
     },
     {
@@ -9875,7 +9875,7 @@
       "message_type": "beacon",
       "protocol": "wifi",
       "distance": 250.39897215554703,
-      "success": false,
+      "success": true,
       "delay_ms": 45.0398972155547
     },
     {

@@ -107,9 +107,11 @@ class AdaptiveTrafficController:
         self.yellow_time = 3          # Reduced from 5 (standard timing)
         self.extension_time = 3       # Reduced from 5 (quicker adaptation)
         
-        # Emergency vehicle detection range (meters)
-        # Reduced from 1000m to prevent excessive green time and congestion in other lanes
+        # Emergency vehicle detection and control ranges (meters)
+        # Detection range: When to start giving green light priority
         self.emergency_detection_range = 150.0  # meters - balanced for response time vs normal traffic flow
+        # Pass-through range: When to return to adaptive control (30m from junction center)
+        # This ensures minimal disruption to normal traffic flow
         
         # Track emergency vehicles that have been served at each junction
         # Format: {junction_id: {vehicle_id: 'served'}}
@@ -429,10 +431,16 @@ class AdaptiveTrafficController:
     def _check_emergency_priority(self):
         """
         Check if emergency vehicles are approaching intersections and need priority.
-        Implements:
-        1. Detection when emergency within range
-        2. Immediate return to adaptive when emergency passes junction center
-        3. First-come-first-served for simultaneous emergencies
+        
+        Emergency Priority Control Logic:
+        1. Detection: Emergency within 150m → Grant green light (greenwave)
+        2. Pass-through: Emergency within 30m → IMMEDIATELY return to adaptive control
+        3. First-come-first-served: Multiple emergencies → Closest gets priority
+        
+        This ensures:
+        - Emergency vehicles get priority when approaching (150m-31m range)
+        - Normal traffic resumes quickly after emergency passes (at 30m mark)
+        - Minimal disruption to overall traffic flow
         
         Returns dict {junction_id: (required_phase, vehicle_id)}
         """
@@ -470,21 +478,21 @@ class AdaptiveTrafficController:
                         distance = ((x - junc_x)**2 + (y - junc_y)**2)**0.5
                         
                         # Check if emergency vehicle has passed through the junction
-                        if distance < 30.0:  # Within 30m = passing through junction
+                        # Once vehicle passes 30m mark, immediately return to density-based control
+                        if distance < 30.0:  # Within 30m = passed through junction
                             # Mark this emergency as served at this junction
-                            self.served_emergencies[junc_id].add(vehicle_id)
-                            if junc_id in self.junction_priority_vehicle and self.junction_priority_vehicle[junc_id] == vehicle_id:
-                                print(f"✅ EMERGENCY CLEARED: {vehicle_id} passed through {junc_id}, returning to adaptive control")
-                                del self.junction_priority_vehicle[junc_id]
-                            continue  # Don't give priority if already passing through
+                            if vehicle_id not in self.served_emergencies[junc_id]:
+                                self.served_emergencies[junc_id].add(vehicle_id)
+                                if junc_id in self.junction_priority_vehicle and self.junction_priority_vehicle[junc_id] == vehicle_id:
+                                    print(f"✅ EMERGENCY CLEARED: {vehicle_id} passed 30m mark at {junc_id}, returning to density-based control")
+                                    del self.junction_priority_vehicle[junc_id]
+                            continue  # Don't give priority if already passed through
                         
-                        # If emergency is beyond detection range, clean up tracking
+                        # If emergency is beyond detection range, clean up tracking for future passes
                         if distance > self.emergency_detection_range:
-                            # Clean up served status if vehicle is far away
+                            # Reset served status if vehicle has left the area completely
                             if vehicle_id in self.served_emergencies[junc_id]:
                                 self.served_emergencies[junc_id].discard(vehicle_id)
-                            if junc_id in self.junction_priority_vehicle and self.junction_priority_vehicle[junc_id] == vehicle_id:
-                                del self.junction_priority_vehicle[junc_id]
                             continue
                         
                         # Emergency vehicle is within detection range and hasn't been served yet
