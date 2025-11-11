@@ -115,6 +115,28 @@ class AdaptiveTrafficController:
         # Density thresholds for adaptive control
         self.low_density_threshold = 3    # vehicles
         self.high_density_threshold = 10  # vehicles
+        
+        # Performance metrics tracking
+        self.performance_metrics = {
+            'total_vehicles': 0,
+            'emergency_vehicles': 0,
+            'normal_vehicles': 0,
+            'total_queue_length': 0,
+            'queue_samples': 0,
+            'emergency_travel_times': [],
+            'emergency_wait_times': [],
+            'emergency_time_loss': [],
+            'normal_travel_times': [],
+            'normal_wait_times': [],
+            'normal_time_loss': [],
+            'vehicle_start_times': {},
+            'vehicle_types': {},
+            'vehicle_max_wait': {},  # Track max wait time per vehicle
+            'vehicle_max_time_loss': {},  # Track max time loss per vehicle
+            'emergency_stops': defaultdict(int),
+            'phase_switches': 0,
+            'emergency_encounters': 0
+        }
 
     # ------------------- SUMO -------------------
     def connect_to_sumo(self, config_path, use_gui=True):
@@ -328,8 +350,20 @@ class AdaptiveTrafficController:
             # else:
             #     print(f"  🚗 Vehicle registered: {vehicle_id} (encrypted)")
 
-    def _handle_emergency_vehicles(self):
-        """Detect emergency vehicles and send encrypted priority requests to nearby RSUs"""
+    def _send_emergency_v2i_messages(self):
+        """
+        Send V2I (WiMAX) messages from emergency vehicles to RSUs.
+        
+        COMMUNICATION LAYER - Runs in BOTH adaptive and RL modes
+        
+        Ambulances ALWAYS communicate with RSUs via WiMAX (1000m range).
+        What differs between modes is the RSU RESPONSE:
+        - Adaptive mode: RSU receives message but doesn't change traffic signals
+        - RL mode: RSU receives message and triggers greenwave coordination
+        
+        This ensures realistic V2I communication is simulated regardless of
+        control strategy, maintaining communication metrics consistency.
+        """
         if not self.security_enabled:
             return
         
@@ -398,26 +432,41 @@ class AdaptiveTrafficController:
                                     size_bytes=len(encrypted_msg.encrypted_data) + len(encrypted_msg.signature)
                                 )
                                 
-                                # Simulate RSU receiving and decrypting (for demo)
+                                # Print V2I communication (happens in BOTH modes)
+                                if self.simulation_step % 50 == 0:  # Print every 50 steps to avoid spam
+                                    mode_str = "RL" if self.mode == "rl" else "ADAPTIVE"
+                                    print(f"📡 V2I-WiMAX [{mode_str}]: {vehicle_id} → {rsu_id} ({distance:.0f}m) - encrypted")
+                                
+                                # Simulate RSU receiving and decrypting
                                 rsu_mgr = self.rsu_managers.get(rsu_id)
                                 if rsu_mgr:
                                     decrypted = rsu_mgr.handler.decrypt_message(encrypted_msg)
                                     if decrypted:
                                         # RSU successfully received emergency request
-                                        # In real system, this would trigger traffic light priority
-                                        pass  # Traffic light adjustment happens in rule-based logic
+                                        # RESPONSE differs by mode:
+                                        # - Adaptive: Message received but NO traffic signal change
+                                        # - RL: Message triggers greenwave (handled in run_simulation_with_rl)
+                                        pass
                 
             except Exception as e:
                 # Silently handle errors (vehicle may have left simulation)
                 pass
     
-    def _check_emergency_priority(self):
+    def _check_emergency_priority_rl_mode(self, rl_controller=None):
         """
-        Check if emergency vehicles are approaching intersections and need priority.
+        EMERGENCY DETECTION & GREENWAVE COORDINATION (RL MODE ONLY)
+        
+        This method is ONLY used when running in RL mode with emergency coordination.
+        In adaptive mode, this is NOT called - ambulances are treated as normal vehicles.
+        
         Implements:
         1. Detection when emergency within range
-        2. Immediate return to adaptive when emergency passes junction center
-        3. First-come-first-served for simultaneous emergencies
+        2. Greenwave coordination across multiple junctions
+        3. Preemptive traffic light switching ahead of ambulance
+        4. First-come-first-served for simultaneous emergencies
+        
+        Used by: run_simulation_with_rl() ONLY
+        Not used by: run_simulation_step() (adaptive mode)
         
         Returns dict {junction_id: (required_phase, vehicle_id)}
         """
@@ -539,6 +588,203 @@ class AdaptiveTrafficController:
         
         return emergency_priorities
 
+    def _collect_performance_metrics(self):
+        """Collect real-time performance metrics from SUMO"""
+        try:
+            all_vehicles = traci.vehicle.getIDList()
+            current_time = traci.simulation.getTime()
+            
+            # Track new vehicles
+            for veh_id in all_vehicles:
+                if veh_id not in self.performance_metrics['vehicle_start_times']:
+                    self.performance_metrics['vehicle_start_times'][veh_id] = current_time
+                    
+                    # Determine vehicle type
+                    try:
+                        veh_type = traci.vehicle.getTypeID(veh_id)
+                        is_emergency = "emergency" in veh_type.lower() or "ambulance" in veh_type.lower()
+                        self.performance_metrics['vehicle_types'][veh_id] = 'emergency' if is_emergency else 'normal'
+                        
+                        if is_emergency:
+                            self.performance_metrics['emergency_vehicles'] += 1
+                        else:
+                            self.performance_metrics['normal_vehicles'] += 1
+                    except:
+                        self.performance_metrics['vehicle_types'][veh_id] = 'normal'
+                    
+                    # Initialize tracking
+                    self.performance_metrics['vehicle_max_wait'][veh_id] = 0.0
+                    self.performance_metrics['vehicle_max_time_loss'][veh_id] = 0.0
+            
+            # Collect queue lengths
+            queue_count = 0
+            
+            for veh_id in all_vehicles:
+                try:
+                    wait_time = traci.vehicle.getWaitingTime(veh_id)
+                    time_loss = traci.vehicle.getTimeLoss(veh_id)
+                    speed = traci.vehicle.getSpeed(veh_id)
+                    
+                    # Track maximum wait time and time loss for each vehicle
+                    if wait_time > self.performance_metrics['vehicle_max_wait'].get(veh_id, 0):
+                        self.performance_metrics['vehicle_max_wait'][veh_id] = wait_time
+                    
+                    if time_loss > self.performance_metrics['vehicle_max_time_loss'].get(veh_id, 0):
+                        self.performance_metrics['vehicle_max_time_loss'][veh_id] = time_loss
+                    
+                    # Count as in queue if speed < 0.1 m/s
+                    if speed < 0.1:
+                        queue_count += 1
+                    
+                    # Track emergency vehicle stops
+                    veh_type = self.performance_metrics['vehicle_types'].get(veh_id, 'normal')
+                    if veh_type == 'emergency' and speed < 0.5:
+                        self.performance_metrics['emergency_stops'][veh_id] += 1
+                        
+                except:
+                    continue
+            
+            # Update queue metrics
+            self.performance_metrics['total_queue_length'] += queue_count
+            self.performance_metrics['queue_samples'] += 1
+            
+            # Track arrived vehicles and their travel times
+            arrived = traci.simulation.getArrivedIDList()
+            
+            for veh_id in arrived:
+                if veh_id in self.performance_metrics['vehicle_start_times']:
+                    start_time = self.performance_metrics['vehicle_start_times'][veh_id]
+                    travel_time = current_time - start_time
+                    veh_type = self.performance_metrics['vehicle_types'].get(veh_id, 'normal')
+                    
+                    # Get final wait time and time loss for this vehicle
+                    max_wait = self.performance_metrics['vehicle_max_wait'].get(veh_id, 0.0)
+                    max_time_loss = self.performance_metrics['vehicle_max_time_loss'].get(veh_id, 0.0)
+                    
+                    if veh_type == 'emergency':
+                        self.performance_metrics['emergency_travel_times'].append(travel_time)
+                        self.performance_metrics['emergency_wait_times'].append(max_wait)
+                        self.performance_metrics['emergency_time_loss'].append(max_time_loss)
+                    else:
+                        self.performance_metrics['normal_travel_times'].append(travel_time)
+                        self.performance_metrics['normal_wait_times'].append(max_wait)
+                        self.performance_metrics['normal_time_loss'].append(max_time_loss)
+                    
+                    # Clean up
+                    del self.performance_metrics['vehicle_start_times'][veh_id]
+                    if veh_id in self.performance_metrics['vehicle_max_wait']:
+                        del self.performance_metrics['vehicle_max_wait'][veh_id]
+                    if veh_id in self.performance_metrics['vehicle_max_time_loss']:
+                        del self.performance_metrics['vehicle_max_time_loss'][veh_id]
+            
+            self.performance_metrics['total_vehicles'] = (
+                self.performance_metrics['emergency_vehicles'] + 
+                self.performance_metrics['normal_vehicles']
+            )
+            
+        except Exception as e:
+            pass  # Silently handle errors
+    
+    def _print_performance_summary(self):
+        """Print comprehensive performance metrics summary"""
+        m = self.performance_metrics
+        
+        print("\n" + "="*80)
+        print("📊 TRAFFIC PERFORMANCE METRICS")
+        print("="*80)
+        
+        # Vehicle statistics
+        print(f"\n🚗 Vehicle Statistics:")
+        print(f"  Total Vehicles: {m['total_vehicles']}")
+        print(f"  Emergency Vehicles: {m['emergency_vehicles']}")
+        print(f"  Normal Vehicles: {m['normal_vehicles']}")
+        
+        # Queue metrics
+        if m['queue_samples'] > 0:
+            avg_queue = m['total_queue_length'] / m['queue_samples']
+            print(f"\n📊 Queue Metrics:")
+            print(f"  Average Queue Length: {avg_queue:.2f} vehicles")
+        
+        # Emergency vehicle metrics
+        if m['emergency_travel_times']:
+            avg_emergency_travel = sum(m['emergency_travel_times']) / len(m['emergency_travel_times'])
+            min_emergency_travel = min(m['emergency_travel_times'])
+            max_emergency_travel = max(m['emergency_travel_times'])
+            
+            avg_emergency_wait = sum(m['emergency_wait_times']) / len(m['emergency_wait_times']) if m['emergency_wait_times'] else 0
+            avg_emergency_time_loss = sum(m['emergency_time_loss']) / len(m['emergency_time_loss']) if m['emergency_time_loss'] else 0
+            
+            print(f"\n🚑 Emergency Vehicle Performance:")
+            print(f"  Completed Trips: {len(m['emergency_travel_times'])}")
+            print(f"  Average Travel Time: {avg_emergency_travel:.2f} seconds")
+            print(f"  Min Travel Time: {min_emergency_travel:.2f} seconds")
+            print(f"  Max Travel Time: {max_emergency_travel:.2f} seconds")
+            print(f"  Average Wait Time: {avg_emergency_wait:.2f} seconds")
+            print(f"  Average Time Loss: {avg_emergency_time_loss:.2f} seconds")
+            
+            # Count emergency stops
+            total_emergency_stops = sum(m['emergency_stops'].values())
+            if total_emergency_stops > 0:
+                avg_stops_per_emergency = total_emergency_stops / len(m['emergency_stops'])
+                print(f"  Total Emergency Stops: {total_emergency_stops}")
+                print(f"  Average Stops per Emergency: {avg_stops_per_emergency:.2f}")
+        
+        # Normal vehicle metrics
+        if m['normal_travel_times']:
+            avg_normal_travel = sum(m['normal_travel_times']) / len(m['normal_travel_times'])
+            min_normal_travel = min(m['normal_travel_times'])
+            max_normal_travel = max(m['normal_travel_times'])
+            
+            avg_normal_wait = sum(m['normal_wait_times']) / len(m['normal_wait_times']) if m['normal_wait_times'] else 0
+            avg_normal_time_loss = sum(m['normal_time_loss']) / len(m['normal_time_loss']) if m['normal_time_loss'] else 0
+            
+            print(f"\n🚙 Normal Vehicle Performance:")
+            print(f"  Completed Trips: {len(m['normal_travel_times'])}")
+            print(f"  Average Travel Time: {avg_normal_travel:.2f} seconds")
+            print(f"  Min Travel Time: {min_normal_travel:.2f} seconds")
+            print(f"  Max Travel Time: {max_normal_travel:.2f} seconds")
+            print(f"  Average Wait Time: {avg_normal_wait:.2f} seconds")
+            print(f"  Average Time Loss: {avg_normal_time_loss:.2f} seconds")
+        
+        # Overall average metrics (all vehicles)
+        if m['emergency_wait_times'] or m['normal_wait_times']:
+            all_wait_times = m['emergency_wait_times'] + m['normal_wait_times']
+            all_time_loss = m['emergency_time_loss'] + m['normal_time_loss']
+            
+            if all_wait_times:
+                overall_avg_wait = sum(all_wait_times) / len(all_wait_times)
+                print(f"\n⏱️  Overall Averages (All Vehicles):")
+                print(f"  Average Wait Time: {overall_avg_wait:.2f} seconds")
+            
+            if all_time_loss:
+                overall_avg_loss = sum(all_time_loss) / len(all_time_loss)
+                print(f"  Average Time Loss: {overall_avg_loss:.2f} seconds")
+        
+        # Time saved calculation (if emergency vehicles present)
+        if m['emergency_travel_times'] and m['normal_travel_times']:
+            avg_emergency_travel = sum(m['emergency_travel_times']) / len(m['emergency_travel_times'])
+            avg_normal_travel = sum(m['normal_travel_times']) / len(m['normal_travel_times'])
+            time_saved_per_emergency = avg_normal_travel - avg_emergency_travel
+            
+            print(f"\n⏰ Emergency Vehicle Time Comparison:")
+            if time_saved_per_emergency > 0:
+                percentage_saved = (time_saved_per_emergency / avg_normal_travel) * 100
+                print(f"  Time Saved per Emergency: {time_saved_per_emergency:.2f} seconds")
+                print(f"  Percentage Faster: {percentage_saved:.1f}%")
+                print(f"  Total Time Saved (all emergencies): {time_saved_per_emergency * len(m['emergency_travel_times']):.2f} seconds")
+            else:
+                print(f"  Emergency vehicles slower than normal by: {abs(time_saved_per_emergency):.2f} seconds")
+                print(f"  (This may indicate high traffic congestion or insufficient priority)")
+        
+        # Traffic control metrics
+        print(f"\n🚦 Traffic Control Statistics:")
+        print(f"  Total Phase Switches: {m['phase_switches']}")
+        if self.simulation_step > 0:
+            switches_per_minute = (m['phase_switches'] / self.simulation_step) * 60
+            print(f"  Phase Switches per Minute: {switches_per_minute:.2f}")
+        
+        print("="*80 + "\n")
+
     # ------------------- SIMULATION -------------------
     def run_simulation_step(self):
         try:
@@ -552,28 +798,15 @@ class AdaptiveTrafficController:
             # Store current simulation time for metrics
             self.last_simulation_time = traci.simulation.getTime()
             
-            # Check for emergency vehicles and handle priority
-            emergency_at_junction = self._check_emergency_priority()
+            # NOTE: In adaptive mode, NO emergency detection or priority
+            # Emergency vehicles are treated as normal vehicles, only density matters
+            # Emergency detection & greenwave coordination is ONLY for RL mode
 
             # OPTIMIZED: Adaptive rule-based traffic light control (skip if RL mode)
             if self.mode != "rl":
                 for tl_id, data in self.intersections.items():
-                    # EMERGENCY OVERRIDE: If emergency vehicle detected at this junction
-                    if tl_id in emergency_at_junction:
-                        emergency_phase, vehicle_id = emergency_at_junction[tl_id]
-                        current_phase = data["current_phase"]
-                        
-                        # Force switch to emergency vehicle's direction if not already green
-                        if current_phase != emergency_phase:
-                            print(f"🚨 EMERGENCY PRIORITY: {tl_id} → {vehicle_id} switching to phase {emergency_phase}")
-                            data["current_phase"] = emergency_phase
-                            data["time_in_phase"] = 0
-                            traci.trafficlight.setRedYellowGreenState(
-                                tl_id, self.default_phases[tl_id][emergency_phase])
-                        # If already in correct phase, extend green time
-                        else:
-                            data["time_in_phase"] = max(0, data["time_in_phase"] - 5)  # Reset timer
-                        continue  # Skip normal adaptive control for this junction
+                    # PURE DENSITY-BASED CONTROL
+                    # No emergency detection in adaptive mode - all vehicles treated equally
                     
                     data["time_in_phase"] += 1
                     current_phase = data["current_phase"]
@@ -613,14 +846,20 @@ class AdaptiveTrafficController:
                             data["time_in_phase"] = 0
                             traci.trafficlight.setRedYellowGreenState(
                                 tl_id, self.default_phases[tl_id][data["current_phase"]])
+                            self.performance_metrics['phase_switches'] += 1
+
+            # Collect performance metrics
+            self._collect_performance_metrics()
 
             # Update edge RSUs with vehicle data
             if self.edge_enabled:
                 self._update_edge_rsus()
 
-            # Check for emergency vehicles and send encrypted messages
+            # Send V2I emergency messages via WiMAX (BOTH modes - communication only)
+            # In adaptive mode: RSU receives but doesn't change signals
+            # In RL mode: RSU receives and triggers greenwave (handled in run_simulation_with_rl)
             if self.security_enabled:
-                self._handle_emergency_vehicles()
+                self._send_emergency_v2i_messages()
 
             # Update WiMAX metrics
             self._update_wimax()
@@ -775,19 +1014,24 @@ class AdaptiveTrafficController:
         except KeyboardInterrupt:
             print("Simulation stopped by user")
         finally:
+            self._print_performance_summary()
             self._save_v2i_metrics()
             self.stop_simulation()
     
     def run_simulation_with_rl(self, rl_controller, steps=3600):
         """
         Run simulation with HYBRID control:
-        - Normal: Density-based adaptive traffic control
-        - Emergency: RL-based control with greenwave
+        - Normal Traffic: DENSITY-based adaptive control (NO emergency detection)
+        - Emergency Detected: RL-based control with GREENWAVE coordination
+        
+        Key Difference:
+        - Adaptive mode: Ambulances treated as normal vehicles, pure density control
+        - RL mode: Ambulances detected, greenwave created, preemptive coordination
         
         Parameters
         ----------
         rl_controller : RLTrafficController
-            The RL controller instance
+            The RL controller instance with EmergencyVehicleCoordinator
         steps : int
             Number of simulation steps to run
         """
@@ -795,13 +1039,13 @@ class AdaptiveTrafficController:
         step_count = 0
         
         # Control mode tracking
-        control_mode = "DENSITY"  # Start with density-based
+        control_mode = "DENSITY"  # Start with density-based (no emergency detection)
         emergency_active = False
         last_emergency_check = 0
         
-        print(f"\n🚦 Running HYBRID traffic control for {steps} steps...")
-        print("   • Normal: DENSITY-based adaptive control")
-        print("   • Emergency: RL-based control with greenwave")
+        print(f"\n🚦 Running HYBRID RL-ADAPTIVE traffic control for {steps} steps...")
+        print("   • Normal Traffic: DENSITY-based (ambulances = normal vehicles)")
+        print("   • Emergency Mode: RL with GREENWAVE coordination (preemptive + reactive)")
         print("=" * 70)
         
         try:
@@ -814,29 +1058,50 @@ class AdaptiveTrafficController:
                     
                     # Check if any emergency vehicles are active
                     if hasattr(rl_controller.env, 'emergency_coordinator'):
-                        active_emergencies = rl_controller.env.emergency_coordinator.get_active_emergency_vehicles()
+                        coordinator = rl_controller.env.emergency_coordinator
+                        active_emergencies = coordinator.get_active_emergency_vehicles()
                         
                         if len(active_emergencies) > 0 and not emergency_active:
-                            # Switch to RL mode
+                            # Switch to RL mode with GREENWAVE
                             emergency_active = True
-                            control_mode = "RL-EMERGENCY"
+                            control_mode = "RL-GREENWAVE"
                             self.mode = "rl"
                             print(f"\n🚨 EMERGENCY DETECTED at step {step_count}!")
-                            print(f"   Switching to RL control with greenwave...")
-                            for emerg in active_emergencies:
-                                print(f"   • {emerg.vehicle_id} detected by {emerg.detected_by_rsu}")
+                            print(f"   ✅ Activating RL control with GREENWAVE coordination")
+                            
+                            # Create greenwave for each emergency vehicle
+                            for emerg in active_emergencies.values():
+                                greenwave_junctions = coordinator.create_greenwave(emerg)
+                                if greenwave_junctions:
+                                    print(f"   🟢 Greenwave created for {emerg.vehicle_id}: {greenwave_junctions}")
+                                    
+                                    # Apply preemptive green to junctions ahead
+                                    for tl_id in greenwave_junctions:
+                                        required_phase = coordinator.apply_greenwave(tl_id, emerg.current_edge)
+                                        if required_phase is not None:
+                                            traci.trafficlight.setPhase(tl_id, required_phase)
+                                            print(f"      → Preemptive green: {tl_id} phase {required_phase}")
                         
                         elif len(active_emergencies) == 0 and emergency_active:
-                            # Switch back to density-based mode
+                            # Switch back to density-based mode (no emergency detection)
                             emergency_active = False
                             control_mode = "DENSITY"
                             self.mode = "rule"
                             print(f"\n✅ EMERGENCY CLEARED at step {step_count}")
-                            print(f"   Switching back to density-based control...")
+                            print(f"   Returning to density-based control (ambulances = normal vehicles)")
+                        
+                        elif emergency_active:
+                            # Update greenwave for active emergencies
+                            for emerg in active_emergencies.values():
+                                greenwave_junctions = coordinator.create_greenwave(emerg)
+                                for tl_id in greenwave_junctions:
+                                    required_phase = coordinator.apply_greenwave(tl_id, emerg.current_edge)
+                                    if required_phase is not None:
+                                        traci.trafficlight.setPhase(tl_id, required_phase)
                 
                 # Execute appropriate control strategy
                 if emergency_active:
-                    # RL control during emergency
+                    # RL control during emergency with greenwave coordination
                     rl_metrics = rl_controller.step()
                     
                     if 'error' in rl_metrics:
@@ -846,7 +1111,7 @@ class AdaptiveTrafficController:
                         control_mode = "DENSITY"
                         self.mode = "rule"
                 else:
-                    # Run density-based control (this happens in run_simulation_step)
+                    # Run density-based control (NO emergency detection in adaptive mode)
                     rl_metrics = {
                         'reward': 0,
                         'episode_reward': 0,
@@ -902,7 +1167,10 @@ class AdaptiveTrafficController:
             import traceback
             traceback.print_exc()
         finally:
-            print(f"\n\n📊 Simulation Summary:")
+            # Print comprehensive performance metrics
+            self._print_performance_summary()
+            
+            print(f"\n\n📊 RL Simulation Summary:")
             print("=" * 70)
             print(f"Total steps: {step_count}")
             print(f"Final control mode: {control_mode}")

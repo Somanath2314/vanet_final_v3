@@ -528,6 +528,13 @@ Examples:
         print("-"*70)
         print(f"✅ Simulation completed in {elapsed_time:.1f} seconds")
         
+        # Print traffic performance metrics
+        print()
+        print("="*70)
+        print("TRAFFIC PERFORMANCE METRICS")
+        print("="*70)
+        traffic_controller._print_performance_summary()
+        
         # Print proximity stats if used
         if proximity_controller:
             proximity_controller.print_stats()

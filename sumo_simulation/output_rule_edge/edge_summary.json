@@ -2,20 +2,20 @@
   "system_metrics": {
     "total_rsus": 0,
     "active_rsus": 0,
-    "total_computations": 798,
+    "total_computations": 844,
     "total_offloaded": 0,
     "bandwidth_saved_mb": 0,
     "avg_latency_ms": 0,
-    "start_time": 1762782799.235399
+    "start_time": 1762844187.236988
   },
   "summary_statistics": {
     "total_rsus": 13,
-    "total_vehicles_served": 798,
-    "total_computations": 798,
+    "total_vehicles_served": 844,
+    "total_computations": 844,
     "cache_hit_rate": 0,
     "avg_latency_ms": 0,
-    "uptime_seconds": 48.02900838851929,
-    "computations_per_second": 16.614958892025587
+    "uptime_seconds": 49.08712673187256,
+    "computations_per_second": 17.193917350472784
   },
   "service_metrics": {
     "traffic_flow": {
@@ -35,5 +35,5 @@
       "compression_ratio": 0
     }
   },
-  "timestamp": 1762782847.2644114
+  "timestamp": 1762844236.3241189
 }
