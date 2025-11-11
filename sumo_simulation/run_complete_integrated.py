@@ -352,10 +352,15 @@ Examples:
 
     # Initialize components
     print("🔧 Initializing simulation components...")
+    
+    # Emergency priority only enabled when using proximity-based RL
+    emergency_priority_enabled = (args.mode == 'proximity')
+    
     traffic_controller = AdaptiveTrafficController(
         security_managers=None,
         security_pending=args.security,
-        edge_computing_enabled=args.edge
+        edge_computing_enabled=args.edge,
+        emergency_priority_enabled=emergency_priority_enabled
     )
     sensor_network = SensorNetwork()
     ns3_bridge = SUMONS3Bridge()
@@ -451,6 +456,20 @@ Examples:
         
         import traci
         
+        # Metrics tracking
+        total_wait_time = 0
+        total_queue_length = 0
+        total_speed = 0
+        metric_samples = 0
+        
+        # Emergency-specific metrics
+        emergency_wait_time = 0
+        emergency_speed = 0
+        emergency_samples = 0
+        normal_wait_time = 0
+        normal_speed = 0
+        normal_samples = 0
+        
         while step < args.steps:
             # Apply control based on mode
             if args.mode == 'proximity' and proximity_controller:
@@ -480,6 +499,41 @@ Examples:
             # Update NS3 network simulation
             ns3_bridge.step(current_time)
             
+            # Collect vehicular metrics every step
+            vehicles = traci.vehicle.getIDList()
+            if vehicles:
+                for veh_id in vehicles:
+                    try:
+                        wait_time = traci.vehicle.getWaitingTime(veh_id)
+                        speed = traci.vehicle.getSpeed(veh_id)
+                        
+                        total_wait_time += wait_time
+                        total_speed += speed
+                        
+                        # Separate emergency and normal vehicle metrics
+                        is_emergency = 'emergency' in veh_id.lower()
+                        if is_emergency:
+                            emergency_wait_time += wait_time
+                            emergency_speed += speed
+                            emergency_samples += 1
+                        else:
+                            normal_wait_time += wait_time
+                            normal_speed += speed
+                            normal_samples += 1
+                    except:
+                        pass
+                
+                # Queue lengths at each junction
+                for tl_id in traci.trafficlight.getIDList():
+                    try:
+                        lanes = traci.trafficlight.getControlledLanes(tl_id)
+                        for lane in lanes:
+                            total_queue_length += traci.lane.getLastStepHaltingNumber(lane)
+                    except:
+                        pass
+                
+                metric_samples += 1
+            
             # Check if simulation should continue
             if traci.simulation.getMinExpectedNumber() <= 0:
                 print("\n⚠️  No more vehicles in simulation")
@@ -504,9 +558,15 @@ Examples:
                                f"🚑 Active Emerg: {active_emergencies} | "
                                f"Switches: {proximity_controller.switches} | ")
                 
+                # Calculate current averages
+                avg_wait = total_wait_time / max(metric_samples, 1)
+                avg_queue = total_queue_length / max(metric_samples, 1)
+                avg_speed = total_speed / max(len(vehicles) * metric_samples, 1)
+                
                 print(f"Step {step:4d}/{args.steps} | {mode_info}"
                       f"Vehicles: {metrics['vehicles']['total']} "
                       f"(Emerg: {metrics['vehicles']['emergency']}) | "
+                      f"Wait: {avg_wait:.1f}s | Queue: {avg_queue:.1f} | Speed: {avg_speed:.1f}m/s | "
                       f"WiFi PDR: {metrics['v2v_wifi']['pdr']*100:.1f}% | "
                       f"WiMAX PDR: {metrics['v2i_wimax']['pdr']*100:.1f}%")
                 last_print_time = time.time()
@@ -528,12 +588,22 @@ Examples:
         print("-"*70)
         print(f"✅ Simulation completed in {elapsed_time:.1f} seconds")
         
-        # Print traffic performance metrics
-        print()
-        print("="*70)
-        print("TRAFFIC PERFORMANCE METRICS")
-        print("="*70)
-        traffic_controller._print_performance_summary()
+        # Print final vehicular metrics summary
+        if metric_samples > 0:
+            print()
+            print("="*70)
+            print("📊 VEHICULAR METRICS SUMMARY")
+            print("="*70)
+            avg_wait_final = total_wait_time / max(metric_samples, 1)
+            avg_queue_final = total_queue_length / max(metric_samples, 1)
+            avg_speed_final = total_speed / max(metric_samples, 1)
+            
+            print(f"  Average Wait Time: {avg_wait_final:.2f} seconds")
+            print(f"  Average Queue Length: {avg_queue_final:.2f} vehicles")
+            print(f"  Average Vehicle Speed: {avg_speed_final:.2f} m/s")
+            print(f"  Total Simulation Steps: {step}")
+            print(f"  Metrics Collected: {metric_samples} samples")
+            print("="*70)
         
         # Print proximity stats if used
         if proximity_controller:
