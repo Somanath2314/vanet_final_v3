@@ -44,6 +44,8 @@ v2v_security_manager = None
 metrics_history = []
 current_metrics = {}
 rl_metrics_history = []
+# Selected control method ("rule" or "rl")
+selected_method = 'rule'
 
 # Load environment variables
 from dotenv import load_dotenv
@@ -526,6 +528,39 @@ def rl_step():
         return jsonify(metrics)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/method', methods=['GET', 'POST'])
+def select_method():
+    """Get or set the selected control method used by the simulation.
+
+    GET: returns { method: 'rule' | 'rl' }
+    POST: accept JSON { method: 'rule'|'rl' } and update in-memory selection. This will
+    toggle the rl_mode_enabled flag; actually enabling RL controller requires the
+    simulation to be running and controller initialization (handled elsewhere).
+    """
+    global selected_method, rl_mode_enabled
+
+    if request.method == 'GET':
+        return jsonify({ 'method': selected_method })
+
+    data = request.get_json() or {}
+    method = data.get('method')
+    if method not in ('rule', 'rl'):
+        return jsonify({ 'error': 'method must be "rule" or "rl"' }), 400
+
+    selected_method = method
+
+    # Basic toggle: prefer rule => disable RL mode; rl => enable RL flag (note: RL controller
+    # initialization must happen via /api/rl/enable or when simulation starts)
+    if method == 'rule':
+        rl_mode_enabled = False
+        msg = 'Rule-based control selected. RL mode disabled.'
+    else:
+        rl_mode_enabled = True
+        msg = 'RL-based control selected. RL mode flag enabled (RL controller may still need initialization).'
+
+    return jsonify({ 'message': msg, 'method': selected_method })
 
 @app.route('/api/traffic/metrics/populate', methods=['POST'])
 def populate_traffic_metrics():

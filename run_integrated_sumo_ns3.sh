@@ -163,7 +163,7 @@ echo -e "${GREEN}🚀 Starting complete integrated SUMO + NS3 + RL simulation...
 echo ""
 
 # Build command with all options
-CMD="python3 run_complete_integrated.py --mode $MODE --steps $STEPS $GUI_FLAG $SECURITY_FLAG $EDGE_FLAG --output ./output"
+CMD="python run_complete_integrated.py --mode $MODE --steps $STEPS $GUI_FLAG $SECURITY_FLAG $EDGE_FLAG --output ./output"
 
 # Add model if specified (adjust path to be relative from sumo_simulation dir)
 if [ -n "$MODEL" ]; then
@@ -203,7 +203,7 @@ if [ $EXIT_CODE -eq 0 ]; then
     echo "  - v2i_metrics.csv (V2I metrics)"
     echo ""
     echo "View results:"
-    echo "  cat sumo_simulation/output/integrated_simulation_results.json | python3 -m json.tool"
+    echo "  cat sumo_simulation/output/integrated_simulation_results.json | python -m json.tool"
 else
     echo ""
     echo -e "${RED}=========================================="

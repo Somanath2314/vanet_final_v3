@@ -304,12 +304,22 @@ class SUMONS3Bridge:
         }
     
     def save_results(self, output_file: str):
-        """Save communication events and metrics to file"""
+        """Save communication events and metrics to file - ALL timestamps"""
+        # Group events by timestamp for time-series analysis
+        events_by_timestamp = {}
+        for event in self.communication_events:
+            ts = event.timestamp
+            if ts not in events_by_timestamp:
+                events_by_timestamp[ts] = []
+            events_by_timestamp[ts].append(asdict(event))
+        
         results = {
             'metrics': self.get_metrics(),
-            'events': [asdict(e) for e in self.communication_events[-1000:]],  # Last 1000 events
+            'events': [asdict(e) for e in self.communication_events],  # ALL events (not just last 1000)
+            'events_by_timestamp': events_by_timestamp,  # Time-series data
             'simulation_info': {
                 'total_events': len(self.communication_events),
+                'unique_timestamps': len(events_by_timestamp),
                 'wifi_range_m': self.wifi_range,
                 'wimax_range_m': self.wimax_range,
                 'beacon_interval_s': self.beacon_interval
@@ -319,7 +329,7 @@ class SUMONS3Bridge:
         with open(output_file, 'w') as f:
             json.dump(results, f, indent=2)
         
-        logger.info(f"Results saved to {output_file}")
+        logger.info(f"Results saved to {output_file} (total events: {len(self.communication_events)}, unique timestamps: {len(events_by_timestamp)})")
     
     def print_summary(self):
         """Print simulation summary"""
@@ -329,34 +339,34 @@ class SUMONS3Bridge:
         print("SUMO-NS3 INTEGRATED SIMULATION RESULTS")
         print("="*70)
         
-        print(f"\n📊 Vehicle Statistics:")
+        print(f"\nðŸ“Š Vehicle Statistics:")
         print(f"  Total Vehicles: {metrics['vehicles']['total']}")
         print(f"  Emergency Vehicles: {metrics['vehicles']['emergency']}")
         print(f"  Normal Vehicles: {metrics['vehicles']['normal']}")
         
-        print(f"\n🔷 V2V Communication (WiFi 802.11p):")
+        print(f"\nðŸ”· V2V Communication (WiFi 802.11p):")
         print(f"  Packets Sent: {metrics['v2v_wifi']['packets_sent']}")
         print(f"  Packets Received: {metrics['v2v_wifi']['packets_received']}")
         print(f"  Packet Delivery Ratio: {metrics['v2v_wifi']['pdr']*100:.2f}%")
         
-        print(f"\n🔶 V2I Communication (WiMAX for Emergency):")
+        print(f"\nðŸ”¶ V2I Communication (WiMAX for Emergency):")
         print(f"  Packets Sent: {metrics['v2i_wimax']['packets_sent']}")
         print(f"  Packets Received: {metrics['v2i_wimax']['packets_received']}")
         print(f"  Packet Delivery Ratio: {metrics['v2i_wimax']['pdr']*100:.2f}%")
         
-        print(f"\n📈 Combined Performance:")
+        print(f"\nðŸ“ˆ Combined Performance:")
         print(f"  Overall PDR: {metrics['combined']['overall_pdr']*100:.2f}%")
         print(f"  Average Delay: {metrics['combined']['average_delay_ms']:.2f} ms")
         print(f"  Throughput: {metrics['combined']['throughput_mbps']:.2f} Mbps")
         
-        print(f"\n🚑 Emergency Vehicle Communication:")
+        print(f"\nðŸš‘ Emergency Vehicle Communication:")
         print(f"  Total Emergency Events: {metrics['emergency']['total_events']}")
         print(f"  Successful Events: {metrics['emergency']['successful_events']}")
         print(f"  Success Rate: {metrics['emergency']['success_rate']*100:.2f}%")
         print(f"  Average Delay: {metrics['emergency']['average_delay_ms']:.2f} ms")
         print(f"  Protocol: {metrics['emergency']['protocol_used']}")
         
-        print(f"\n🌐 Infrastructure:")
+        print(f"\nðŸŒ Infrastructure:")
         print(f"  RSUs: {metrics['infrastructure']['rsus']}")
         print(f"  WiFi Range: {metrics['infrastructure']['wifi_range_m']} m")
         print(f"  WiMAX Range: {metrics['infrastructure']['wimax_range_m']} m")
