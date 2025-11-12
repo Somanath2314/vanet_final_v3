@@ -3,11 +3,70 @@ from flask_cors import CORS
 import subprocess
 import threading
 import os
+import shutil
+import platform
+import shlex
 
 app = Flask(__name__)
 CORS(app)
 
 selected_method = None  # store which method user selected
+
+
+def get_script_path():
+    """Return absolute path to run_integrated_sumo_ns3.sh resolved from this file's directory."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.abspath(os.path.join(base_dir, 'run_integrated_sumo_ns3.sh'))
+
+
+def to_wsl_path(win_path: str) -> str:
+    """Convert a Windows path like C:\\path\\to\\file to a WSL path /mnt/c/path/to/file.
+    If path doesn't look like a Windows drive path, return a forward-slash-normalized path."""
+    p = os.path.abspath(win_path)
+    # Windows absolute path starts with DriveLetter ':' e.g. C:\\
+    if len(p) >= 2 and p[1] == ':' and p[0].isalpha():
+        drive = p[0].lower()
+        rest = p[2:].replace('\\', '/')
+        if rest.startswith('/'):
+            rest = rest[1:]
+        return f"/mnt/{drive}/{rest}"
+    return p.replace('\\', '/')
+
+
+def preflight_status():
+    """Return a dict describing availability of script, bash, wsl and sumo."""
+    script_path = get_script_path()
+    bash_exists = bool(shutil.which('bash') or shutil.which('bash.exe') or (platform.system() != 'Windows' and os.path.exists('/bin/bash')))
+    wsl_exists = bool(shutil.which('wsl'))
+    sumo_exists = bool(shutil.which('sumo-gui') or shutil.which('sumo'))
+    script_exists = os.path.isfile(script_path)
+    # Require SUMO for GUI runs as well
+    runnable = script_exists and (bash_exists or (platform.system() == 'Windows' and wsl_exists) or platform.system() != 'Windows') and sumo_exists
+    missing = []
+    if not script_exists:
+        missing.append('script')
+    if not bash_exists and not (platform.system() == 'Windows' and wsl_exists):
+        missing.append('bash')
+    if not sumo_exists:
+        missing.append('sumo')
+
+    message = 'OK' if runnable else f"Missing: {', '.join(missing)}"
+    return {
+        'script_path': script_path,
+        'script_exists': script_exists,
+        'bash_exists': bash_exists,
+        'wsl_exists': wsl_exists,
+        'sumo_exists': sumo_exists,
+        'runnable': runnable,
+        'message': message,
+    }
+
+
+
+@app.route('/api/preflight', methods=['GET'])
+def preflight():
+    status = preflight_status()
+    return jsonify(status), (200 if status['runnable'] else 400)
 
 
 @app.route('/api/method', methods=['POST'])
@@ -26,12 +85,17 @@ def run_simulation():
     if not selected_method:
         return jsonify({"message": "No method selected"}), 400
 
-    # Path to Git Bash
-    git_bash = r"C:\Program Files\Git\bin\bash.exe"
-
-    # Path to your .sh script
-    script_path = os.path.abspath('./run_integrated_sumo_ns3.sh')
+    # Resolve script path relative to this file so repo can be run from any working directory
+    script_path = get_script_path()
     print("📁 Script Path:", script_path)
+
+    # Try to find a bash executable in PATH (works on Unix and Git Bash on Windows)
+    bash_exe = shutil.which('bash') or shutil.which('bash.exe')
+    # platform fallback: on POSIX try /bin/bash if which didn't find it
+    if not bash_exe and platform.system() != 'Windows' and os.path.exists('/bin/bash'):
+        bash_exe = '/bin/bash'
+    # detect WSL if available (used as fallback on Windows)
+    wsl_exe = shutil.which('wsl')
 
     # Choose args based on method
     if selected_method == 'rl':
@@ -45,14 +109,46 @@ def run_simulation():
     else:
         return jsonify({"message": "Invalid method"}), 400
 
+    # Run a quick preflight check and return error to frontend if not runnable
+    status = preflight_status()
+    if not status.get('runnable'):
+        print("❌ Preflight failed:", status.get('message'))
+        return jsonify(status), 400
+
     def run_script():
         try:
-            cmd = [git_bash, script_path] + args
+            # Ensure script exists
+            if not os.path.isfile(script_path):
+                print(f"❌ Script not found: {script_path}")
+                return
+
+            if bash_exe:
+                cmd = [bash_exe, script_path] + args
+            else:
+                # Try WSL on Windows as a fallback
+                if platform.system() == 'Windows' and wsl_exe:
+                    wsl_path = to_wsl_path(script_path)
+                    quoted_args = ' '.join(shlex.quote(a) for a in args)
+                    # Build a single command string for wsl to execute under bash
+                    cmd = ['wsl', f"bash {shlex.quote(wsl_path)} {quoted_args}"]
+                else:
+                    # No bash available. On Windows without WSL we can't run .sh
+                    if platform.system() == 'Windows':
+                        print("❌ No bash found on PATH and WSL not available. Install Git for Windows or enable WSL.")
+                        return
+                    # On non-Windows fallback to executing the script directly (requires executable bit)
+                    cmd = [script_path] + args
+
+            # Use a string for display but pass list to subprocess to avoid shell=True
             print("🚀 Running command:", " ".join(cmd))
             subprocess.run(cmd, check=True)
             print("✅ Simulation finished successfully.")
+        except FileNotFoundError as e:
+            print("❌ Execution failed, file not found:", e)
         except subprocess.CalledProcessError as e:
             print("❌ Error running simulation:", e)
+        except Exception as e:
+            print("❌ Unexpected error while running simulation:", e)
 
     threading.Thread(target=run_script).start()
     return jsonify({"message": f"Simulation started in background using {selected_method} method"}), 200

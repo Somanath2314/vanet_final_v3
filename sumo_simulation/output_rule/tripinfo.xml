@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2025-11-12 21:30:03 by Eclipse SUMO GUI Version 1.24.0
+<!-- generated on 2025-11-12 23:11:37 by Eclipse SUMO GUI Version 1.22.0
 <sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
 
     <input>
-        <net-file value="D:\capstone\vanet_final_v3\sumo_simulation\maps/simple_network.net.xml"/>
-        <route-files value="D:\capstone\vanet_final_v3\sumo_simulation\maps/routes.rou.xml"/>
+        <net-file value="/Users/apple/Desktop/vanet_12_nov/vanet_final_v3/sumo_simulation/maps/simple_network.net.xml"/>
+        <route-files value="/Users/apple/Desktop/vanet_12_nov/vanet_final_v3/sumo_simulation/maps/routes.rou.xml"/>
     </input>
 
     <output>
-        <summary-output value="./output_rule\summary.xml"/>
-        <tripinfo-output value="./output_rule\tripinfo.xml"/>
+        <summary-output value="./output_rule/summary.xml"/>
+        <tripinfo-output value="./output_rule/tripinfo.xml"/>
     </output>
 
     <time>
@@ -24,11 +24,11 @@
     </processing>
 
     <traci_server>
-        <remote-port value="56222"/>
+        <remote-port value="61915"/>
     </traci_server>
 
     <gui_only>
-        <gui-settings-file value="D:\capstone\vanet_final_v3\sumo_simulation\maps/gui-settings.cfg"/>
+        <gui-settings-file value="/Users/apple/Desktop/vanet_12_nov/vanet_final_v3/sumo_simulation/maps/gui-settings.cfg"/>
         <quit-on-end value="false"/>
         <start value="true"/>
     </gui_only>
@@ -53,4 +53,13 @@
     <tripinfo id="flow_ns_j2.3" depart="56.00" departLane="E5_1" departPos="5.10" departSpeed="12.74" departDelay="0.14" arrival="138.00" arrivalLane="E6_1" arrivalPos="496.00" arrivalSpeed="12.28" duration="82.00" routeLength="994.90" waitingTime="0.00" waitingCount="0" stopTime="0.00" timeLoss="3.78" rerouteNo="0" devices="tripinfo_flow_ns_j2.3" vType="passenger" speedFactor="0.92" vaporized=""/>
     <tripinfo id="flow_ns_j3.2" depart="51.00" departLane="E7_0" departPos="5.10" departSpeed="11.47" departDelay="0.43" arrival="144.00" arrivalLane="E8_0" arrivalPos="496.00" arrivalSpeed="10.72" duration="93.00" routeLength="994.90" waitingTime="0.00" waitingCount="0" stopTime="0.00" timeLoss="5.66" rerouteNo="0" devices="tripinfo_flow_ns_j3.2" vType="passenger" speedFactor="0.83" vaporized=""/>
     <tripinfo id="emergency_2" depart="55.00" departLane="E5_0" departPos="6.10" departSpeed="0.00" departDelay="0.00" arrival="145.00" arrivalLane="E6_0" arrivalPos="496.00" arrivalSpeed="11.34" duration="90.00" routeLength="993.90" waitingTime="0.00" waitingCount="0" stopTime="0.00" timeLoss="3.74" rerouteNo="0" devices="tripinfo_emergency_2" vType="emergency" speedFactor="0.83" vaporized=""/>
+    <tripinfo id="flow_ns_j2.5" depart="77.00" departLane="E5_1" departPos="5.10" departSpeed="16.28" departDelay="0.57" arrival="159.00" arrivalLane="E6_0" arrivalPos="496.00" arrivalSpeed="16.08" duration="82.00" routeLength="994.90" waitingTime="11.00" waitingCount="1" stopTime="0.00" timeLoss="20.20" rerouteNo="0" devices="tripinfo_flow_ns_j2.5" vType="passenger" speedFactor="1.17" vaporized=""/>
+    <tripinfo id="flow_ew_j2.3" depart="42.00" departLane="E1_0" departPos="5.10" departSpeed="14.14" departDelay="0.00" arrival="162.00" arrivalLane="E3_1" arrivalPos="489.60" arrivalSpeed="13.33" duration="120.00" routeLength="1494.90" waitingTime="0.00" waitingCount="0" stopTime="0.00" timeLoss="13.94" rerouteNo="0" devices="tripinfo_flow_ew_j2.3" vType="passenger" speedFactor="1.02" vaporized=""/>
+    <tripinfo id="flow_ew_j2.2" depart="33.00" departLane="E1_1" departPos="5.10" departSpeed="13.08" departDelay="0.00" arrival="163.00" arrivalLane="E3_0" arrivalPos="489.60" arrivalSpeed="12.61" duration="130.00" routeLength="1494.90" waitingTime="3.00" waitingCount="1" stopTime="0.00" timeLoss="14.99" rerouteNo="0" devices="tripinfo_flow_ew_j2.2" vType="passenger" speedFactor="0.94" vaporized=""/>
+    <tripinfo id="flow_ns_j2.6" depart="87.00" departLane="E5_0" departPos="5.10" departSpeed="15.31" departDelay="0.28" arrival="163.00" arrivalLane="E6_0" arrivalPos="496.00" arrivalSpeed="14.18" duration="76.00" routeLength="994.90" waitingTime="1.00" waitingCount="1" stopTime="0.00" timeLoss="10.14" rerouteNo="0" devices="tripinfo_flow_ns_j2.6" vType="passenger" speedFactor="1.10" vaporized=""/>
+    <tripinfo id="flow_ns_j2.4" depart="67.00" departLane="E5_1" departPos="5.10" departSpeed="12.94" departDelay="0.86" arrival="167.00" arrivalLane="E6_0" arrivalPos="496.00" arrivalSpeed="12.61" duration="100.00" routeLength="994.90" waitingTime="13.00" waitingCount="1" stopTime="0.00" timeLoss="22.66" rerouteNo="0" devices="tripinfo_flow_ns_j2.4" vType="passenger" speedFactor="0.93" vaporized=""/>
+    <tripinfo id="flow_ns_j2.7" depart="98.00" departLane="E5_1" departPos="5.10" departSpeed="15.17" departDelay="1.00" arrival="167.00" arrivalLane="E6_1" arrivalPos="496.00" arrivalSpeed="14.87" duration="69.00" routeLength="994.90" waitingTime="0.00" waitingCount="0" stopTime="0.00" timeLoss="3.22" rerouteNo="0" devices="tripinfo_flow_ns_j2.7" vType="passenger" speedFactor="1.09" vaporized=""/>
+    <tripinfo id="flow_ns_j3.4" depart="72.00" departLane="E7_1" departPos="5.10" departSpeed="13.96" departDelay="0.86" arrival="170.00" arrivalLane="E8_0" arrivalPos="496.00" arrivalSpeed="12.78" duration="98.00" routeLength="994.90" waitingTime="18.00" waitingCount="1" stopTime="0.00" timeLoss="26.73" rerouteNo="0" devices="tripinfo_flow_ns_j3.4" vType="passenger" speedFactor="1.01" vaporized=""/>
+    <tripinfo id="flow_ns_j3.5" depart="82.00" departLane="E7_1" departPos="5.10" departSpeed="13.52" departDelay="0.57" arrival="172.00" arrivalLane="E8_1" arrivalPos="496.00" arrivalSpeed="13.20" duration="90.00" routeLength="994.90" waitingTime="8.00" waitingCount="1" stopTime="0.00" timeLoss="15.94" rerouteNo="0" devices="tripinfo_flow_ns_j3.5" vType="passenger" speedFactor="0.97" vaporized=""/>
+    <tripinfo id="flow_ns_j3.6" depart="92.00" departLane="E7_1" departPos="5.10" departSpeed="14.31" departDelay="0.28" arrival="172.00" arrivalLane="E8_0" arrivalPos="496.00" arrivalSpeed="13.30" duration="80.00" routeLength="994.90" waitingTime="0.00" waitingCount="0" stopTime="0.00" timeLoss="10.14" rerouteNo="0" devices="tripinfo_flow_ns_j3.6" vType="passenger" speedFactor="1.03" vaporized=""/>
 </tripinfos>
