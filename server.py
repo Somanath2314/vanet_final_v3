@@ -83,64 +83,6 @@ def live():
     
     # Try to get real metrics from running simulation
     real_metrics = bridge.read_metrics()
-    # If no bridge file, try to query a running SUMO via TraCI as a fallback
-    if not real_metrics:
-        try:
-            # Attempt to import traci and connect to common ports
-            import traci
-            traci_available = True
-        except Exception:
-            traci_available = False
-
-        if traci_available:
-            # Try some common TRACI ports (8813 is common default, 34363 seen in configs)
-            for port in (8813, 34363, 8873, 13333):
-                try:
-                    # Try to connect briefly to the running SUMO instance
-                    # use a small timeout via numRetries=1 to avoid long waits
-                    conn = traci.connect(port=port)
-                    try:
-                        vehicles = traci.vehicle.getIDList()
-                        active = len(vehicles)
-                        emergency_count = sum(1 for v in vehicles if 'emerg' in v.lower() or 'emergency' in v.lower())
-
-                        # queue length from lanes
-                        queue_len = 0
-                        try:
-                            for lane in traci.lane.getIDList():
-                                try:
-                                    queue_len += traci.lane.getLastStepHaltingNumber(lane)
-                                except Exception:
-                                    pass
-                        except Exception:
-                            queue_len = 0
-
-                        # Build minimal live metrics (pdr/throughput unknown here)
-                        real_metrics = {
-                            'activeVehicles': active,
-                            'avgWait': 0.0,
-                            'pdr': 0.0,
-                            'queueLength': queue_len,
-                            'throughput': 0.0,
-                            'emergencyCount': emergency_count,
-                        }
-                        # Persist to bridge so frontend sees a file immediately
-                        try:
-                            bridge.write_metrics(real_metrics)
-                        except Exception:
-                            pass
-                        # Close connection and break
-                        traci.close()
-                        break
-                    finally:
-                        # Ensure traci closed if still connected
-                        try:
-                            traci.close()
-                        except Exception:
-                            pass
-                except Exception:
-                    # try next port
-                    continue
     
     if real_metrics:
         # Return REAL data from live simulation
