@@ -76,3 +76,6 @@ timestamp,bs_id,vehicle_id,packet_type,size_bytes
 119.0,J3,emergency_1,emergency_encrypted,656
 120.0,J3,emergency_1,emergency_encrypted,656
 121.0,J3,emergency_1,emergency_encrypted,656
+122.0,J3,emergency_1,emergency_encrypted,656
+123.0,J3,emergency_1,emergency_encrypted,656
+124.0,J3,emergency_1,emergency_encrypted,656

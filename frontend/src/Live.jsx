@@ -1,38 +1,64 @@
 import React, { useEffect, useState, useRef } from 'react'
 
 // Simple Sparkline-like SVG chart component
-function Sparkline({ data, color = '#3b82f6', height = 80, width = 280, showLabels = true }) {
-  if (!data || data.length < 2) return <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: 13 }}>No data</div>
-  
+function Sparkline({ data, color = '#3b82f6', height = 80, width = '100%', showLabels = true }) {
+  const wrapperRef = useRef(null)
+  const [measuredWidth, setMeasuredWidth] = useState(null)
+
+  useEffect(() => {
+    function measure() {
+      try {
+        if (typeof width === 'number') {
+          setMeasuredWidth(width)
+        } else if (wrapperRef.current) {
+          const w = wrapperRef.current.clientWidth
+          // Fallback to 280 if measurement fails
+          setMeasuredWidth(w || 280)
+        }
+      } catch (e) {
+        setMeasuredWidth(280)
+      }
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [width, data])
+
+  if (!data || data.length < 2) return <div ref={wrapperRef} style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: 13 }}>No data</div>
+
+  const numericWidth = typeof width === 'number' ? width : (measuredWidth || 280)
+
   const min = Math.min(...data)
   const max = Math.max(...data)
   const range = max - min || 1
-  
+
   const points = data.map((val, i) => ({
-    x: (i / (data.length - 1)) * width,
+    x: (i / (data.length - 1)) * numericWidth,
     y: height - ((val - min) / range) * height
   }))
-  
+
   const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
-  const areaData = `${pathData} L ${width} ${height} L 0 ${height} Z`
-  
+  const areaData = `${pathData} L ${numericWidth} ${height} L 0 ${height} Z`
+
   return (
-    <svg width={width} height={height} style={{ display: 'block' }}>
-      <defs>
-        <linearGradient id={`grad-${color}`} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" style={{ stopColor: color, stopOpacity: 0.3 }} />
-          <stop offset="100%" style={{ stopColor: color, stopOpacity: 0.05 }} />
-        </linearGradient>
-      </defs>
-      <path d={areaData} fill={`url(#grad-${color})`} />
-      <path d={pathData} fill="none" stroke={color} strokeWidth="2" />
-      {showLabels && (
-        <>
-          <text x={width - 5} y={15} textAnchor="end" fill={color} fontSize="12" opacity="0.7" fontWeight="500">Max: {max.toFixed(1)}</text>
-          <text x={width - 5} y={height - 5} textAnchor="end" fill={color} fontSize="12" opacity="0.7" fontWeight="500">Min: {min.toFixed(1)}</text>
-        </>
-      )}
-    </svg>
+    <div ref={wrapperRef} style={{ width: typeof width === 'number' ? width : '100%' }}>
+      <svg width="100%" height={height} viewBox={`0 0 ${numericWidth} ${height}`} preserveAspectRatio="none" style={{ display: 'block' }}>
+        <defs>
+          <linearGradient id={`grad-${color}`} x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style={{ stopColor: color, stopOpacity: 0.3 }} />
+            <stop offset="100%" style={{ stopColor: color, stopOpacity: 0.05 }} />
+          </linearGradient>
+        </defs>
+        <path d={areaData} fill={`url(#grad-${color})`} />
+        <path d={pathData} fill="none" stroke={color} strokeWidth="2" />
+        {showLabels && (
+          <>
+            <text x={numericWidth - 5} y={15} textAnchor="end" fill={color} fontSize="12" opacity="0.7" fontWeight="500">Max: {max.toFixed(1)}</text>
+            <text x={numericWidth - 5} y={height - 5} textAnchor="end" fill={color} fontSize="12" opacity="0.7" fontWeight="500">Min: {min.toFixed(1)}</text>
+          </>
+        )}
+      </svg>
+    </div>
   )
 }
 
@@ -92,6 +118,7 @@ export default function Live() {
     color: '#cbd5e1',
     border: '1px solid rgba(71,85,105,0.5)',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+    overflow: 'hidden',
     transition: 'transform 0.2s ease, box-shadow 0.2s ease',
     cursor: 'pointer',
   }
@@ -185,7 +212,7 @@ export default function Live() {
               <div style={{ fontSize: 36, color: 'white', fontWeight: 'bold' }}>{pointsActive[pointsActive.length -1] ?? 0}</div>
               <div style={{ fontSize: 14, fontWeight: 700, color: pctChange(pointsActive) >= 0 ? '#10b981' : '#fb7185' }}>{formatChange(pctChange(pointsActive))}</div>
             </div>
-            <div style={{ marginBottom: 14 }}><Sparkline data={pointsActive} color="#3b82f6" height={100} width={320} /></div>
+            <div style={{ marginBottom: 14 }}><Sparkline data={pointsActive} color="#3b82f6" height={100} width={'100%'} /></div>
             <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.5 }}>Count of vehicles currently in network</div>
           </div>
 
@@ -200,7 +227,7 @@ export default function Live() {
               <div style={{ fontSize: 36, color: 'white', fontWeight: 'bold' }}>{(pointsWait[pointsWait.length -1] ?? 0).toFixed?.(2) ?? (pointsWait[pointsWait.length -1] ?? 0)}</div>
               <div style={{ fontSize: 14, fontWeight: 700, color: pctChange(pointsWait) >= 0 ? '#fb7185' : '#10b981' }}>{formatChange(pctChange(pointsWait))}</div>
             </div>
-            <div style={{ marginBottom: 14 }}><Sparkline data={pointsWait} color="#10b981" height={100} width={320} /></div>
+            <div style={{ marginBottom: 14 }}><Sparkline data={pointsWait} color="#10b981" height={100} width={'100%'} /></div>
             <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.5 }}>Average waiting time for vehicles</div>
           </div>
 
@@ -215,7 +242,7 @@ export default function Live() {
               <div style={{ fontSize: 36, color: 'white', fontWeight: 'bold' }}>{(pointsPDR[pointsPDR.length -1] ?? 0).toFixed?.(2) ?? (pointsPDR[pointsPDR.length -1] ?? 0)}</div>
               <div style={{ fontSize: 14, fontWeight: 700, color: pctChange(pointsPDR) >= 0 ? '#10b981' : '#fb7185' }}>{formatChange(pctChange(pointsPDR))}</div>
             </div>
-            <div style={{ marginBottom: 14 }}><Sparkline data={pointsPDR} color="#fb923c" height={100} width={320} /></div>
+            <div style={{ marginBottom: 14 }}><Sparkline data={pointsPDR} color="#fb923c" height={100} width={'100%'} /></div>
             <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.5 }}>Network reliability metric</div>
           </div>
         </div>
@@ -231,7 +258,7 @@ export default function Live() {
           >
             <div style={{ color: '#93c5fd', fontWeight: 700, fontSize: 15, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Queue Length</div>
             <div style={{ fontSize: 32, color: 'white', fontWeight: 'bold', marginBottom: 16 }}>{pointsQueue[pointsQueue.length -1] ?? 0}</div>
-            <div style={{ marginBottom: 14 }}><Sparkline data={pointsQueue} color="#60a5fa" height={100} width={320} /></div>
+            <div style={{ marginBottom: 14 }}><Sparkline data={pointsQueue} color="#60a5fa" height={100} width={'100%'} /></div>
             <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.5 }}>Average queue at junctions</div>
           </div>
 
@@ -244,7 +271,7 @@ export default function Live() {
           >
             <div style={{ color: '#fbbf24', fontWeight: 700, fontSize: 15, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Throughput (Mbps)</div>
             <div style={{ fontSize: 32, color: 'white', fontWeight: 'bold', marginBottom: 16 }}>{(pointsThroughput[pointsThroughput.length -1] ?? 0).toFixed?.(1) ?? 0}</div>
-            <div style={{ marginBottom: 14 }}><Sparkline data={pointsThroughput} color="#f59e0b" height={100} width={320} /></div>
+            <div style={{ marginBottom: 14 }}><Sparkline data={pointsThroughput} color="#f59e0b" height={100} width={'100%'} /></div>
             <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.5 }}>Network throughput</div>
           </div>
 
@@ -257,7 +284,7 @@ export default function Live() {
           >
             <div style={{ color: '#fca5a5', fontWeight: 700, fontSize: 15, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Emergency Vehicles</div>
             <div style={{ fontSize: 32, color: 'white', fontWeight: 'bold', marginBottom: 16 }}>{pointsEmergency[pointsEmergency.length -1] ?? 0}</div>
-            <div style={{ marginBottom: 14 }}><Sparkline data={pointsEmergency} color="#ef4444" height={100} width={320} /></div>
+            <div style={{ marginBottom: 14 }}><Sparkline data={pointsEmergency} color="#ef4444" height={100} width={'100%'} /></div>
             <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.5 }}>Emergency vehicles in network</div>
           </div>
         </div>
