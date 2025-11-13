@@ -585,6 +585,47 @@ Examples:
                 print("\n⚠️  No more vehicles in simulation")
                 break
             
+            # Update live metrics for web dashboard (every step for smooth updates)
+            if step % 1 == 0:  # Update every step for real-time feel
+                try:
+                    import sys
+                    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                    if parent_dir not in sys.path:
+                        sys.path.insert(0, parent_dir)
+                    from live_metrics_bridge import get_bridge
+
+                    metrics = ns3_bridge.get_metrics()
+                    current_waiting = sum(1 for veh_id in vehicles 
+                                        if veh_id in vehicle_accumulated_wait 
+                                        and traci.vehicle.getSpeed(veh_id) < 0.1)
+                    active_waits = [vehicle_accumulated_wait[v] for v in vehicles if v in vehicle_accumulated_wait]
+                    avg_wait_current = sum(active_waits) / max(len(active_waits), 1) if active_waits else 0
+                    current_queue = 0
+                    for tl_id in traci.trafficlight.getIDList():
+                        try:
+                            lanes = traci.trafficlight.getControlledLanes(tl_id)
+                            for lane in lanes:
+                                current_queue += traci.lane.getLastStepHaltingNumber(lane)
+                        except:
+                            pass
+                    emergency_count = sum(1 for v in vehicles if 'emergency' in v.lower())
+                    wifi_throughput = metrics['v2v_wifi'].get('packets_sent', 0) * 0.5  # rough estimate in Mbps
+                    live_data = {
+                        'activeVehicles': len(vehicles),
+                        'avgWait': avg_wait_current,
+                        'pdr': metrics['v2v_wifi']['pdr'] * 100,
+                        'queueLength': current_queue,
+                        'throughput': wifi_throughput,
+                        'emergencyCount': emergency_count,
+                    }
+                    bridge = get_bridge()
+                    bridge.write_metrics(live_data)
+                    if step == 1:
+                        print("✅ [LIVE METRICS] Successfully writing to live_metrics.json")
+                except Exception as e:
+                    if step == 1:
+                        print(f"❌ [LIVE METRICS] ERROR: {e}")
+            
             # Print progress
             if time.time() - last_print_time >= 5.0:
                 metrics = ns3_bridge.get_metrics()
@@ -629,6 +670,18 @@ Examples:
         print(f"\n\n❌ Simulation error: {e}")
         traceback.print_exc()
     finally:
+        # Cleanup live metrics file
+        try:
+            import sys
+            parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            if parent_dir not in sys.path:
+                sys.path.insert(0, parent_dir)
+            from live_metrics_bridge import get_bridge
+            bridge = get_bridge()
+            bridge.cleanup()
+        except:
+            pass
+        
         # Stop SUMO
         traffic_controller.stop_simulation()
         

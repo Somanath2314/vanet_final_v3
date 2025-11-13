@@ -1,11 +1,11 @@
 {
-  "total_packets": 4975,
-  "successful_packets": 4875,
-  "PDR": 0.9798994974874372,
-  "mean_latency_s": 0.035568534720518886,
+  "total_packets": 64,
+  "successful_packets": 63,
+  "PDR": 0.984375,
+  "mean_latency_s": 0.03780841946409069,
   "jitter_s": 0.0,
-  "packet_loss_rate": 0.02010050251256279,
-  "throughput_bps": 331657409.66796875,
+  "packet_loss_rate": 0.015625,
+  "throughput_bps": 19119262.6953125,
   "loss_reasons": {
     "rx_error": 0
   },
@@ -24,8 +24,8 @@
       "connected_vehicles": 0
     }
   },
-  "emergency_vehicles": 4,
-  "emergency_events": 8743,
-  "emergency_success_rate": 0.973921994738648,
+  "emergency_vehicles": 2,
+  "emergency_events": 95,
+  "emergency_success_rate": 0.968421052631579,
   "data_source": "ns3_bridge"
 }

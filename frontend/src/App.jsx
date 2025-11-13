@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Live from './Live'
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -210,6 +211,11 @@ function App() {
         `}
       </style>
       <div style={styles.wrapper}>
+        {/* Simple client-side routing: show Live when at /live or when user clicked analyze */}
+        {window.location.pathname === '/live' ? (
+          <Live />
+        ) : (
+        <>
         {/* Header */}
         <div style={styles.header}>
           <div style={styles.icon}>
@@ -393,15 +399,37 @@ function App() {
               )}
             </button>
           </div>
-        </div>
+          </div>
 
-        {/* Footer Info */}
-        <div style={styles.footer}>
-          <p>
-            Backend running on{" "}
-            <span style={styles.footerHighlight}>localhost:5000</span>
-          </p>
-        </div>
+          {/* Footer Info */}
+          <div style={styles.footer}>
+            <p>
+              Backend running on{" "}
+              <span style={styles.footerHighlight}>localhost:5000</span>
+            </p>
+            <p>
+              <button
+                onClick={() => {
+                  // navigate to /live
+                  window.history.pushState({}, '', '/live')
+                  window.location.reload()
+                }}
+                style={{
+                  marginTop: 12,
+                  padding: '8px 14px',
+                  borderRadius: 8,
+                  border: '1px solid rgba(71,85,105,0.4)',
+                  background: 'transparent',
+                  color: '#93c5fd',
+                  cursor: 'pointer'
+                }}
+              >
+                Analyze (Live)
+              </button>
+            </p>
+          </div>
+        </>
+        )}
       </div>
     </div>
   );

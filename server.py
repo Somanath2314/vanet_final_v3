@@ -69,6 +69,114 @@ def preflight():
     return jsonify(status), (200 if status['runnable'] else 400)
 
 
+@app.route('/api/live', methods=['GET'])
+def live():
+    """Return live metrics payload. Reads from running simulation if available,
+    otherwise returns synthetic demo data.
+    """
+    import time, math, random
+    from live_metrics_bridge import get_bridge
+    
+    bridge = get_bridge()
+    t = time.time()
+    mode = selected_method or 'unknown'
+    
+    # Try to get real metrics from running simulation
+    real_metrics = bridge.read_metrics()
+    # If no bridge file, try to query a running SUMO via TraCI as a fallback
+    if not real_metrics:
+        try:
+            # Attempt to import traci and connect to common ports
+            import traci
+            traci_available = True
+        except Exception:
+            traci_available = False
+
+        if traci_available:
+            # Try some common TRACI ports (8813 is common default, 34363 seen in configs)
+            for port in (8813, 34363, 8873, 13333):
+                try:
+                    # Try to connect briefly to the running SUMO instance
+                    # use a small timeout via numRetries=1 to avoid long waits
+                    conn = traci.connect(port=port)
+                    try:
+                        vehicles = traci.vehicle.getIDList()
+                        active = len(vehicles)
+                        emergency_count = sum(1 for v in vehicles if 'emerg' in v.lower() or 'emergency' in v.lower())
+
+                        # queue length from lanes
+                        queue_len = 0
+                        try:
+                            for lane in traci.lane.getIDList():
+                                try:
+                                    queue_len += traci.lane.getLastStepHaltingNumber(lane)
+                                except Exception:
+                                    pass
+                        except Exception:
+                            queue_len = 0
+
+                        # Build minimal live metrics (pdr/throughput unknown here)
+                        real_metrics = {
+                            'activeVehicles': active,
+                            'avgWait': 0.0,
+                            'pdr': 0.0,
+                            'queueLength': queue_len,
+                            'throughput': 0.0,
+                            'emergencyCount': emergency_count,
+                        }
+                        # Persist to bridge so frontend sees a file immediately
+                        try:
+                            bridge.write_metrics(real_metrics)
+                        except Exception:
+                            pass
+                        # Close connection and break
+                        traci.close()
+                        break
+                    finally:
+                        # Ensure traci closed if still connected
+                        try:
+                            traci.close()
+                        except Exception:
+                            pass
+                except Exception:
+                    # try next port
+                    continue
+    
+    if real_metrics:
+        # Return REAL data from live simulation
+        return jsonify({
+            'timestamp': int(t),
+            'activeVehicles': real_metrics.get('activeVehicles', 0),
+            'avgWait': round(real_metrics.get('avgWait', 0.0), 2),
+            'pdr': round(real_metrics.get('pdr', 0.0), 2),
+            'queueLength': real_metrics.get('queueLength', 0),
+            'throughput': round(real_metrics.get('throughput', 0.0), 2),
+            'emergencyCount': real_metrics.get('emergencyCount', 0),
+            'mode': mode,
+            'isLive': True,  # Flag indicating real data
+        }), 200
+    else:
+        # Fallback to synthetic data for demo (when simulation not running)
+        active = int(30 + 10 * math.sin(t / 5) + random.uniform(-3, 3))
+        avg_wait = max(0.5, 5 + 2 * math.sin(t / 7) + random.uniform(-0.5, 0.5))
+        pdr = max(80, min(100, 95 + 2 * math.sin(t / 6) + random.uniform(-1.5, 1.5)))
+        queue_len = max(0, int(2 + 2 * math.sin(t / 4) + random.uniform(-1, 1)))
+        throughput = max(100, 400 + 60 * math.sin(t / 8) + random.uniform(-20, 20))
+        emergency_count = max(0, int(3 + 2 * math.sin(t / 9) + random.uniform(-1, 1)))
+        
+        return jsonify({
+            'timestamp': int(t),
+            'activeVehicles': active,
+            'avgWait': round(avg_wait, 2),
+            'pdr': round(pdr, 2),
+            'queueLength': queue_len,
+            'throughput': round(throughput, 2),
+            'emergencyCount': emergency_count,
+            'mode': mode,
+            'isLive': False,  # Flag indicating synthetic demo data
+        }), 200
+
+
 @app.route('/api/method', methods=['POST'])
 def set_method():
     global selected_method
