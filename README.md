@@ -1,5 +1,5 @@
 
-# VANET Integrated System — Overview
+# VANET Integrated System — Overview - https://doi.org/10.5281/zenodo.17707167
 
 This repository contains a full-stack Vehicular Ad-Hoc Network (VANET) simulation integrating traffic simulation (SUMO), network protocol simulation (NS3), hybrid traffic control (rule-based and reinforcement learning), optional security features, and edge-computing components.
 
