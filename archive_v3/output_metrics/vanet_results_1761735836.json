@@ -1,0 +1,38 @@
+{
+  "wifi": {
+    "simulation": {
+      "duration": 45,
+      "vehicles": 15,
+      "standard": "802.11p"
+    },
+    "performance": {
+      "total_packets": 6750,
+      "packets_received": 6520,
+      "packet_delivery_ratio": 0.9659616896528705,
+      "average_delay_ms": 29.623577080463324,
+      "throughput_mbps": 24.381195796586212
+    }
+  },
+  "wimax": {
+    "simulation": {
+      "duration": 45,
+      "vehicles": 15,
+      "intersections": 4
+    },
+    "performance": {
+      "packets_sent": 2025,
+      "packets_received": 1956,
+      "packet_delivery_ratio": 0.9959616896528706,
+      "average_delay_ms": 20.736503956324327
+    }
+  },
+  "combined": {
+    "overall_pdr": 0.9659616896528705,
+    "overall_delay_ms": 29.623577080463324,
+    "overall_throughput_mbps": 24.381195796586212,
+    "v2v_success_rate": 0.9659616896528705,
+    "v2i_success_rate": 0.9959616896528706,
+    "emergency_response_time_ms": 14.811788540231662
+  },
+  "source": "ns3"
+}

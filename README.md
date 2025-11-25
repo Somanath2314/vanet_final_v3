@@ -1,148 +1,49 @@
-# 🚗 Complete Integrated VANET System with RL, Security & Edge Computing
 
-**Status**: ✅ FULLY OPERATIONAL | **Control**: Proximity-Based RL + Adaptive + Emergency Priority | **Security**: AES-256-GCM + RSA-PSS | **Edge**: 13 Smart RSUs | **PDR**: 96-98%
+# VANET Integrated System — Overview
 
-Complete Vehicular Ad-Hoc Network (VANET) simulation combining **SUMO traffic simulation** with **NS3-based network protocols**, **proximity-based Deep RL traffic control**, **AES-256-GCM encryption**, **emergency vehicle priority**, and **3-tier edge computing infrastructure** with real-time GUI visualization.
+This repository contains a full-stack Vehicular Ad-Hoc Network (VANET) simulation integrating traffic simulation (SUMO), network protocol simulation (NS3), hybrid traffic control (rule-based and reinforcement learning), optional security features, and edge-computing components.
 
-> 📚 **Documentation**: See [DOCS_INDEX.md](DOCS_INDEX.md) for complete guide to all documentation files
+Primary entry points
+- `server.py` — Flask backend used as an API and simulation launcher. Run with `python3 server.py`. The server exposes endpoints such as `/api/preflight`, `/api/run`, `/api/live`, and `/api/method`.
+- `frontend/` — Frontend application based on Vite. Run the development server from the `frontend` directory with `npm run dev`.
 
----
+Quick start (development)
 
-## � Recent Updates (November 2025)
-
-### 🚑 Emergency Vehicle Priority System
-- **Pass-Through Detection**: Immediate return to adaptive control when emergency passes junction center (30m)
-- **First-Come-First-Served**: Multiple emergencies at same junction handled intelligently
-- **Detection Range**: 150m optimal balance between response time and congestion
-- **Traffic Configuration**: 10 individual + 35 veh/h flows = 45+ emergency vehicles per simulation
-- **Console Logging**: Real-time "🚨 EMERGENCY PRIORITY", "✅ CLEARED", "🚦 waiting" messages
-
-### 🔐 Security Enhancements
-- **Encryption**: Migrated from XOR to AES-256-GCM (AEAD) for V2V/V2I messages
-- **Timestamp Validation**: Added replay attack prevention (5-minute tolerance)
-- **No Hardcoded Keys**: All keys generated dynamically, stored securely
-- **Message Authentication**: RSA-PSS signatures with SHA256 for all messages
-
-### 📊 Metrics Improvements
-- **V2I Metrics**: Fixed to use NS3 bridge data (accurate packet counts)
-- **Emergency Statistics**: Track encounters, travel time improvements, priority switches
-- **Hybrid Model Stats**: RL activation percentage, junction switches, mode usage time
-
----
-
-## �🎯 System Overview
-
-This system provides a complete VANET simulation environment with:
-
-- **🚦 Traffic Simulation**: Real vehicle movements, intersections, emergency vehicles (SUMO)
-- **📡 Network Protocols**: WiFi 802.11p (V2V) + WiMAX (V2I for emergency)
-- **🤖 Traffic Control**: Rule-based (density) OR **Proximity-Based RL (DQN)** ⭐ NEW
-- **🔐 Security**: AES-256-GCM encryption + RSA-PSS signatures with Certificate Authority
-- **🚑 Emergency Priority**: Automatic detection, pass-through tracking, first-come-first-served
-- **🔷 Edge Computing**: 13 Smart RSUs with local processing, caching, and collision detection
-
----
-
-## 🚀 Quick Start
-
-### Proximity-Based RL (⭐ **RECOMMENDED** - NEW)
+- Backend (API):
 
 ```bash
-# Intelligent junction-specific RL control (BEST PERFORMANCE)
-./run_integrated_sumo_ns3.sh \
-    --proximity 250 \
-    --model rl_module/trained_models/dqn_traffic_20251108_130019/dqn_traffic_final.zip \
-    --gui \
-    --edge \
-    --steps 1000
-
-# With security (adds 30-60s startup)
-./run_integrated_sumo_ns3.sh \
-    --proximity 250 \
-    --model rl_module/trained_models/dqn_traffic_20251108_130019/dqn_traffic_final.zip \
-    --gui \
-    --edge \
-    --security \
-    --steps 1000
+python3 server.py
 ```
 
-**Why Proximity-Based?**
-- ✅ **Efficient**: Only uses RL within 250m of emergencies (70% density, 30% RL)
-- ✅ **Junction-Specific**: Per-junction control, not global switching
-- ✅ **Responsive**: Switches immediately when emergency passes (~40 steps per junction)
-- ✅ **Resource-Efficient**: Minimal overhead compared to continuous RL
-
-### Basic Usage (No RL)
+- Frontend (development):
 
 ```bash
-# Rule-based traffic control with GUI (OPTIMIZED - Adaptive)
-./run_integrated_sumo_ns3.sh --gui --steps 100
-# Watch: Green lights adapt 10-45s based on traffic density!
-
-# With Edge Computing (Smart RSUs)
-./run_integrated_sumo_ns3.sh --gui --steps 100 --edge
-# Adds: Collision warnings, emergency coordination, local processing
-
-# RL-based traffic control with GUI
-./run_integrated_sumo_ns3.sh --rl --gui --steps 100
-
-# Fast testing without GUI
-./run_integrated_sumo_ns3.sh --steps 50
+cd frontend
+npm install
+npm run dev
 ```
 
-### With Security (RSA Encryption)
+Notes about the repository
 
-```bash
-# Rule-based + RSA encryption (45-60s startup)
-./run_integrated_sumo_ns3.sh --gui --steps 100 --security
+- There are two main runtime entry points (`server.py` and `frontend`) and supporting scripts in the project root and `backend/` directory. Typical simulation runs are performed via the `run_integrated_sumo_ns3.sh` script referenced by `server.py`.
+- Backend requirements: see `backend/requirements.txt` for Python dependencies.
 
-# Rule-based + Edge Computing + Security (Full featured)
-./run_integrated_sumo_ns3.sh --gui --steps 100 --security --edge
+Archive and documentation
 
-# RL + RSA encryption
-./run_integrated_sumo_ns3.sh --rl --gui --steps 100 --security
-```
+- A non-destructive archive of repository markdown files has been added at `archive_v3/readmes/`. See `archive_v3/readmes/ARCHIVE_INDEX.md` for a list of discovered markdown files.
+- A snapshot of the original root `README.md` has been saved to `archive_v3/readmes/README_original_backup.md`.
 
-### All Options
+Consolidated documentation
 
-```bash
-./run_integrated_sumo_ns3.sh [OPTIONS]
+- This file is a concise entrypoint and contains the necessary run and overview instructions. Detailed guides and historical notes have been archived and indexed under `archive_v3/readmes/`.
 
-Options:
-  --rl          Use RL-based traffic control (default: rule-based)
-  --gui         Use SUMO-GUI for visualization
-  --steps N     Number of simulation steps (default: 1000)
-  --security    Enable RSA encryption (adds 30-60s startup time)
-  --edge        Enable edge computing with smart RSUs
-```
+Next actions and recommendations
 
----
+- I copied and indexed documentation files non-destructively. If you want me to move (remove) the original markdown files into the archive (cleaner root), confirm and I will proceed.
+- I can also produce a candidate list of likely-unused source files (scripts, legacy binaries, large assets) ready to be moved — I recommend reviewing that list before any destructive move.
 
-## ✨ Key Features
+If you want changes to the consolidated README (add more run examples, system diagram excerpt, or dependency install steps), tell me what to include and I will update it.
 
-### � Emergency Vehicle Priority System
-
-**Intelligent Traffic Light Control for Ambulances:**
-
-The system automatically detects and prioritizes emergency vehicles using a sophisticated multi-stage approach:
-
-**Detection & Priority Logic:**
-```
-1. Detection Range: 150 meters from junction center
-   - Emergency vehicles monitored continuously
-   - Real-time distance calculation to each junction
-
-2. Pass-Through Detection (30m): 
-   - When emergency reaches 30m from junction center
-   - Marks as "served" and immediately returns to adaptive control
-   - Prevents excessive green time for other directions
-
-3. First-Come-First-Served (Simultaneous Emergencies):
-   - Multiple emergencies approaching same junction
-   - Priority assigned to closest unserved emergency
-   - Others wait until first emergency passes through
-   - Console logs: "🚨 EMERGENCY PRIORITY", "🚦 waiting"
-```
 
 **V2I Emergency Communication:**
 - WiMAX protocol (1000m range) for long-distance alerts

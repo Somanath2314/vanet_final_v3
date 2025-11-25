@@ -1,0 +1,361 @@
+```
+EMERGENCY VEHICLE GREENWAVE SYSTEM - VISUAL OVERVIEW
+=====================================================
+
+NETWORK TOPOLOGY
+================
+
+    J1          J2          J3          J4          J5
+    O ----E1---[🚥]---E2---[🚥]---E3----O----E4---- O
+               📡         📡
+              RSU1       RSU2
+               |           |
+               +-----+-----+
+                     |
+           Emergency Coordinator
+                     |
+              RL Environment
+
+
+NORMAL OPERATION (No Emergency)
+================================
+
+Time: t=0
+
+    [Vehicle Flow]
+    🚗 → [🚥] → 🚗 → [🚥] → 🚗
+         J2           J3
+
+    RL Agent:
+    1. Observe: Vehicle speeds, positions, queue lengths
+    2. Decide: Which phase for each traffic light
+    3. Reward: Based on traffic flow (+10 to -10)
+
+
+EMERGENCY VEHICLE DETECTED
+===========================
+
+Time: t=10s - Ambulance spawns
+
+    🚑 ----------300m------→ [🚥]
+    emergency_1              J2
+                             📡 RSU1
+                             ↓
+                    "🚨 EMERGENCY DETECTED!"
+                             ↓
+              Emergency Coordinator
+                     ↓
+        Analyze route: E1→E2→E3→E4
+        Junctions ahead: [J2, J3]
+                     ↓
+        Create greenwave path
+
+
+GREENWAVE CREATION
+==================
+
+Time: t=12s - RSU detects ambulance
+
+    Route Analysis:
+    🚑 is on E1
+    └─> Next: E2 (through J2)
+    └─> Then: E3 (through J3)
+    └─> Future: E4, E5...
+
+    Greenwave Plan:
+    ┌─────────────┬──────────┬─────────┐
+    │ Traffic Light│ Current │ Target │
+    ├─────────────┼──────────┼─────────┤
+    │ J2          │ Phase 0  │ Phase 2 │ ← Green for E1→E2
+    │ J3          │ Phase 1  │ Phase 1 │ ← Green for E2→E3
+    └─────────────┴──────────┴─────────┘
+
+
+GREENWAVE ACTIVE
+================
+
+Time: t=13s - Lights turn green
+
+    🚑 →→→ [🟢] →→→ [🟢] →→→
+           J2       J3
+           📡       📡
+         RSU1     RSU2
+           ↓        ↓
+     Detection  Detection
+     "Clear!"   "Clear!"
+
+    Other directions:
+    🚗 ⛔ (Red)    🚗 ⛔ (Red)
+       ↓              ↓
+    Wait for      Wait for
+    ambulance     ambulance
+
+
+REWARD CALCULATION
+==================
+
+During Emergency (t=13s):
+
+    Emergency Vehicle Metrics:
+    ├─ Speed: 15 m/s (54 km/h) ✓ Fast
+    ├─ Waiting: 0 seconds ✓ No delay
+    └─ Greenwave: Active ✓ Coordinated
+
+    Rewards:
+    ├─ Speed bonus: +200 (HUGE - moving fast!)
+    ├─ Greenwave bonus: +50 (Active coordination)
+    ├─ Waiting penalty: 0 (No waiting)
+    └─ Total Emergency: +250
+
+    Base Traffic (scaled down):
+    ├─ Normal vehicles: +5 (moderate flow)
+    └─ Scaled (×0.3): +1.5
+
+    Queue Penalties:
+    ├─ Side roads waiting: -10 (acceptable)
+    └─ Scaled (×0.5): -5
+
+    TOTAL REWARD: +250 + 1.5 - 5 = +246.5 ✅ EXCELLENT
+
+
+BAD SCENARIO - Emergency Delayed
+=================================
+
+Time: t=20s - If lights were NOT coordinated:
+
+    🚑 ⛔ [🔴] ← Stopped at red light!
+           J2
+           📡
+         RSU1
+           ↓
+    "Emergency waiting!"
+
+    Emergency Vehicle Metrics:
+    ├─ Speed: 0 m/s ✗ Stopped
+    ├─ Waiting: 8 seconds ✗ Delayed
+    └─ Greenwave: Inactive ✗ No coordination
+
+    Rewards:
+    ├─ Speed penalty: -150 (SEVERE - stopped!)
+    ├─ Waiting penalty: -100 (SEVERE - delayed!)
+    ├─ Greenwave bonus: 0 (Not active)
+    └─ Total Emergency: -250
+
+    TOTAL REWARD: -250 ❌ TERRIBLE
+
+    Learning Signal:
+    Difference: +246.5 - (-250) = +496.5
+    → MASSIVE difference teaches agent:
+      "Prioritize emergency vehicles!"
+
+
+VEHICLE LIFECYCLE MANAGEMENT
+=============================
+
+Problem: Vehicles with short routes disappear, causing crashes
+
+Solution: Track vehicle lifecycle
+
+    Vehicle States:
+    ┌─────────────┐
+    │   Spawned   │ ← Vehicle enters simulation
+    └──────┬──────┘
+           ↓
+    ┌─────────────┐
+    │   Active    │ ← Vehicle moving in network
+    │ (Tracked)   │    • Added to all_seen_vehicles
+    └──────┬──────┘    • Observable by RL agent
+           ↓
+    ┌─────────────┐
+    │  Completed  │ ← Vehicle reaches destination
+    │  (Removed)  │    • Removed from active vehicles
+    └──────┬──────┘    • Added to completed_vehicles
+           ↓            • No longer observable
+    ┌─────────────┐    • No crash! ✓
+    │   Despawned │
+    └─────────────┘
+
+    Code:
+    def get_observable_veh_ids():
+        all_vehs = traci.vehicle.getIDList()
+        
+        # Track new vehicles
+        for veh in all_vehs:
+            if veh not in self.all_seen_vehicles:
+                self.all_seen_vehicles.add(veh)
+        
+        # Detect completed vehicles
+        current_set = set(all_vehs)
+        newly_completed = self.all_seen_vehicles - current_set - self.completed_vehicles
+        self.completed_vehicles.update(newly_completed)
+        
+        # Return only active vehicles
+        return list(all_vehs)[:self.beta]
+
+
+RSU DETECTION ZONES
+===================
+
+    RSU Coverage (300m radius):
+
+                300m
+           ◄───────────►
+              ▲
+              │         ╔════════════╗
+         ┌────┼────┐    ║  Detection ║
+         │    │    │    ║    Zone    ║
+    ─────┴─── 📡 ──┴────╚════════════╝
+         │   RSU  │
+         └────────┘
+           Junction
+
+    Detection Logic:
+    1. Calculate distance: √[(veh_x - rsu_x)² + (veh_y - rsu_y)²]
+    2. If distance ≤ 300m AND vehicle is emergency type:
+       └─> DETECT!
+    3. Create greenwave for detected vehicle
+
+
+MULTI-JUNCTION COORDINATION
+============================
+
+    Scenario: Ambulance on long route
+
+    t=10s: RSU1 detects
+    🚑 →→→ [📡]─────[  ]─────[  ]
+           J2      J3      J4
+           🟢      ⚪      ⚪
+           Active  Planned Planned
+
+    t=15s: Ambulance at J2, RSU2 activates J3
+    [  ]─────🚑 →→→ [📡]─────[  ]
+     J2              J3      J4
+     🔴              🟢      ⚪
+     Cleared        Active  Planned
+
+    t=20s: Ambulance at J3, RSU3 activates J4
+    [  ]─────[  ]─────🚑 →→→ [📡]
+     J2      J3              J4
+     🔴      🔴              🟢
+     Cleared Cleared        Active
+
+    Greenwave propagates forward!
+
+
+REWARD STRUCTURE SUMMARY
+========================
+
+    Normal Traffic Rewards:
+    ┌─────────────────────┬──────────┐
+    │ Metric              │ Reward   │
+    ├─────────────────────┼──────────┤
+    │ Good flow           │ +5 to +10│
+    │ Moderate flow       │ 0 to +5  │
+    │ Congestion          │ -5 to -20│
+    │ Long waits          │ -50      │
+    └─────────────────────┴──────────┘
+
+    Emergency Vehicle Rewards:
+    ┌─────────────────────┬──────────┐
+    │ Metric              │ Reward   │
+    ├─────────────────────┼──────────┤
+    │ Moving fast (>10m/s)│ +200 ✓✓✓│
+    │ Moving (>5m/s)      │ +100 ✓✓ │
+    │ Slow/stopped        │ -150 ✗✗✗│
+    │ Waiting >5s         │ -100 ✗✗ │
+    │ Greenwave active    │ +50  ✓  │
+    └─────────────────────┴──────────┘
+
+    Combined Best Case:
+    Emergency moving fast + greenwave + good flow
+    = +200 + 50 + 5 = +255 reward
+
+    Combined Worst Case:
+    Emergency stopped + waiting + congestion
+    = -150 - 100 - 20 = -270 reward
+
+    Learning gradient: 525 points difference!
+    → Very strong teaching signal
+
+
+SYSTEM ARCHITECTURE
+===================
+
+    ┌──────────────────────────────────────────────┐
+    │            RL Training Loop                   │
+    │                                               │
+    │  1. Observe State                             │
+    │     ├─ Vehicle positions & speeds             │
+    │     ├─ Traffic light states                   │
+    │     └─ Emergency vehicle locations (NEW)      │
+    │                                               │
+    │  2. Emergency Check (NEW)                     │
+    │     ├─ RSU detection                          │
+    │     ├─ Greenwave creation                     │
+    │     └─ Priority override                      │
+    │                                               │
+    │  3. RL Agent Action                           │
+    │     └─ Select traffic light phases            │
+    │                                               │
+    │  4. Apply Actions                             │
+    │     ├─ Set traffic lights                     │
+    │     └─ Maintain greenwave if active           │
+    │                                               │
+    │  5. Simulate                                  │
+    │     └─ SUMO advances 1 second                 │
+    │                                               │
+    │  6. Compute Reward (ENHANCED)                 │
+    │     ├─ Base traffic rewards (×0.3 if emerg)   │
+    │     ├─ Emergency rewards (PRIORITY)           │
+    │     └─ Queue penalties (×0.5 if emerg)        │
+    │                                               │
+    │  7. Learn                                     │
+    │     └─ Update policy with reward              │
+    │                                               │
+    └──────────────────────────────────────────────┘
+
+
+KEY METRICS TO MONITOR
+======================
+
+    Console Output:
+    ┌────────────────────────────────────────────┐
+    │ 🚨 Emergency vehicle detected: emergency_1 │
+    │    by RSU_J2                               │
+    │ 🟢 Greenwave created: ['J2', 'J3']         │
+    │ 🟢 Greenwave: J2 set to phase 2            │
+    │ ✓ Emergency vehicle completed route        │
+    └────────────────────────────────────────────┘
+
+    Metrics Dictionary:
+    {
+      'active_emergencies': 1,      ← Current count
+      'successful_greenwaves': 3,   ← Total created
+      'emergency_detections': 5,    ← Total RSU detections
+      'completed_vehicles': 127,    ← Vehicles finished
+      'episode_reward': +1847.3     ← Cumulative reward
+    }
+
+
+SUCCESS INDICATORS
+==================
+
+    System is working correctly if you see:
+
+    ✅ Emergency vehicles detected by RSUs
+    ✅ Greenwave messages in console
+    ✅ Traffic lights turning green ahead of ambulances
+    ✅ High positive rewards when emergencies pass smoothly
+    ✅ No crashes when vehicles complete short routes
+    ✅ 'completed_vehicles' count increasing
+    ✅ Emergency vehicles maintaining high speed
+    ✅ Low emergency waiting times
+
+    Problems indicators:
+
+    ❌ No detection messages (check vehicle types)
+    ❌ Emergency vehicles stopping at red lights
+    ❌ Crashes when vehicles disappear
+    ❌ Low/negative rewards during emergency passage
+    ❌ Long emergency waiting times
+```

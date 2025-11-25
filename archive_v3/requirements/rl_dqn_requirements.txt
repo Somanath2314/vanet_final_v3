@@ -1,0 +1,16 @@
+# RL DQN Training Requirements
+# Install with: pip install -r rl_dqn_requirements.txt
+
+# Core RL library
+stable-baselines3==2.2.1
+
+# Dependencies for stable-baselines3
+torch>=2.0.0
+gymnasium>=0.28.0
+numpy>=1.20.0
+
+# Monitoring and logging
+tensorboard>=2.11.0
+
+# Utility
+tqdm>=4.65.0
