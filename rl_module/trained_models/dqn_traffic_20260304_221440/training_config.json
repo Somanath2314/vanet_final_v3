@@ -1,0 +1,66 @@
+{
+  "sumo_config": "/Users/apple/Desktop/vanet/vanet_final_v3/sumo_simulation/simulation.sumocfg",
+  "algorithm": "DQN",
+  "framework": "stable-baselines3",
+  "policy": "MlpPolicy",
+  "total_timesteps": 200000,
+  "learning_rate": 0.0001,
+  "buffer_size": 50000,
+  "learning_starts": 1000,
+  "batch_size": 32,
+  "gamma": 0.99,
+  "target_update_interval": 1000,
+  "epsilon_schedule": {
+    "type": "linear",
+    "epsilon_start": 1.0,
+    "epsilon_final": 0.05,
+    "exploration_fraction": 0.3,
+    "exploration_timesteps": 60000,
+    "description": "Linear decay from 1.0 to 0.05 over the first 30% of training (60,000 steps), then held constant."
+  },
+  "reward_coefficients": {
+    "alpha_1_speed": {
+      "value": 0.01,
+      "description": "c * penalize_min_speed(8 km/h): +0.01 per vehicle above threshold"
+    },
+    "alpha_2_waiting": {
+      "value": -0.5,
+      "description": "c * penalize_max_wait(60 steps, penalty=-50): -0.5 per idled vehicle"
+    },
+    "alpha_3_emergency": {
+      "fast_bonus": 200,
+      "moderate_bonus": 100,
+      "slow_penalty": -150,
+      "wait_penalty": -100,
+      "greenwave_bonus": 50,
+      "description": "Emergency vehicle speed/wait bonuses and penalties"
+    },
+    "alpha_4_queue": {
+      "severe_penalty": -20,
+      "moderate_penalty": -5,
+      "description": "Queue congestion penalty per lane (avg speed < 2 m/s or < 5 m/s)"
+    },
+    "base_scaling_c": 0.01,
+    "emergency_weight_reduction": {
+      "base_factor": 0.3,
+      "queue_factor": 0.5,
+      "description": "When emergency vehicles present: R = 0.3*R_base + R_emerg + 0.5*R_queue"
+    }
+  },
+  "environment": {
+    "beta": 20,
+    "horizon": 1000,
+    "tl_constraint_min": 5,
+    "tl_constraint_max": 60,
+    "sim_step": 1.0
+  },
+  "training_results": {
+    "episodes_completed": 0,
+    "episode_rewards": [],
+    "final_avg_reward_last10": null,
+    "best_episode_reward": null,
+    "worst_episode_reward": null
+  },
+  "seed": 42,
+  "device": "auto"
+}
