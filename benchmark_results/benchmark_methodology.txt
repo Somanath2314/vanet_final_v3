@@ -1,0 +1,442 @@
+================================================================================
+  VANET BENCHMARK — METRICS METHODOLOGY & MATHEMATICAL FORMULATION
+  For Academic Paper Reference
+================================================================================
+
+Generated: 9 March 2026
+Project: VANET Integrated Traffic Control with V2V/V2I Communication
+Simulation Framework: SUMO (Simulation of Urban MObility) + NS3-style Bridge
+
+
+================================================================================
+  1. EXPERIMENTAL SETUP
+================================================================================
+
+Benchmark Configuration:
+  - Number of seeds (N):       30
+  - Seed range:                42 to 71 (inclusive)
+  - Simulation steps per run:  1000 (1 step = 1 second of simulated time)
+  - Control modes:             3 (Fixed, Density-Adaptive, Proximity-RL)
+  - Security configurations:   2 (Without Security, With RSA/AES Security)
+  - Total simulation runs:     3 × 30 × 2 = 180
+
+Seed Usage:
+  Each seed value s ∈ {42, 43, ..., 71} is passed to:
+    - Python:  random.seed(s) and numpy.random.seed(s)
+    - SUMO:    --seed s (controls vehicle departure times, route choices)
+  This ensures full reproducibility of each individual run.
+
+Control Modes:
+  1. Fixed:      Constant 30-second green phase per direction
+  2. Density:    Adaptive green time (10–45s) based on real-time lane density
+  3. Proximity:  Hybrid DQN RL that activates within 250m of emergency vehicles,
+                 falls back to density-based control elsewhere
+
+Security Configuration:
+  - Without Security: No encryption or authentication overhead
+  - With Security:    RSA-4096 Certificate Authority, RSA-2048 per entity,
+                      AES-256-GCM symmetric encryption for V2V/V2I messages
+
+Network Parameters:
+  - V2V Protocol:    IEEE 802.11p (WiFi), range = 300m
+  - V2I Protocol:    WiMAX (emergency vehicles), range = 1000m
+                     WiFi 802.11p (regular vehicles), range = 300m
+  - Beacon interval: 0.1s (10 Hz)
+  - RSUs:            13 at intersection/road-segment positions
+
+
+================================================================================
+  2. NOTATION & AGGREGATION — WHAT "±" MEANS
+================================================================================
+
+For each metric M, we collect one scalar value per simulation run.
+For a given mode and security setting, we have N = 30 values:
+
+    M_1, M_2, ..., M_N     (one per seed)
+
+The table reports:  mean ± std
+
+  Mean (arithmetic average):
+
+                        1   N
+              μ_M  =  --- Σ  M_i
+                       N  i=1
+
+  Standard Deviation (population, not sample):
+
+                          ┌         ┐ 1/2
+                          │ 1   N   │
+              σ_M  =      │--- Σ (M_i - μ_M)²│
+                          │ N  i=1  │
+                          └         ┘
+
+  NOTE: We use numpy.std() which computes the POPULATION standard deviation
+  (ddof=0 by default), dividing by N (not N-1).
+
+  Reported as:  μ_M ± σ_M
+
+  Example: "16.50 ± 0.42" means the mean across 30 seeds is 16.50 and
+  the population standard deviation is 0.42.
+
+  Code reference (run_benchmark.py, aggregate_metrics function):
+    agg[key] = {
+        'mean': np.mean(values),    # μ = (1/N) Σ M_i
+        'std':  np.std(values),     # σ = sqrt((1/N) Σ (M_i - μ)²)
+        'min':  np.min(values),
+        'max':  np.max(values),
+        'n':    len(values),        # = 30
+    }
+
+
+================================================================================
+  3. PER-RUN METRIC DEFINITIONS
+================================================================================
+
+Each of the 180 simulation runs produces the following metrics. These are
+the raw per-run values that then get aggregated across seeds as described
+in Section 2.
+
+Source file: sumo_simulation/run_complete_integrated.py
+
+
+--- 3.1  AVERAGE WAIT TIME (seconds) ---
+
+  Definition: Mean total waiting time across all vehicles that completed
+  their trip during the simulation.
+
+  A vehicle is considered "waiting" when its instantaneous speed < 0.1 m/s
+  (effectively stopped at a red light or in congestion).
+
+  For each vehicle v that completes its trip (arrives at destination):
+
+    W_v = Σ_{t ∈ trip(v)} 1_{speed_v(t) < 0.1}
+
+  Where:
+    - trip(v) is the set of simulation steps where vehicle v exists
+    - speed_v(t) is the instantaneous speed (m/s) from traci.vehicle.getSpeed()
+    - 1_{...} is the indicator function (= 1 if condition true, else 0)
+    - Each step = 1 second, so W_v is in seconds
+
+  Per-run metric:
+                         1
+    avg_wait_time  =  ------- Σ  W_v
+                       |C|   v∈C
+
+  Where C is the set of completed vehicles (reached their destination).
+
+
+--- 3.2  AVERAGE TRIP SPEED (m/s) ---
+
+  Definition: Mean average speed across all completed vehicles.
+
+  For each completed vehicle v:
+
+    D_v = Σ_{t ∈ trip(v)} speed_v(t)      (total accumulated distance, meters)
+    T_v = |trip(v)|                         (trip duration in steps/seconds)
+    S_v = D_v / max(T_v, 1)               (average speed over trip)
+
+  Note: D_v = Σ speed_v(t) × Δt where Δt = 1s, so D_v ≈ total distance.
+
+  Per-run metric:
+                          1
+    avg_trip_speed  =  ------- Σ  S_v
+                        |C|   v∈C
+
+
+--- 3.3  AVERAGE QUEUE LENGTH (vehicles) ---
+
+  Definition: Mean total halting vehicles across all junctions, averaged
+  over all simulation steps.
+
+  At each step t:
+
+    Q(t) = Σ_{j ∈ J} Σ_{l ∈ lanes(j)} halting(l, t)
+
+  Where:
+    - J is the set of all traffic-light-controlled junctions
+    - lanes(j) are the controlled lanes of junction j
+    - halting(l, t) = traci.lane.getLastStepHaltingNumber(lane)
+      (SUMO definition: vehicles with speed < 0.1 m/s on that lane)
+
+  Per-run metric:
+                             1
+    avg_queue_length  =  ------- Σ  Q(t)
+                          |T|   t∈T
+
+  Where T is the set of simulation steps where vehicles were present
+  (metric_steps counter).
+
+
+--- 3.4  TOTAL COMPLETED VEHICLES (count) ---
+
+  Definition: Number of vehicles that reached their destination during
+  the simulation.
+
+    total_completed_vehicles = |C|
+
+  A vehicle is "completed" when it disappears from the SUMO vehicle list
+  between consecutive steps (previous_vehicles - current_vehicles), meaning
+  it arrived at its route destination.
+
+
+--- 3.5  THROUGHPUT (vehicles per minute) ---
+
+  Definition: Rate of vehicle completions normalized to wall-clock time.
+
+    throughput = |C| / max(elapsed_time_minutes, 1)
+
+  Where elapsed_time_minutes = (wall-clock end - wall-clock start) / 60.
+
+  NOTE: This is wall-clock throughput, not simulated-time throughput.
+  This is why throughput differs between security/no-security (security
+  adds ~2× wall-clock time due to RSA key generation), even though the
+  same number of vehicles complete their trips.
+
+
+--- 3.6  EMERGENCY AVERAGE WAIT TIME (seconds) ---
+
+  Same formula as 3.1, restricted to emergency vehicles:
+
+                             1
+    emergency_avg_wait = -------- Σ  W_v
+                          |C_e|  v∈C_e
+
+  Where C_e = {v ∈ C : "emergency" ∈ vehicle_id(v)}
+
+  Emergency vehicles are identified by the substring "emergency" in their
+  SUMO vehicle ID.
+
+
+--- 3.7  EMERGENCY AVERAGE SPEED (m/s) ---
+
+  Same formula as 3.2, restricted to emergency vehicles:
+
+                              1
+    emergency_avg_speed = -------- Σ  S_v
+                           |C_e|  v∈C_e
+
+
+--- 3.8  EMERGENCY VEHICLES COMPLETED (count) ---
+
+    emergency_completed = |C_e|
+
+
+--- 3.9  NORMAL AVERAGE WAIT TIME (seconds) ---
+
+  Same formula as 3.1, restricted to non-emergency vehicles:
+
+                           1
+    normal_avg_wait = -------- Σ  W_v
+                       |C_n|  v∈C_n
+
+  Where C_n = C \ C_e  (all completed vehicles excluding emergency)
+
+
+--- 3.10  NORMAL AVERAGE SPEED (m/s) ---
+
+                            1
+    normal_avg_speed = -------- Σ  S_v
+                        |C_n|  v∈C_n
+
+
+--- 3.11  NORMAL VEHICLES COMPLETED (count) ---
+
+    normal_completed = |C_n|
+
+
+--- 3.12  WiFi PACKET DELIVERY RATIO — PDR (%) ---
+
+  Definition: Percentage of WiFi (802.11p) packets successfully received
+  out of all packets transmitted, across both V2V and V2I communication.
+
+                       wifi_packets_received
+    wifi_pdr (%) = ─────────────────────────── × 100
+                        wifi_packets_sent
+
+  WiFi is used for:
+    - V2V: All vehicle-to-vehicle communication (beacon messages)
+    - V2I: Regular (non-emergency) vehicle to RSU communication
+
+  The per-packet success probability depends on distance d:
+
+    P_success(d) = max(0.92, 1.0 - (d / R_wifi) × 0.08)
+
+  Where R_wifi = 300m (WiFi range).
+
+  This models a minimum PDR of 92% at maximum range, linearly decreasing
+  from 100% at d=0 to 92% at d=300m.
+
+  Packet delivery is determined deterministically using a hash function:
+
+    delivered = (hash(source_id, dest_id, timestamp) mod 100) / 100 < P_success(d)
+
+
+--- 3.13  WiMAX PACKET DELIVERY RATIO — PDR (%) ---
+
+  Definition: Percentage of WiMAX packets successfully received out of all
+  WiMAX packets transmitted (V2I communication for emergency vehicles only).
+
+                        wimax_packets_received
+    wimax_pdr (%) = ──────────────────────────── × 100
+                         wimax_packets_sent
+
+  WiMAX is used exclusively for emergency vehicle to RSU communication.
+
+  Per-packet success probability:
+
+    P_success(d) = max(0.95, 1.0 - (d / R_wimax) × 0.05)
+
+  Where R_wimax = 1000m (WiMAX range).
+
+  This models a minimum PDR of 95% at maximum range, linearly decreasing
+  from 100% at d=0 to 95% at d=1000m.
+
+
+--- 3.14  SIMULATION TIME (seconds) ---
+
+  Wall-clock elapsed time for the simulation run:
+
+    elapsed_time_s = wall_clock_end - wall_clock_start
+
+  Measured using Python's time.time(). Includes all computation:
+  traffic control, network simulation, security operations (if enabled).
+
+
+================================================================================
+  4. AGGREGATION ACROSS SEEDS — TABLE CONSTRUCTION
+================================================================================
+
+For each metric M defined in Section 3, and for each (mode, security) pair:
+
+  Input:  M_1, M_2, ..., M_30   (one raw value per seed s ∈ {42,...,71})
+
+  Output (in comparison CSV):
+
+              ┌                                    ┐
+              │     1  30              ┌ 1  30      │1/2
+              │    ── Σ  M_i    ±     │── Σ (M_i - μ)²│
+              │    30 i=1             │30 i=1      │
+              └                                    ┘
+
+  This is reported as a formatted string: "μ ± σ" rounded to 2 decimal places.
+
+  Additional statistics available in the aggregated JSON files:
+    - mean:  μ = (1/30) Σ M_i
+    - std:   σ = sqrt((1/30) Σ (M_i - μ)²)     [population std dev]
+    - min:   min(M_1, ..., M_30)
+    - max:   max(M_1, ..., M_30)
+    - n:     30
+
+
+================================================================================
+  5. FILE STRUCTURE
+================================================================================
+
+benchmark_results/
+├── comparison_no_security.csv     ← Table: 14 metrics × 3 modes (no security)
+├── comparison_security.csv        ← Table: 14 metrics × 3 modes (with security)
+├── aggregated_no_security.json    ← Full aggregation (mean/std/min/max/n) per mode
+├── aggregated_security.json       ← Full aggregation (mean/std/min/max/n) per mode
+├── all_raw_results.json           ← All 180 individual run results combined
+├── raw_metrics/                   ← 180 individual JSON files
+│   ├── fixed_nosec_seed42.json
+│   ├── fixed_nosec_seed43.json
+│   ├── ...
+│   ├── fixed_sec_seed42.json
+│   ├── ...
+│   ├── density_nosec_seed42.json
+│   ├── ...
+│   ├── proximity_sec_seed71.json
+│   └── (180 files total)
+└── benchmark_methodology.txt      ← This file
+
+Each raw_metrics JSON contains these fields:
+  {
+    "mode":                       string ("fixed"|"density"|"proximity")
+    "seed":                       int (42–71)
+    "security":                   bool
+    "steps":                      int (actual steps completed, ≤1000)
+    "elapsed_time_s":             float (wall-clock seconds)
+    "avg_wait_time":              float (seconds)
+    "avg_trip_speed":             float (m/s)
+    "avg_queue_length":           float (vehicles)
+    "total_completed_vehicles":   int
+    "throughput_veh_per_min":     float (vehicles/minute, wall-clock)
+    "emergency_avg_wait":         float (seconds)
+    "emergency_avg_speed":        float (m/s)
+    "emergency_completed":        int
+    "normal_avg_wait":            float (seconds)
+    "normal_avg_speed":           float (m/s)
+    "normal_completed":           int
+    "wifi_pdr":                   float (percentage, 0–100)
+    "wimax_pdr":                  float (percentage, 0–100)
+    "wifi_packets_sent":          int
+    "wifi_packets_received":      int
+    "wimax_packets_sent":         int
+    "wimax_packets_received":     int
+  }
+
+
+================================================================================
+  6. SOURCE CODE REFERENCES
+================================================================================
+
+Per-run metric computation:
+  File: sumo_simulation/run_complete_integrated.py
+  - Vehicle tracking:           lines ~490–510 (initialization of accumulators)
+  - Wait time accumulation:     lines ~570–575 (speed < 0.1 check)
+  - Distance accumulation:      lines ~578 (speed × 1s per step)
+  - Completed vehicle capture:  lines ~582–610 (arrived_this_step detection)
+  - Queue length measurement:   lines ~615–625 (getLastStepHaltingNumber)
+  - Benchmark JSON output:      lines ~800–830 (benchmark_metrics dict)
+
+Network PDR computation:
+  File: sumo_simulation/sumo_ns3_bridge.py
+  - WiFi V2V PDR model:         line 128:  pdr = max(0.92, 1.0 - (d/300) × 0.08)
+  - WiMAX V2I PDR model:        line 176:  pdr = max(0.95, 1.0 - (d/1000) × 0.05)
+  - WiFi V2I PDR model:         line 203:  pdr = max(0.92, 1.0 - (d/300) × 0.08)
+  - Aggregate PDR:              lines 241–244: received / sent
+
+Aggregation across seeds:
+  File: run_benchmark.py
+  - aggregate_metrics():        lines ~118–150 (np.mean, np.std)
+  - format_table():             lines ~153–180 (CSV generation)
+
+Seed assignment:
+  File: sumo_simulation/run_complete_integrated.py
+  - Python/NumPy seeding:       lines ~320–324
+  - SUMO seed via TraCI:        passed to connect_to_sumo(seed=...)
+
+Traffic control modes:
+  File: sumo_simulation/traffic_controller.py
+  - Fixed mode:                 constant 30s green (fixed_green_time = 30)
+  - Density mode:               adaptive 10–45s based on _get_lane_density()
+  - Proximity mode:             see ProximityHybridController in run_complete_integrated.py
+                                RL activates within 250m of emergency vehicles
+
+
+================================================================================
+  7. KEY OBSERVATIONS FOR PAPER
+================================================================================
+
+1. Traffic metrics (wait time, speed, queue length, completed vehicles) are
+   IDENTICAL between security and no-security configurations. This is because:
+   - Security operates at the application layer (RSA/AES encryption)
+   - SUMO's traffic simulation is fully deterministic for a given seed
+   - Security does not affect traffic light phase decisions
+
+2. The only metrics that differ between security/no-security are:
+   - Throughput (veh/min): Lower with security due to ~2× wall-clock time
+   - Simulation Time (s): ~2× longer with security (RSA key generation)
+   - WiFi/WiMAX PDR: Marginal differences due to timing of network events
+
+3. Standard deviation is POPULATION std (divides by N), not SAMPLE std
+   (which divides by N-1). For N=30, the difference is minimal:
+   σ_sample = σ_population × sqrt(N/(N-1)) = σ_population × 1.017
+
+4. All 30 seeds produce complete results (30/30) for every mode/security
+   combination. No runs failed or were excluded.
+
+================================================================================
+  END OF METHODOLOGY DOCUMENT
+================================================================================
