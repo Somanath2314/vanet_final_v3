@@ -121,12 +121,15 @@ class AdaptiveTrafficController:
         # Format: {junction_id: vehicle_id}
         self.junction_priority_vehicle = {}
         
+        # Fixed-time green duration (used only in 'fixed' mode)
+        self.fixed_green_time = 30  # seconds per green phase
+
         # Density thresholds for adaptive control
         self.low_density_threshold = 3    # vehicles
         self.high_density_threshold = 10  # vehicles
 
     # ------------------- SUMO -------------------
-    def connect_to_sumo(self, config_path, use_gui=True):
+    def connect_to_sumo(self, config_path, use_gui=True, seed=None):
         try:
             try: traci.close()
             except: pass
@@ -139,13 +142,19 @@ class AdaptiveTrafficController:
 
             sumo_binary = "sumo-gui" if use_gui else "sumo"
             
-            traci.start([
+            cmd = [
                 sumo_binary,
                 "-c", config_path,
                 "--summary-output", summary_path,
                 "--tripinfo-output", tripinfo_path,
                 "--start"  # Auto-start simulation
-            ])
+            ]
+            
+            # Add seed for reproducibility
+            if seed is not None:
+                cmd.extend(["--seed", str(seed)])
+            
+            traci.start(cmd)
             print(f"Connected to SUMO ({sumo_binary}).")
             self.sumo_connected = True
             self._initialize_intersections()
@@ -581,7 +590,7 @@ class AdaptiveTrafficController:
             # Check for emergency vehicles and handle priority
             emergency_at_junction = self._check_emergency_priority()
 
-            # OPTIMIZED: Adaptive rule-based traffic light control (skip if RL mode)
+            # Traffic light control (skip if RL mode)
             if self.mode != "rl":
                 for tl_id, data in self.intersections.items():
                     # EMERGENCY OVERRIDE: If emergency vehicle detected at this junction
@@ -607,26 +616,25 @@ class AdaptiveTrafficController:
                     
                     # Check if in green phase (contains 'G')
                     if 'G' in phase_state:
-                        # Get traffic density on current green lanes
-                        density = self._get_lane_density(tl_id, current_phase)
-                        
-                        # Adaptive duration based on density
-                        if density >= self.high_density_threshold:
-                            # High traffic: extend green up to max
-                            target_duration = self.max_green_time
-                        elif density <= self.low_density_threshold:
-                            # Low traffic: reduce green to min
-                            target_duration = self.min_green_time
+                        if self.mode == 'fixed':
+                            # FIXED-TIME: constant green duration, no adaptation
+                            target_duration = self.fixed_green_time
                         else:
-                            # Medium traffic: scale between min and max
-                            scale = (density - self.low_density_threshold) / \
-                                    (self.high_density_threshold - self.low_density_threshold)
-                            target_duration = int(self.min_green_time + 
-                                                scale * (self.max_green_time - self.min_green_time))
+                            # DENSITY-ADAPTIVE: scale green time with vehicle count
+                            density = self._get_lane_density(tl_id, current_phase)
+                            
+                            if density >= self.high_density_threshold:
+                                target_duration = self.max_green_time
+                            elif density <= self.low_density_threshold:
+                                target_duration = self.min_green_time
+                            else:
+                                scale = (density - self.low_density_threshold) / \
+                                        (self.high_density_threshold - self.low_density_threshold)
+                                target_duration = int(self.min_green_time + 
+                                                    scale * (self.max_green_time - self.min_green_time))
                         
-                        # Switch to yellow if minimum time met and other direction has queue
+                        # Switch to yellow when target duration reached
                         if data["time_in_phase"] >= target_duration:
-                            # Move to yellow phase
                             data["current_phase"] = (current_phase + 1) % len(self.default_phases[tl_id])
                             data["time_in_phase"] = 0
                             traci.trafficlight.setRedYellowGreenState(
