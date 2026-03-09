@@ -54,8 +54,19 @@ def load_trained_model(model_path):
         print(f"✅ Loaded trained model from: {model_path}")
         return model
     except Exception as e:
-        print(f"❌ Failed to load model: {e}")
-        return None
+        print(f"⚠️  Standard load failed ({e}), trying with custom_objects...")
+        try:
+            # Handle Python version incompatibility (e.g., model trained on 3.8, loading on 3.11)
+            custom_objects = {
+                "lr_schedule": lambda _: 1e-4,
+                "exploration_schedule": lambda _: 0.05,
+            }
+            model = DQN.load(model_path, custom_objects=custom_objects)
+            print(f"✅ Loaded trained model (with custom_objects) from: {model_path}")
+            return model
+        except Exception as e2:
+            print(f"❌ Failed to load model: {e2}")
+            return None
 
 
 class ProximityHybridController:
@@ -290,9 +301,9 @@ Examples:
         """
     )
     
-    parser.add_argument('--mode', choices=['rule', 'rl', 'hybrid', 'proximity'], 
+    parser.add_argument('--mode', choices=['rule', 'fixed', 'density', 'rl', 'hybrid', 'proximity'], 
                        default='rule',
-                       help='Control mode: rule (density), rl (trained model), hybrid (global switching), proximity (junction-specific)')
+                       help='Control mode: fixed (fixed-time), density (adaptive), rule (same as density), rl (trained model), hybrid (global switching), proximity (junction-specific)')
     parser.add_argument('--model', type=str, default=None,
                        help='Path to trained DQN model (.zip file)')
     parser.add_argument('--proximity', type=float, default=250.0,
@@ -307,8 +318,21 @@ Examples:
                        help='Enable RSA encryption for V2V/V2I (adds 30-60s startup)')
     parser.add_argument('--edge', action='store_true',
                        help='Enable edge computing RSUs (smart processing)')
+    parser.add_argument('--seed', type=int, default=None,
+                       help='Random seed for SUMO reproducibility')
     
     args = parser.parse_args()
+
+    # Normalize mode: 'rule' is alias for 'density'
+    if args.mode == 'rule':
+        args.mode = 'density'
+
+    # Set Python random seed if provided
+    if args.seed is not None:
+        import random
+        random.seed(args.seed)
+        import numpy as np
+        np.random.seed(args.seed)
 
     # Validate RL mode requirements
     if args.mode in ['rl', 'hybrid', 'proximity']:
@@ -330,6 +354,8 @@ Examples:
     print("🚗 COMPLETE INTEGRATED VANET SIMULATION")
     print("="*70)
     print(f"Control Mode: {args.mode.upper()}")
+    if args.seed is not None:
+        print(f"Seed: {args.seed}")
     if args.mode in ['rl', 'proximity'] and args.model:
         print(f"Model: {args.model}")
     if args.mode == 'proximity':
@@ -347,8 +373,8 @@ Examples:
     if args.mode in ['rl', 'proximity'] and args.model:
         model = load_trained_model(args.model)
         if not model:
-            print("❌ Failed to load model, falling back to rule-based")
-            args.mode = 'rule'
+            print("❌ Failed to load model, falling back to density-based")
+            args.mode = 'density'
 
     # Initialize components
     print("🔧 Initializing simulation components...")
@@ -356,7 +382,12 @@ Examples:
     # Emergency priority only enabled when using proximity-based RL
     emergency_priority_enabled = (args.mode == 'proximity')
     
+    # Map mode to traffic controller mode
+    # 'fixed' -> fixed-time, 'density' -> adaptive density, others -> rl/proximity
+    tc_mode = args.mode if args.mode in ['fixed', 'density'] else args.mode
+    
     traffic_controller = AdaptiveTrafficController(
+        mode=tc_mode,
         security_managers=None,
         security_pending=args.security,
         edge_computing_enabled=args.edge,
@@ -382,7 +413,7 @@ Examples:
 
     print(f"📁 Using SUMO config: {config_path}")
     
-    if not traffic_controller.connect_to_sumo(config_path, use_gui=args.gui):
+    if not traffic_controller.connect_to_sumo(config_path, use_gui=args.gui, seed=args.seed):
         print("❌ Error: Could not connect to SUMO")
         return
 
@@ -763,6 +794,44 @@ Examples:
         # Save results
         results_file = os.path.join(output_dir, 'integrated_simulation_results.json')
         ns3_bridge.save_results(results_file)
+        
+        # Save per-run benchmark metrics as JSON (used by benchmark script)
+        import json
+        ns3_metrics = ns3_bridge.get_metrics()
+        
+        benchmark_metrics = {
+            'mode': args.mode,
+            'seed': args.seed,
+            'security': args.security,
+            'steps': step,
+            'elapsed_time_s': elapsed_time,
+            # Overall traffic metrics
+            'avg_wait_time': sum(completed_vehicles_wait) / len(completed_vehicles_wait) if completed_vehicles_wait else 0,
+            'avg_trip_speed': sum(completed_vehicles_speed) / len(completed_vehicles_speed) if completed_vehicles_speed else 0,
+            'avg_queue_length': total_queue_length / max(metric_steps, 1),
+            'total_completed_vehicles': len(completed_vehicles_wait),
+            'throughput_veh_per_min': len(completed_vehicles_wait) / max(elapsed_time / 60, 1),
+            # Emergency vehicle metrics
+            'emergency_avg_wait': sum(completed_emergency_wait) / len(completed_emergency_wait) if completed_emergency_wait else 0,
+            'emergency_avg_speed': sum(completed_emergency_speed) / len(completed_emergency_speed) if completed_emergency_speed else 0,
+            'emergency_completed': len(completed_emergency_wait),
+            # Normal vehicle metrics
+            'normal_avg_wait': sum(completed_normal_wait) / len(completed_normal_wait) if completed_normal_wait else 0,
+            'normal_avg_speed': sum(completed_normal_speed) / len(completed_normal_speed) if completed_normal_speed else 0,
+            'normal_completed': len(completed_normal_wait),
+            # Network metrics (V2V / V2I)
+            'wifi_pdr': ns3_metrics['v2v_wifi']['pdr'] * 100,
+            'wimax_pdr': ns3_metrics['v2i_wimax']['pdr'] * 100,
+            'wifi_packets_sent': ns3_metrics['v2v_wifi'].get('packets_sent', 0),
+            'wifi_packets_received': ns3_metrics['v2v_wifi'].get('packets_received', 0),
+            'wimax_packets_sent': ns3_metrics['v2i_wimax'].get('packets_sent', 0),
+            'wimax_packets_received': ns3_metrics['v2i_wimax'].get('packets_received', 0),
+        }
+        
+        benchmark_file = os.path.join(output_dir, 'benchmark_metrics.json')
+        with open(benchmark_file, 'w') as f:
+            json.dump(benchmark_metrics, f, indent=2)
+        print(f"  ✅ Saved benchmark_metrics.json")
         
         # Save outputs
         print(f"\n📁 Saving outputs to {output_dir}...")

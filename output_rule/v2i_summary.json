@@ -1,0 +1,31 @@
+{
+  "total_packets": 24656,
+  "successful_packets": 24152,
+  "PDR": 0.9795587280986372,
+  "mean_latency_s": 0.0361887618631707,
+  "jitter_s": 0.0,
+  "packet_loss_rate": 0.0204412719013628,
+  "throughput_bps": 2880821228.0273438,
+  "loss_reasons": {
+    "rx_error": 0
+  },
+  "handoff_success_rate": null,
+  "rsu_stats_sample": {
+    "rsu_J2": {
+      "utilization": 6.510747991366047e-05,
+      "tx_bytes": 0,
+      "rx_bytes": 0,
+      "connected_vehicles": 0
+    },
+    "rsu_J3": {
+      "utilization": 2.5092448253337633e-05,
+      "tx_bytes": 0,
+      "rx_bytes": 0,
+      "connected_vehicles": 0
+    }
+  },
+  "emergency_vehicles": 2,
+  "emergency_events": 46438,
+  "emergency_success_rate": 0.9711443214608726,
+  "data_source": "ns3_bridge"
+}

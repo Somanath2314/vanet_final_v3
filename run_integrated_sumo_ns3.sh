@@ -55,9 +55,18 @@ SECURITY_FLAG=""
 EDGE_FLAG=""
 MODEL=""
 PROXIMITY="250"
+SEED=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --fixed)
+            MODE="fixed"
+            shift
+            ;;
+        --density)
+            MODE="density"
+            shift
+            ;;
         --rl)
             MODE="rl"
             shift
@@ -83,6 +92,10 @@ while [[ $# -gt 0 ]]; do
             STEPS="$2"
             shift 2
             ;;
+        --seed)
+            SEED="$2"
+            shift 2
+            ;;
         --security)
             SECURITY_FLAG="--security"
             shift
@@ -95,20 +108,23 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Control Modes:"
-            echo "  --rl                Use pure RL-based traffic control"
-            echo "  --hybrid            Use hybrid global switching (RL during emergencies)"
-            echo "  --proximity DIST    Use proximity-based RL (default: 250m)"
-            echo "                      Only activates RL for junctions near emergencies"
+            echo "  --fixed              Use fixed-time traffic lights (30s green each)"
+            echo "  --density            Use density-adaptive traffic control"
+            echo "  --rl                 Use pure RL-based traffic control"
+            echo "  --hybrid             Use hybrid global switching (RL during emergencies)"
+            echo "  --proximity DIST     Use proximity-based RL (default: 250m)"
+            echo "                       Only activates RL for junctions near emergencies"
             echo ""
             echo "Model Options:"
-            echo "  --model PATH        Path to trained DQN model (.zip file)"
-            echo "                      Required for --rl and --proximity modes"
+            echo "  --model PATH         Path to trained DQN model (.zip file)"
+            echo "                       Required for --rl and --proximity modes"
             echo ""
             echo "Simulation Options:"
-            echo "  --gui               Use SUMO-GUI for visualization"
-            echo "  --steps N           Number of simulation steps (default: 1000)"
-            echo "  --security          Enable RSA encryption (adds 30-60s startup)"
-            echo "  --edge              Enable edge computing RSUs (smart processing)"
+            echo "  --gui                Use SUMO-GUI for visualization"
+            echo "  --steps N            Number of simulation steps (default: 1000)"
+            echo "  --seed N             Random seed for reproducibility"
+            echo "  --security           Enable RSA encryption (adds 30-60s startup)"
+            echo "  --edge               Enable edge computing RSUs (smart processing)"
             echo ""
             echo "Examples:"
             echo "  # Rule-based with GUI"
@@ -136,6 +152,9 @@ if [ "$MODE" = "proximity" ]; then
 fi
 if [ -n "$MODEL" ]; then
     echo "  Model: $MODEL"
+fi
+if [ -n "$SEED" ]; then
+    echo "  Seed: $SEED"
 fi
 echo "  Steps: $STEPS"
 echo "  GUI: $([ -n "$GUI_FLAG" ] && echo 'Yes' || echo 'No')"
@@ -178,6 +197,11 @@ fi
 # Add proximity if in proximity mode
 if [ "$MODE" = "proximity" ]; then
     CMD="$CMD --proximity $PROXIMITY"
+fi
+
+# Add seed if specified
+if [ -n "$SEED" ]; then
+    CMD="$CMD --seed $SEED"
 fi
 
 echo "Running: $CMD"
