@@ -438,5 +438,659 @@ Traffic control modes:
    combination. No runs failed or were excluded.
 
 ================================================================================
+  8. SIMULATION ENVIRONMENT (SUMO)
+================================================================================
+
+Software:
+  - SUMO:           Eclipse SUMO Version 1.22.0, Darwin (arm64)
+  - Configuration:  sumo_simulation/simulation.sumocfg
+
+SUMO Configuration (simulation.sumocfg):
+  <input>
+    <net-file>        maps/simple_network.net.xml
+    <route-files>     maps/routes.rou.xml
+  </input>
+  <time>
+    <begin>           0
+    <end>             3600    (max simulated time in seconds)
+    <step-length>     1       (1 simulation step = 1 second)
+  </time>
+
+Network Topology (simple_network.net.xml):
+  - Edges:            17
+  - Junctions:        9 total (J0, J1, J2, J3, J4, J5, J6, J7, J8)
+  - Traffic lights:   2 (J2 at (500, 500) and J3 at (1000, 500))
+  - Network bounds:   X: 0–2000 m, Y: 0–1000 m
+  - Layout:           Two signalized intersections on an east–west corridor
+                      with north–south cross-streets at each
+
+Routes (defined in routes.rou.xml):
+  - route_east_west_full:   E1 → E2 → E3 → E4   (full east–west corridor)
+  - route_east_west_short:  E1 → E2 → E3         (partial east–west)
+  - route_north_south_j2:   E5 → E6              (north–south through J2)
+  - route_north_south_j3:   E7 → E8              (north–south through J3)
+
+Simulation Steps vs Simulated Time:
+  - The benchmark uses --steps 1000 (= 1000 simulation steps = 1000 seconds).
+  - SUMO's maximum simulation time is 3600 s, but the simulation terminates
+    after 1000 steps via the TraCI controller.
+
+
+================================================================================
+  9. VEHICLE CONFIGURATION
+================================================================================
+
+Vehicle Types (defined in routes.rou.xml):
+
+  ┌─────────────┬────────────────┬────────────────┐
+  │ Parameter   │ passenger      │ emergency      │
+  ├─────────────┼────────────────┼────────────────┤
+  │ accel       │ 2.6 m/s²      │ 3.0 m/s²      │
+  │ decel       │ 4.5 m/s²      │ 5.0 m/s²      │
+  │ sigma       │ 0.5            │ 0.2            │
+  │ length      │ 5.0 m          │ 6.0 m          │
+  │ minGap      │ 2.5 m          │ 2.0 m          │
+  │ maxSpeed    │ 70.0 m/s       │ 80.0 m/s       │
+  │ guiShape    │ passenger      │ emergency      │
+  │ color       │ (default)      │ red            │
+  └─────────────┴────────────────┴────────────────┘
+
+  Note: sigma is the Krauss driver imperfection parameter (0 = perfect,
+  1 = fully imperfect). Emergency vehicles are more predictable (σ = 0.2).
+
+Traffic Flows (continuous generation):
+
+  ┌─────────────────────┬──────────┬────────────┬──────────┬───────────┐
+  │ Flow ID             │ Type     │ Route      │ Begin(s) │ veh/hr    │
+  ├─────────────────────┼──────────┼────────────┼──────────┼───────────┤
+  │ flow_ew_j2          │ passenger│ ew_short   │ 15       │ 400       │
+  │ flow_ew_full        │ passenger│ ew_full    │ 20       │ 300       │
+  │ flow_ns_j2          │ passenger│ ns_j2      │ 25       │ 350       │
+  │ flow_ns_j3          │ passenger│ ns_j3      │ 30       │ 350       │
+  │ emergency_flow      │ emergency│ ew_full    │ 150      │ 20        │
+  │ emergency_flow_ns   │ emergency│ ns_j2      │ 220      │ 15        │
+  └─────────────────────┴──────────┴────────────┴──────────┴───────────┘
+
+  Total passenger demand:  400 + 300 + 350 + 350 = 1400 veh/hr
+  Total emergency demand:  20 + 15 = 35 veh/hr
+
+  All flows: departLane="best", departSpeed="max", end time = 3600 s
+
+Individual Test Vehicles (pre-generated departures):
+  - test_vehicle_1  (passenger, ew_short,  depart=1s)
+  - test_vehicle_2  (passenger, ns_j2,     depart=3s)
+  - test_vehicle_3  (passenger, ew_short,  depart=5s)
+  - test_vehicle_4  (passenger, ns_j3,     depart=7s)
+
+Individual Emergency Vehicles (scripted arrivals):
+  - emergency_1   (ew_full,  depart=50s)
+  - emergency_2   (ns_j2,    depart=55s)
+  - emergency_3   (ns_j3,    depart=60s)
+  - emergency_4   (ew_short, depart=120s)
+  - emergency_5   (ns_j2,    depart=125s)
+  - emergency_6   (ew_full,  depart=180s)
+  - emergency_7   (ns_j2,    depart=200s)
+  - emergency_8   (ns_j3,    depart=250s)
+  - emergency_9   (ew_short, depart=300s)
+  - emergency_10  (ns_j2,    depart=350s)
+
+
+================================================================================
+  10. TRAFFIC CONTROL PARAMETERS
+================================================================================
+
+Source: sumo_simulation/traffic_controller.py (class AdaptiveTrafficController)
+
+Phase Definitions (identical for both J2 and J3):
+  Phase 0: "rrrGGG"  — North–South green  (green phase)
+  Phase 1: "rrryyy"  — North–South yellow (yellow phase)
+  Phase 2: "GGGrrr"  — East–West green    (green phase)
+  Phase 3: "yyyrrr"  — East–West yellow   (yellow phase)
+  Cycle: 0 → 1 → 2 → 3 → 0 → ...
+
+Timing Parameters:
+  ┌────────────────────────────┬─────────┬────────────────────────────────┐
+  │ Parameter                  │ Value   │ Description                    │
+  ├────────────────────────────┼─────────┼────────────────────────────────┤
+  │ fixed_green_time           │ 30 s    │ Green duration in fixed mode   │
+  │ min_green_time             │ 10 s    │ Min green in density mode      │
+  │ max_green_time             │ 45 s    │ Max green in density mode      │
+  │ yellow_time                │ 3 s     │ Yellow phase duration (all)    │
+  │ extension_time             │ 3 s     │ Green extension increment      │
+  │ emergency_detection_range  │ 150 m   │ Emergency vehicle detection    │
+  │ low_density_threshold      │ 3 veh   │ → min_green_time               │
+  │ high_density_threshold     │ 10 veh  │ → max_green_time               │
+  └────────────────────────────┴─────────┴────────────────────────────────┘
+
+
+--- 10.1  FIXED MODE ---
+
+  Green duration = fixed_green_time = 30 seconds (constant, no adaptation).
+  All green phases last exactly 30 s regardless of traffic conditions.
+  Yellow phase = 3 s.
+  Full cycle = 2 × (30 + 3) = 66 seconds per intersection.
+
+
+--- 10.2  DENSITY-ADAPTIVE MODE ---
+
+  Green duration is computed per junction per phase based on real-time
+  lane density using traci.lane.getLastStepVehicleNumber() and
+  traci.lane.getLastStepHaltingNumber().
+
+  Lane density formula:
+
+    For each green lane i in current phase:
+      weighted_count_i = vehicles_i + halting_i × 0.5
+
+    density = (Σ weighted_count_i) / max(green_lane_count, 1)
+
+  Green time mapping (piecewise linear):
+
+    If density >= 10:        target_duration = 45 s  (max_green)
+    If density <= 3:         target_duration = 10 s  (min_green)
+    Otherwise:
+      scale = (density - 3) / (10 - 3)
+      target_duration = floor(10 + scale × (45 - 10))
+                      = floor(10 + scale × 35) seconds
+
+  When time_in_phase >= target_duration, transition to yellow.
+
+
+--- 10.3  EMERGENCY VEHICLE PRIORITY (all modes) ---
+
+  Detection: Every step, the controller checks all vehicles. If a vehicle
+  has "emergency" in its type name and is within emergency_detection_range
+  (150 m) of a traffic light junction, it is given priority.
+
+  Priority action: The traffic light immediately switches to the phase
+  that gives green to the emergency vehicle's approach direction. If
+  already in the correct phase, the green timer is extended by resetting
+  time_in_phase to max(0, time_in_phase - 5), effectively adding 5 s.
+
+  First-come-first-served: If multiple emergency vehicles approach,
+  priority goes to the first detected. Served emergency vehicles are
+  tracked to avoid re-triggering.
+
+
+================================================================================
+  11. PROXIMITY-RL HYBRID (DQN) CONFIGURATION
+================================================================================
+
+--- 11.1  HYBRID CONTROL LOGIC ---
+
+  Source: sumo_simulation/run_complete_integrated.py (ProximityHybridController)
+
+  The proximity-RL mode operates as a hybrid:
+    - Within 250 m of any emergency vehicle: DQN RL agent takes control
+    - Outside 250 m of all emergency vehicles: Density-adaptive control
+
+  Proximity threshold: 250.0 m (passed via --proximity 250)
+
+  At each simulation step:
+    1. Check all vehicles with "emergency" in their type name
+    2. Calculate Euclidean distance from each traffic light (J2, J3) to
+       the nearest emergency vehicle
+    3. If min_distance ≤ 250 m → RL agent selects the traffic light action
+    4. If min_distance > 250 m → Density-adaptive mode (Section 10.2)
+
+
+--- 11.2  DQN MODEL HYPERPARAMETERS ---
+
+  Trained model: rl_module/trained_models/dqn_traffic_20260304_222100/
+  File: dqn_traffic_final.zip  (stable-baselines3 format)
+
+  ┌─────────────────────────┬───────────────────────────────────────────┐
+  │ Parameter               │ Value                                     │
+  ├─────────────────────────┼───────────────────────────────────────────┤
+  │ Algorithm               │ DQN (Deep Q-Network)                     │
+  │ Framework               │ stable-baselines3 (v2.3.2)               │
+  │ Policy                  │ MlpPolicy (Multi-Layer Perceptron)       │
+  │ Total timesteps         │ 200,000                                  │
+  │ Learning rate           │ 0.0001 (1×10⁻⁴)                         │
+  │ Replay buffer size      │ 50,000                                   │
+  │ Batch size              │ 32                                       │
+  │ Discount factor (γ)     │ 0.99                                     │
+  │ Target update interval  │ 1,000 steps                              │
+  │ Learning starts         │ 1,000 steps                              │
+  │ Training seed           │ 42                                       │
+  │ Device                  │ auto                                      │
+  └─────────────────────────┴───────────────────────────────────────────┘
+
+  Epsilon-greedy exploration schedule:
+    - Type: Linear decay
+    - ε_start = 1.0 (fully random)
+    - ε_final = 0.05 (5% random)
+    - Exploration fraction = 0.3 (30% of total timesteps)
+    - Decay over first 60,000 steps, then held constant at 0.05
+
+  Environment parameters:
+    - Horizon (max steps per episode): 1,000
+    - Simulation step: 1.0 s
+    - Traffic light constraint: min = 5 s, max = 60 s
+    - β (reward scaling): 20
+
+
+--- 11.3  REWARD FUNCTION ---
+
+  The DQN reward is a weighted combination:
+
+    R_total = { 0.3 × R_base + R_emergency + 0.5 × R_queue,  if emergency present
+              { R_base + R_queue,                               otherwise
+
+  Components:
+
+  1. Speed reward (α₁ = 0.01):
+     +0.01 per vehicle with speed > 8 km/h threshold
+
+  2. Waiting penalty (α₂ = -0.5):
+     -0.5 per idle vehicle (waited > 60 steps)
+     Additional penalty of -50 for max-wait violations
+
+  3. Emergency reward (α₃):
+     +200 for fast emergency vehicle passage
+     +100 for moderate emergency vehicle speed
+     -150 for slow emergency vehicles
+     -100 for excessive emergency vehicle wait
+     +50  green-wave bonus (emergency gets consecutive greens)
+
+  4. Queue penalty (α₄):
+     -20 per lane with severe congestion (avg speed < 2 m/s)
+     -5  per lane with moderate congestion (avg speed < 5 m/s)
+
+
+--- 11.4  TRAINING RESULTS ---
+
+  Episodes completed:     200
+  Best episode reward:    377,545.60
+  Worst episode reward:   -162,196.39
+  Final avg (last 10):    296,941.07
+
+  The model converges after approximately episode 70–80, with rewards
+  stabilizing in the 250,000–370,000 range.
+
+
+================================================================================
+  12. RSU (ROADSIDE UNIT) INFRASTRUCTURE
+================================================================================
+
+Source: rl_module/rsu_config.py
+
+13 RSUs deployed across 3 tiers:
+
+Tier 1 — Major Intersection RSUs (at traffic lights):
+  ┌───────────┬──────────────┬──────────────┬──────────────┐
+  │ RSU ID    │ Position     │ Junction     │ Coverage (m) │
+  ├───────────┼──────────────┼──────────────┼──────────────┤
+  │ RSU_J2    │ (500, 500)   │ J2           │ 300          │
+  │ RSU_J3    │ (1000, 500)  │ J3           │ 300          │
+  └───────────┴──────────────┴──────────────┴──────────────┘
+
+Tier 2 — Road Segment RSUs (between intersections):
+  ┌─────────────┬──────────────┬──────────────────────────────┬──────────────┐
+  │ RSU ID      │ Position     │ Location                     │ Coverage (m) │
+  ├─────────────┼──────────────┼──────────────────────────────┼──────────────┤
+  │ RSU_E1_MID  │ (250, 500)   │ E1 (between J0 and J2)      │ 250          │
+  │ RSU_E2_MID  │ (750, 500)   │ E2 (between J2 and J3)      │ 250          │
+  │ RSU_E3_MID  │ (1250, 500)  │ E3 (between J3 and J4)      │ 250          │
+  │ RSU_E5_MID  │ (500, 250)   │ E5 (between J5 and J2)      │ 250          │
+  │ RSU_E6_MID  │ (500, 750)   │ E6 (between J2 and J6)      │ 250          │
+  │ RSU_E7_MID  │ (1000, 250)  │ E7 (between J7 and J3)      │ 250          │
+  │ RSU_E8_MID  │ (1000, 750)  │ E8 (between J3 and J8)      │ 250          │
+  └─────────────┴──────────────┴──────────────────────────────┴──────────────┘
+
+Tier 3 — Coverage RSUs (fill gaps):
+  ┌──────────┬──────────────┬──────────────┬──────────────┐
+  │ RSU ID   │ Position     │ Location     │ Coverage (m) │
+  ├──────────┼──────────────┼──────────────┼──────────────┤
+  │ RSU_SW   │ (250, 250)   │ Southwest    │ 200          │
+  │ RSU_NW   │ (250, 750)   │ Northwest    │ 200          │
+  │ RSU_SE   │ (1250, 250)  │ Southeast    │ 200          │
+  │ RSU_NE   │ (1250, 750)  │ Northeast    │ 200          │
+  └──────────┴──────────────┴──────────────┴──────────────┘
+
+
+================================================================================
+  13. COMMUNICATION NETWORK PARAMETERS
+================================================================================
+
+Source: sumo_simulation/sumo_ns3_bridge.py (SUMONS3Bridge)
+
+
+--- 13.1  IEEE 802.11p (WiFi) — V2V & V2I (regular vehicles) ---
+
+  Maximum range:   300 m
+  Beacon interval: 0.1 s (10 Hz)
+  Base delay:      20 ms + (d / 300) × 30 ms
+
+  Packet Delivery Ratio (PDR) model:
+
+    P_wifi(d) = max(0.92, 1.0 − (d / 300) × 0.08)
+
+    At d = 0 m:    P = 1.00 (100%)
+    At d = 150 m:  P = 0.96 (96%)
+    At d = 300 m:  P = 0.92 (92%)
+
+  Used for:
+    - V2V: All vehicle-to-vehicle beacon messages
+    - V2I: Regular (non-emergency) vehicle ↔ RSU communication
+
+
+--- 13.2  WiMAX — V2I (emergency vehicles only) ---
+
+  Maximum range:   1000 m
+  Base delay:      15 ms + (d / 1000) × 15 ms
+
+  Packet Delivery Ratio (PDR) model:
+
+    P_wimax(d) = max(0.95, 1.0 − (d / 1000) × 0.05)
+
+    At d = 0 m:     P = 1.00 (100%)
+    At d = 500 m:   P = 0.975 (97.5%)
+    At d = 1000 m:  P = 0.95 (95%)
+
+  Used exclusively for emergency vehicle ↔ RSU communication
+  (higher priority, longer range, better reliability).
+
+
+--- 13.3  Packet Delivery Determination ---
+
+  Packet success is deterministic (not stochastic). A hash function
+  determines delivery:
+
+    hash_val = hash(source_id, dest_id, timestamp) mod 100
+    delivered = (hash_val / 100) < P_success(d)
+
+  This ensures reproducibility: the same source/dest/time always yields
+  the same delivery outcome for a given distance.
+
+
+================================================================================
+  14. SECURITY CONFIGURATION
+================================================================================
+
+Source: v2v_communication/security.py, v2v_communication/key_management.py
+
+When --security flag is enabled:
+
+Cryptographic Primitives:
+  ┌──────────────────────────┬────────────────────────────────────────────┐
+  │ Component                │ Specification                              │
+  ├──────────────────────────┼────────────────────────────────────────────┤
+  │ Certificate Authority    │ RSA-4096 (CA key pair)                    │
+  │ Entity keys (per RSU &   │ RSA-2048 (per-entity key pair)            │
+  │   per vehicle)           │                                            │
+  │ Public exponent          │ 65537                                      │
+  │ Symmetric encryption     │ AES-256-GCM (32-byte key)                 │
+  │ Digital signatures       │ RSA-PSS with SHA-256                       │
+  │ Certificate validity     │ 365 days                                   │
+  │ Serial number entropy    │ 16 bytes (128-bit random)                  │
+  └──────────────────────────┴────────────────────────────────────────────┘
+
+Security Initialization Flow (initialize_vanet_security):
+  1. Create CertificateAuthority with RSA-4096 key pair
+  2. Generate RSA-2048 key pairs for each of the 13 RSUs
+  3. Generate RSA-2048 key pairs for each vehicle in the simulation
+  4. CA issues X.509-style certificates to all entities
+  5. RSUs register all vehicle public keys (from verified certificates)
+  6. Vehicles register all RSU public keys (from verified certificates)
+  7. Vehicles register peer vehicle public keys (for V2V)
+
+Message Security (per V2V/V2I message):
+  1. Generate random AES-256 session key (32 bytes)
+  2. Encrypt payload with AES-256-GCM (authenticated encryption)
+  3. Encrypt AES session key with recipient's RSA-2048 public key
+  4. Sign message with sender's RSA-2048 private key
+  5. Transmit: encrypted_data + encrypted_session_key + signature + nonce
+
+Performance Impact:
+  - RSA key generation at startup adds significant wall-clock time (~2×)
+  - Per-message overhead: RSA encrypt + AES encrypt + RSA sign
+  - Traffic simulation results are IDENTICAL (security is application-layer)
+  - Only throughput (wall-clock based) and simulation time differ
+
+
+================================================================================
+  15. EXACT COMMANDS USED TO RUN THE BENCHMARK
+================================================================================
+
+--- 15.1  SOFTWARE VERSIONS ---
+
+  Python interpreter:  Python 3.8.18 (via pyenv)
+                       Path: /Users/apple/.pyenv/versions/3.8.18/bin/python3
+  SUMO:                Eclipse SUMO Version 1.22.0 (Darwin arm64)
+  stable-baselines3:   2.3.2
+  NumPy:               (compatible with Python 3.8)
+  Pandas:              (compatible with Python 3.8)
+  OS:                  macOS (Apple Silicon / arm64)
+
+  IMPORTANT: Python 3.8 was required because the DQN model
+  (dqn_traffic_final.zip) was trained and saved under Python 3.8 using
+  pickle serialization. Loading under Python 3.11+ fails with:
+    "loaded state dict contains a parameter group that doesn't match
+     the size of optimizer's group"
+  All 180 benchmark runs were executed under Python 3.8.18 via pyenv.
+
+
+--- 15.2  BENCHMARK RUNNER COMMAND ---
+
+  The full benchmark was run in two phases from the project root:
+
+  Phase 1 — Without Security (90 runs):
+
+    /Users/apple/.pyenv/versions/3.8.18/bin/python3 run_benchmark.py \
+      --seeds 30 --steps 1000 --skip-sec
+
+  Phase 2 — With Security (90 runs):
+
+    /Users/apple/.pyenv/versions/3.8.18/bin/python3 run_benchmark.py \
+      --seeds 30 --steps 1000 --skip-nosec
+
+  Both commands use defaults for:
+    --seed-start 42
+    --model rl_module/trained_models/dqn_traffic_20260304_222100/dqn_traffic_final.zip
+    --modes fixed,density,proximity
+
+  Equivalent to:
+
+    /Users/apple/.pyenv/versions/3.8.18/bin/python3 run_benchmark.py \
+      --seeds 30 --seed-start 42 --steps 1000 \
+      --model rl_module/trained_models/dqn_traffic_20260304_222100/dqn_traffic_final.zip \
+      --modes fixed,density,proximity
+
+
+--- 15.3  PER-RUN SUBPROCESS COMMAND ---
+
+  For each of the 180 runs, run_benchmark.py spawns a subprocess:
+
+  Without security (e.g., density mode, seed 42):
+
+    python sumo_simulation/run_complete_integrated.py \
+      --mode density \
+      --steps 1000 \
+      --seed 42 \
+      --output sumo_simulation/benchmark_output/density_nosec_seed42 \
+      --edge
+
+  With security (e.g., proximity mode, seed 55):
+
+    python sumo_simulation/run_complete_integrated.py \
+      --mode proximity \
+      --steps 1000 \
+      --seed 55 \
+      --output sumo_simulation/benchmark_output/proximity_sec_seed55 \
+      --edge \
+      --security \
+      --model rl_module/trained_models/dqn_traffic_20260304_222100/dqn_traffic_final.zip \
+      --proximity 250
+
+  Key flags:
+    --mode         : "fixed", "density", or "proximity"
+    --steps 1000   : Run for 1000 simulation steps (1000 seconds simulated)
+    --seed N       : Seeds Python random, NumPy random, and SUMO's RNG
+    --output DIR   : Per-run output directory (cleaned up after metrics cached)
+    --edge         : Enable edge computing RSU infrastructure
+    --security     : Enable RSA/AES security layer
+    --model PATH   : DQN model file (only for proximity mode)
+    --proximity 250: Emergency vehicle detection threshold (meters)
+
+  Each subprocess has a 600-second (10-minute) timeout.
+
+
+--- 15.4  RUN_BENCHMARK.PY ARGUMENT REFERENCE ---
+
+  ┌─────────────────┬─────────┬───────────────────────────────────────────┐
+  │ Argument        │ Default │ Description                               │
+  ├─────────────────┼─────────┼───────────────────────────────────────────┤
+  │ --seeds         │ 30      │ Number of random seeds to run             │
+  │ --seed-start    │ 42      │ Starting seed value                       │
+  │ --steps         │ 1000    │ Simulation steps per run                  │
+  │ --model         │ (DQN)   │ Path to trained DQN model ZIP             │
+  │ --quick         │ false   │ Quick test mode (3 seeds, 300 steps)      │
+  │ --modes         │ fixed,  │ Comma-separated list of modes             │
+  │                 │ density,│                                            │
+  │                 │proximity│                                            │
+  │ --skip-nosec    │ false   │ Skip no-security runs                     │
+  │ --skip-sec      │ false   │ Skip with-security runs                   │
+  └─────────────────┴─────────┴───────────────────────────────────────────┘
+
+
+================================================================================
+  16. END-TO-END EXECUTION FLOW
+================================================================================
+
+This section describes exactly what happens during a single benchmark run
+from start to finish.
+
+
+--- 16.1  BENCHMARK ORCHESTRATION (run_benchmark.py) ---
+
+  1. Parse arguments: seeds=30, seed-start=42, steps=1000, modes=[fixed,
+     density, proximity]
+
+  2. Generate seed list: [42, 43, 44, ..., 71]
+
+  3. For each security setting (nosec, then sec):
+       For each mode (fixed, density, proximity):
+         For each seed (42 through 71):
+           a. Check cache: benchmark_results/raw_metrics/{mode}_{sec}_seed{N}.json
+              If exists → skip (load from cache)
+           b. If not cached → spawn subprocess (Section 15.3)
+           c. On success: read benchmark_metrics.json from output dir
+           d. Cache the small JSON (~1 KB) to benchmark_results/raw_metrics/
+           e. Delete the large output directory (~271 MB) to save disk space
+           f. On failure/timeout: log error, continue to next run
+
+  4. After all runs for a security setting complete:
+     a. Aggregate metrics across 30 seeds per mode (np.mean, np.std)
+     b. Build comparison table (14 metrics × 3 modes)
+     c. Save CSV: benchmark_results/comparison_{no_security|security}.csv
+     d. Save JSON: benchmark_results/aggregated_{no_security|security}.json
+
+  5. Combine all 180 raw results → benchmark_results/all_raw_results.json
+
+
+--- 16.2  SINGLE SIMULATION RUN (run_complete_integrated.py) ---
+
+  For each spawned subprocess:
+
+  1. INITIALIZATION
+     a. Parse CLI arguments (mode, steps, seed, output, security, model, etc.)
+     b. Set random seeds:
+        - random.seed(seed)
+        - numpy.random.seed(seed)
+     c. If --security:
+        - Create CertificateAuthority (RSA-4096)
+        - Generate RSA-2048 key pairs for all 13 RSUs
+        - Generate RSA-2048 key pairs for vehicles
+        - Issue and exchange certificates
+     d. Initialize AdaptiveTrafficController with mode, output_dir, etc.
+     e. Connect to SUMO:
+        - Launch `sumo -c simulation.sumocfg --seed {seed} --start`
+        - Initialize intersection state (read traffic light programs)
+        - Initialize WiMAX base stations at J2; J3
+        - If --edge: Initialize 13 edge computing RSUs
+     f. Initialize SUMONS3Bridge (network simulation layer)
+     g. If --model and mode=proximity:
+        - Load DQN model from ZIP file
+        - Create ProximityHybridController (threshold=250m)
+
+  2. MAIN SIMULATION LOOP (1000 steps)
+     For step = 1 to 1000:
+       a. traci.simulationStep()  — advance SUMO by 1 second
+       b. Get all vehicle IDs, positions, speeds from SUMO
+       c. Traffic light control:
+          - Fixed: constant 30s green
+          - Density: adaptive green based on _get_lane_density()
+          - Proximity: check if emergency within 250m
+            → Yes: DQN agent selects action
+            → No: density-adaptive control
+          - Emergency priority override (all modes): if emergency within
+            150m, force green on its approach direction
+       d. Network simulation:
+          - V2V beacons (WiFi 802.11p) for nearby vehicle pairs
+          - V2I messages (WiFi for regular, WiMAX for emergency)
+          - If --security: encrypt/sign all messages
+       e. Track metrics:
+          - For each vehicle: accumulate wait time (if speed < 0.1 m/s)
+          - For each vehicle: accumulate distance (speed × 1s)
+          - Detect completed vehicles (disappeared from simulation)
+          - Record queue lengths (halting vehicles per lane)
+       f. If --edge: Update edge RSU vehicle registrations and services
+
+  3. METRICS COMPUTATION (after loop ends)
+     a. Compute per-run averages from accumulated data:
+        - avg_wait_time = mean(wait times of completed vehicles)
+        - avg_trip_speed = mean(distance/time for completed vehicles)
+        - avg_queue_length = mean(queue per step)
+        - total_completed_vehicles = count of completed
+        - throughput = completed / wall-clock minutes
+     b. Compute emergency vs normal vehicle subsets
+     c. Retrieve network PDR from NS3 bridge (wifi_pdr, wimax_pdr)
+     d. Write benchmark_metrics.json to output directory
+
+  4. CLEANUP
+     a. Close SUMO connection (traci.close())
+     b. Process exits; run_benchmark.py reads the metrics JSON
+     c. Large output files (~271 MB) are deleted; only ~1 KB cache kept
+
+
+--- 16.3  DISK SPACE MANAGEMENT ---
+
+  Each simulation run generates approximately 271 MB of output files
+  (SUMO XML logs, trip info, edge computing logs, etc.). For 180 runs
+  this would require ~48 GB. To manage this:
+
+  - After each run, run_benchmark.py caches only the small benchmark
+    metrics JSON (~1 KB) to benchmark_results/raw_metrics/
+  - The full output directory is deleted via shutil.rmtree()
+  - Total benchmark storage: ~180 KB (180 × ~1 KB cache files)
+  - If a cached file exists, the run is skipped entirely (idempotent)
+
+  This also enables re-running failed seeds without repeating successful ones.
+
+
+--- 16.4  DATA QUALITY VALIDATION ---
+
+  After all 180 runs completed, validation was performed:
+
+  1. File count check: 180 JSON files in benchmark_results/raw_metrics/
+     (60 per mode: 30 nosec + 30 sec)
+
+  2. Mode correctness: Verified each JSON's "mode" field matches filename
+     (caught a data quality issue where proximity_nosec files had mode=
+     "density" due to model load failure under Python 3.11; fixed by
+     re-running under Python 3.8)
+
+  3. Step count: All files have steps = 1000 (999–1000)
+     (caught an issue where seeds 42–44 had steps = 300 from an earlier
+     quick test; deleted and re-run)
+
+  4. Metric validity: No NaN or null values in any metric field
+
+  5. Sample size: n = 30 for every (mode, security) group (confirmed
+     in aggregated JSON files)
+
+
+================================================================================
   END OF METHODOLOGY DOCUMENT
 ================================================================================

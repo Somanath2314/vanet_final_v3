@@ -1,0 +1,8 @@
+Metric                                       No Security        With Security
+-----------------------------------------------------------------------------
+Overall PDR (%)                             96.02 ± 0.04         96.02 ± 0.04
+V2V PDR (%)                                 96.34 ± 0.05         96.33 ± 0.05
+V2I PDR (%)                                 95.57 ± 0.04         95.57 ± 0.05
+Avg Latency (ms)                            36.20 ± 0.08         36.20 ± 0.08
+Emergency Comm Delay (ms)                   28.37 ± 0.16         28.37 ± 0.16
+Emergency Comm Success Rate (%)             97.24 ± 0.07         97.27 ± 0.07

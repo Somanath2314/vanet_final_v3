@@ -1,15 +1,23 @@
 Metric,Fixed,Density,Proximity
-Avg Wait Time (s),16.50 +/- 0.42,4.11 +/- 0.31,5.36 +/- 0.34
-Avg Trip Speed (m/s),10.89 +/- 0.06,12.18 +/- 0.07,12.04 +/- 0.07
-Avg Queue Length,9.71 +/- 0.22,2.46 +/- 0.18,3.17 +/- 0.18
-Total Completed Vehicles,349.87 +/- 2.31,358.33 +/- 1.76,358.70 +/- 1.85
-Throughput (veh/min),200.96 +/- 2.53,224.87 +/- 35.05,219.92 +/- 7.07
-Emergency Avg Wait (s),12.89 +/- 1.16,5.24 +/- 1.07,2.66 +/- 0.80
-Emergency Avg Speed (m/s),11.27 +/- 0.23,12.14 +/- 0.32,12.84 +/- 0.32
-Emergency Vehicles Completed,17.00 +/- 0.00,17.00 +/- 0.00,17.00 +/- 0.00
-Normal Avg Wait (s),16.69 +/- 0.42,4.05 +/- 0.32,5.50 +/- 0.37
-Normal Avg Speed (m/s),10.87 +/- 0.06,12.18 +/- 0.07,12.00 +/- 0.07
-Normal Vehicles Completed,332.87 +/- 2.31,341.33 +/- 1.76,341.70 +/- 1.85
-WiFi PDR (%),96.42 +/- 0.03,95.85 +/- 0.03,95.90 +/- 0.04
-WiMAX PDR (%),98.09 +/- 0.05,98.04 +/- 0.06,98.03 +/- 0.06
-Simulation Time (s),104.47 +/- 1.02,109.32 +/- 88.23,97.97 +/- 3.47
+Avg Wait Time (s),16.50 ± 0.42,4.11 ± 0.31,5.36 ± 0.34
+Avg Trip Speed (m/s),10.89 ± 0.06,12.18 ± 0.07,12.04 ± 0.07
+Avg Queue Length,6.43 ± 0.15,1.60 ± 0.12,2.06 ± 0.12
+Total Completed Vehicles,349.87 ± 2.31,358.33 ± 1.76,358.70 ± 1.85
+Throughput (veh/min),198.77 ± 2.97,229.20 ± 3.00,221.53 ± 2.61
+Emergency Avg Wait (s),12.89 ± 1.16,5.24 ± 1.07,2.66 ± 0.80
+Emergency Avg Speed (m/s),11.27 ± 0.23,12.14 ± 0.32,12.84 ± 0.32
+Emergency Vehicles Completed,17.00 ± 0.00,17.00 ± 0.00,17.00 ± 0.00
+Normal Avg Wait (s),16.69 ± 0.42,4.05 ± 0.32,5.50 ± 0.37
+Normal Avg Speed (m/s),10.87 ± 0.06,12.18 ± 0.07,12.00 ± 0.07
+Normal Vehicles Completed,332.87 ± 2.31,341.33 ± 1.76,341.70 ± 1.85
+Emergency Avg Queue Length,0.26 ± 0.02,0.10 ± 0.02,0.05 ± 0.01
+Normal Avg Queue Length,6.18 ± 0.14,1.51 ± 0.11,2.02 ± 0.12
+WiFi PDR (%),97.04 ± 0.04,96.26 ± 0.05,96.33 ± 0.05
+WiMAX PDR (%),98.09 ± 0.07,98.04 ± 0.06,98.01 ± 0.07
+V2V PDR (%),97.04 ± 0.04,96.26 ± 0.05,96.33 ± 0.05
+V2I PDR (%),95.60 ± 0.03,95.62 ± 0.05,95.57 ± 0.05
+Overall PDR (%),96.51 ± 0.03,95.99 ± 0.03,96.02 ± 0.04
+Avg Communication Latency (ms),34.37 ± 0.08,36.30 ± 0.05,36.20 ± 0.08
+Emergency Comm Success Rate (%),97.53 ± 0.06,97.30 ± 0.09,97.27 ± 0.07
+Emergency Comm Avg Delay (ms),27.76 ± 0.14,28.26 ± 0.14,28.37 ± 0.16
+Simulation Time (s),105.63 ± 1.50,93.82 ± 1.08,97.16 ± 0.97

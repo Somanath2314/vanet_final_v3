@@ -6,7 +6,7 @@
     "total_offloaded": 0,
     "bandwidth_saved_mb": 0,
     "avg_latency_ms": 0,
-    "start_time": 1772994294.1453109
+    "start_time": 1773255530.9167302
   },
   "summary_statistics": {
     "total_rsus": 13,
@@ -14,8 +14,8 @@
     "total_computations": 3398,
     "cache_hit_rate": 0,
     "avg_latency_ms": 0,
-    "uptime_seconds": 68.87981796264648,
-    "computations_per_second": 49.3323022694795
+    "uptime_seconds": 99.4672110080719,
+    "computations_per_second": 34.16201143635411
   },
   "service_metrics": {
     "traffic_flow": {
@@ -35,5 +35,5 @@
       "compression_ratio": 0
     }
   },
-  "timestamp": 1772994363.02513
-}}
+  "timestamp": 1773255630.383945
+}
