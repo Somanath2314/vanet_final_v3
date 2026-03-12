@@ -494,7 +494,14 @@ Examples:
         vehicle_first_seen = {}  # {vehicle_id: first_step}
         
         total_queue_length = 0
+        total_emergency_queue_length = 0
+        total_normal_queue_length = 0
         metric_steps = 0
+        
+        # Per-step time-series arrays for graphs
+        per_step_avg_wait = []
+        per_step_queue = []
+        per_step_emergency_wait = []
         
         # Track vehicles between steps to detect arrivals
         previous_vehicles = set()
@@ -598,18 +605,51 @@ Examples:
                         del vehicle_accumulated_distance[veh_id]
                         del vehicle_first_seen[veh_id]
                 
-                # Queue lengths at each junction (per step)
+                # Queue lengths at each junction (per step), split by vehicle type
                 step_queue_length = 0
+                step_emergency_queue = 0
+                step_normal_queue = 0
                 for tl_id in traci.trafficlight.getIDList():
                     try:
                         lanes = traci.trafficlight.getControlledLanes(tl_id)
-                        for lane in lanes:
-                            step_queue_length += traci.lane.getLastStepHaltingNumber(lane)
+                        for lane in set(lanes):  # deduplicate lanes
+                            halting = traci.lane.getLastStepHaltingNumber(lane)
+                            step_queue_length += halting
+                            # Split halting vehicles by type
+                            if halting > 0:
+                                lane_vehs = traci.lane.getLastStepVehicleIDs(lane)
+                                for v in lane_vehs:
+                                    try:
+                                        if traci.vehicle.getSpeed(v) < 0.1:
+                                            if 'emergency' in v.lower():
+                                                step_emergency_queue += 1
+                                            else:
+                                                step_normal_queue += 1
+                                    except:
+                                        pass
                     except:
                         pass
                 
                 total_queue_length += step_queue_length
+                total_emergency_queue_length += step_emergency_queue
+                total_normal_queue_length += step_normal_queue
                 metric_steps += 1
+                
+                # Per-step time-series data
+                per_step_queue.append(step_queue_length)
+                # Average wait of currently active vehicles
+                if vehicle_accumulated_wait:
+                    all_waits = list(vehicle_accumulated_wait.values())
+                    per_step_avg_wait.append(sum(all_waits) / len(all_waits))
+                    # Emergency wait time per step
+                    emerg_waits = [vehicle_accumulated_wait[v] for v in vehicle_accumulated_wait if 'emergency' in v.lower()]
+                    per_step_emergency_wait.append(sum(emerg_waits) / len(emerg_waits) if emerg_waits else 0)
+                elif per_step_avg_wait:
+                    per_step_avg_wait.append(per_step_avg_wait[-1])
+                    per_step_emergency_wait.append(per_step_emergency_wait[-1] if per_step_emergency_wait else 0)
+                else:
+                    per_step_avg_wait.append(0)
+                    per_step_emergency_wait.append(0)
             
             # Check if simulation should continue
             if traci.simulation.getMinExpectedNumber() <= 0:
@@ -821,11 +861,29 @@ Examples:
             'normal_completed': len(completed_normal_wait),
             # Network metrics (V2V / V2I)
             'wifi_pdr': ns3_metrics['v2v_wifi']['pdr'] * 100,
+            'v2v_pdr': ns3_metrics['v2v_wifi']['pdr'] * 100,
+            'v2i_pdr': ns3_metrics['v2i_combined']['pdr'] * 100,
             'wimax_pdr': ns3_metrics['v2i_wimax']['pdr'] * 100,
             'wifi_packets_sent': ns3_metrics['v2v_wifi'].get('packets_sent', 0),
             'wifi_packets_received': ns3_metrics['v2v_wifi'].get('packets_received', 0),
             'wimax_packets_sent': ns3_metrics['v2i_wimax'].get('packets_sent', 0),
             'wimax_packets_received': ns3_metrics['v2i_wimax'].get('packets_received', 0),
+            'v2i_packets_sent': ns3_metrics['v2i_combined'].get('packets_sent', 0),
+            'v2i_packets_received': ns3_metrics['v2i_combined'].get('packets_received', 0),
+            # Combined network metrics
+            'overall_pdr': ns3_metrics['combined']['overall_pdr'] * 100,
+            'avg_latency_ms': ns3_metrics['combined']['average_delay_ms'],
+            # Emergency vehicle communication metrics
+            'emergency_comm_success_rate': ns3_metrics['emergency']['success_rate'] * 100,
+            'emergency_comm_avg_delay_ms': ns3_metrics['emergency']['average_delay_ms'],
+            # Queue length by vehicle type
+            'emergency_avg_queue_length': total_emergency_queue_length / max(metric_steps, 1),
+            'normal_avg_queue_length': total_normal_queue_length / max(metric_steps, 1),
+            # Per-step time-series data (for graphs)
+            'per_step_delay_ms': ns3_bridge.per_step_delay,
+            'per_step_wait_time': per_step_avg_wait,
+            'per_step_queue_length': per_step_queue,
+            'per_step_emergency_wait': per_step_emergency_wait,
         }
         
         benchmark_file = os.path.join(output_dir, 'benchmark_metrics.json')

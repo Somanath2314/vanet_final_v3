@@ -124,9 +124,13 @@ def aggregate_metrics(all_results):
         'total_completed_vehicles', 'throughput_veh_per_min',
         'emergency_avg_wait', 'emergency_avg_speed', 'emergency_completed',
         'normal_avg_wait', 'normal_avg_speed', 'normal_completed',
-        'wifi_pdr', 'wimax_pdr',
+        'v2v_pdr', 'v2i_pdr', 'wifi_pdr', 'wimax_pdr', 'overall_pdr',
+        'avg_latency_ms',
+        'emergency_comm_success_rate', 'emergency_comm_avg_delay_ms',
+        'emergency_avg_queue_length', 'normal_avg_queue_length',
         'wifi_packets_sent', 'wifi_packets_received',
         'wimax_packets_sent', 'wimax_packets_received',
+        'v2i_packets_sent', 'v2i_packets_received',
         'elapsed_time_s',
     ]
     
@@ -160,8 +164,16 @@ def format_table(results_by_mode, security_label):
         ('normal_avg_wait', 'Normal Avg Wait (s)'),
         ('normal_avg_speed', 'Normal Avg Speed (m/s)'),
         ('normal_completed', 'Normal Vehicles Completed'),
+        ('emergency_avg_queue_length', 'Emergency Avg Queue Length'),
+        ('normal_avg_queue_length', 'Normal Avg Queue Length'),
         ('wifi_pdr', 'WiFi PDR (%)'),
         ('wimax_pdr', 'WiMAX PDR (%)'),
+        ('v2v_pdr', 'V2V PDR (%)'),
+        ('v2i_pdr', 'V2I PDR (%)'),
+        ('overall_pdr', 'Overall PDR (%)'),
+        ('avg_latency_ms', 'Avg Communication Latency (ms)'),
+        ('emergency_comm_success_rate', 'Emergency Comm Success Rate (%)'),
+        ('emergency_comm_avg_delay_ms', 'Emergency Comm Avg Delay (ms)'),
         ('elapsed_time_s', 'Simulation Time (s)'),
     ]
     

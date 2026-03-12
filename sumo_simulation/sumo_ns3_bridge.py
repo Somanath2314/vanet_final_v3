@@ -69,6 +69,16 @@ class SUMONS3Bridge:
         self.total_delay = 0.0
         self.delay_samples = []
         
+        # Separate V2V and V2I WiFi counters
+        self.v2v_wifi_sent = 0
+        self.v2v_wifi_received = 0
+        self.v2i_wifi_sent = 0
+        self.v2i_wifi_received = 0
+        
+        # Per-step time-series tracking
+        self.per_step_delay = []       # avg delay per beacon step
+        self.per_step_wait_time = []   # avg wait time per step (set externally)
+        
     def initialize_rsus(self, positions: List[Tuple[float, float]]):
         """Initialize RSU (Road Side Unit) positions"""
         self.rsus = positions
@@ -152,9 +162,11 @@ class SUMONS3Bridge:
                     
                     self.communication_events.append(event)
                     self.wifi_packets_sent += 1
+                    self.v2v_wifi_sent += 1
                     
                     if success:
                         self.wifi_packets_received += 1
+                        self.v2v_wifi_received += 1
                         self.total_delay += delay
                         self.delay_samples.append(delay)
     
@@ -219,9 +231,11 @@ class SUMONS3Bridge:
                         
                         self.communication_events.append(event)
                         self.wifi_packets_sent += 1
+                        self.v2i_wifi_sent += 1
                         
                         if success:
                             self.wifi_packets_received += 1
+                            self.v2i_wifi_received += 1
                             self.total_delay += delay
                             self.delay_samples.append(delay)
     
@@ -232,9 +246,16 @@ class SUMONS3Bridge:
         
         # Simulate communications every beacon interval
         if current_time - self.last_beacon_time >= self.beacon_interval:
+            prev_delay_count = len(self.delay_samples)
             self.simulate_v2v_communication(current_time)
             self.simulate_v2i_communication(current_time)
             self.last_beacon_time = current_time
+            # Track per-step average delay
+            new_delays = self.delay_samples[prev_delay_count:]
+            if new_delays:
+                self.per_step_delay.append(sum(new_delays) / len(new_delays))
+            elif self.per_step_delay:
+                self.per_step_delay.append(self.per_step_delay[-1])
     
     def get_metrics(self) -> Dict:
         """Get current network performance metrics"""
@@ -242,6 +263,14 @@ class SUMONS3Bridge:
                     if self.wifi_packets_sent > 0 else 0.0)
         wimax_pdr = (self.wimax_packets_received / self.wimax_packets_sent 
                      if self.wimax_packets_sent > 0 else 0.0)
+        
+        # Separate V2V and V2I PDRs
+        v2v_pdr = (self.v2v_wifi_received / self.v2v_wifi_sent
+                   if self.v2v_wifi_sent > 0 else 0.0)
+        v2i_total_sent = self.v2i_wifi_sent + self.wimax_packets_sent
+        v2i_total_received = self.v2i_wifi_received + self.wimax_packets_received
+        v2i_pdr = (v2i_total_received / v2i_total_sent
+                   if v2i_total_sent > 0 else 0.0)
         
         avg_delay = (sum(self.delay_samples) / len(self.delay_samples) 
                      if self.delay_samples else 0.0)
@@ -264,10 +293,15 @@ class SUMONS3Bridge:
         
         return {
             'v2v_wifi': {
-                'packets_sent': self.wifi_packets_sent,
-                'packets_received': self.wifi_packets_received,
-                'pdr': wifi_pdr,
+                'packets_sent': self.v2v_wifi_sent,
+                'packets_received': self.v2v_wifi_received,
+                'pdr': v2v_pdr,
                 'protocol': '802.11p'
+            },
+            'v2i_combined': {
+                'packets_sent': v2i_total_sent,
+                'packets_received': v2i_total_received,
+                'pdr': v2i_pdr,
             },
             'v2i_wimax': {
                 'packets_sent': self.wimax_packets_sent,
