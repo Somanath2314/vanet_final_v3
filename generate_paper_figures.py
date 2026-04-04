@@ -9,6 +9,8 @@ Produces:
   - Fig 3:    Average queue length by vehicle type (bar chart)
   - Fig 4:    Average communication delay over time (line chart)
   - Fig 5:    Average wait time over time (line chart)
+  - Fig 9:    DQN epsilon decay schedule (from trained model config)
+  - Fig 10:   DQN training convergence (episode rewards from trained model)
 
 Usage:
   python generate_paper_figures.py
@@ -140,9 +142,9 @@ def generate_table_iii(data, output_dir):
     ]
     
     modes_display = [
-        ('fixed', 'Fixed (30s)'),
-        ('density', 'Adaptive'),
-        ('proximity', 'RL (Ours)'),
+        ('fixed', 'Fixed Time'),
+        ('density', 'Density Based'),
+        ('proximity', 'Proximity Based RL'),
     ]
     
     header = f"{'Metric':<30}"
@@ -414,9 +416,9 @@ def generate_fig4(data, output_dir):
     fig, ax = plt.subplots(figsize=(10, 5))
     
     mode_styles = [
-        ('fixed', 'Fixed (30s)', '#A5A5A5', '--'),
-        ('density', 'Adaptive', '#4472C4', '-.'),
-        ('proximity', 'RL (Ours)', '#ED7D31', '-'),
+        ('fixed', 'Fixed Time', '#A5A5A5', '--'),
+        ('density', 'Density Based', '#4472C4', '-.'),
+        ('proximity', 'Proximity Based RL', '#ED7D31', '-'),
     ]
     
     for mode, label, color, linestyle in mode_styles:
@@ -430,9 +432,9 @@ def generate_fig4(data, output_dir):
             ax.fill_between(steps, means_arr - stds_arr, means_arr + stds_arr,
                            alpha=0.15, color=color)
     
-    ax.set_xlabel('Simulation Step', fontsize=12)
-    ax.set_ylabel('Avg Communication Delay (ms)', fontsize=12)
-    ax.set_title('Average Communication Delay Over Time', fontsize=14)
+    ax.set_xlabel('timestamp(s)', fontsize=12)
+    ax.set_ylabel('Avg Latency (ms)', fontsize=12)
+    ax.set_title('Average Latency Over Time', fontsize=14)
     ax.legend(fontsize=11)
     ax.grid(alpha=0.3)
     
@@ -458,9 +460,9 @@ def generate_fig5(data, output_dir):
     fig, ax = plt.subplots(figsize=(10, 5))
     
     mode_styles = [
-        ('fixed', 'Fixed (30s)', '#A5A5A5', '--'),
-        ('density', 'Adaptive', '#4472C4', '-.'),
-        ('proximity', 'RL (Ours)', '#ED7D31', '-'),
+        ('fixed', 'Fixed Time', '#A5A5A5', '--'),
+        ('density', 'Density Based', '#4472C4', '-.'),
+        ('proximity', 'Proximity Based RL', '#ED7D31', '-'),
     ]
     
     for mode, label, color, linestyle in mode_styles:
@@ -502,9 +504,9 @@ def generate_fig6(data, output_dir):
     fig, ax = plt.subplots(figsize=(10, 5))
     
     mode_styles = [
-        ('fixed', 'Fixed (30s)', '#A5A5A5', '--'),
-        ('density', 'Adaptive', '#4472C4', '-.'),
-        ('proximity', 'RL (Ours)', '#ED7D31', '-'),
+        ('fixed', 'Fixed Time', '#A5A5A5', '--'),
+        ('density', 'Density Based', '#4472C4', '-.'),
+        ('proximity', 'Proximity Based RL', '#ED7D31', '-'),
     ]
     
     for mode, label, color, linestyle in mode_styles:
@@ -546,9 +548,9 @@ def generate_fig7(data, output_dir):
     fig, ax = plt.subplots(figsize=(10, 5))
     
     mode_styles = [
-        ('fixed', 'Fixed (30s)', '#A5A5A5', '--'),
-        ('density', 'Adaptive', '#4472C4', '-.'),
-        ('proximity', 'RL (Ours)', '#ED7D31', '-'),
+        ('fixed', 'Fixed Time', '#A5A5A5', '--'),
+        ('density', 'Density Based', '#4472C4', '-.'),
+        ('proximity', 'Proximity Based RL', '#ED7D31', '-'),
     ]
     
     for mode, label, color, linestyle in mode_styles:
@@ -634,6 +636,160 @@ def generate_fig8(data, output_dir):
 
 
 # ──────────────────────────────────────────────────────────────────
+#  FIG 9: DQN Epsilon Decay Schedule (from trained model)
+# ──────────────────────────────────────────────────────────────────
+
+def find_trained_model_dir():
+    """Find the latest trained model directory with training_config.json."""
+    base = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rl_module', 'trained_models')
+    if not os.path.isdir(base):
+        return None
+    dirs = sorted([d for d in os.listdir(base)
+                   if os.path.isfile(os.path.join(base, d, 'training_config.json'))],
+                  reverse=True)
+    return os.path.join(base, dirs[0]) if dirs else None
+
+
+def load_training_config():
+    """Load training_config.json from the latest trained model."""
+    model_dir = find_trained_model_dir()
+    if not model_dir:
+        return None, None
+    config_path = os.path.join(model_dir, 'training_config.json')
+    with open(config_path) as f:
+        config = json.load(f)
+    return config, model_dir
+
+
+def generate_fig9(output_dir):
+    """Plot the epsilon (exploration rate) decay schedule from the trained DQN model."""
+    if not HAS_MPL:
+        return
+
+    config, model_dir = load_training_config()
+    if config is None:
+        print("  Skipping Fig 9: no trained model found")
+        return
+
+    eps_cfg = config.get('epsilon_schedule', {})
+    total_timesteps = config.get('total_timesteps', 200000)
+    eps_start = eps_cfg.get('epsilon_start', 1.0)
+    eps_final = eps_cfg.get('epsilon_final', 0.05)
+    exploration_fraction = eps_cfg.get('exploration_fraction', 0.3)
+    exploration_steps = int(total_timesteps * exploration_fraction)
+
+    # Build epsilon curve
+    timesteps = np.arange(0, total_timesteps + 1, 100)
+    epsilon = np.where(
+        timesteps <= exploration_steps,
+        eps_start + (eps_final - eps_start) * (timesteps / exploration_steps),
+        eps_final
+    )
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(timesteps, epsilon, color='#4472C4', linewidth=2)
+    ax.axvline(x=exploration_steps, color='#ED7D31', linestyle='--', linewidth=1.2,
+               label=f'Exploration ends ({exploration_steps:,} steps)')
+    ax.axhline(y=eps_final, color='#A5A5A5', linestyle=':', linewidth=1, alpha=0.7,
+               label=f'$\\epsilon_{{final}}$ = {eps_final}')
+
+    ax.set_xlabel('Training Timestep', fontsize=12)
+    ax.set_ylabel('Epsilon ($\\epsilon$)', fontsize=12)
+    ax.set_title('DQN Epsilon Decay Schedule', fontsize=14, fontweight='bold')
+    ax.legend(fontsize=11)
+    ax.grid(alpha=0.3)
+    ax.set_xlim(0, total_timesteps)
+    ax.set_ylim(0, 1.05)
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x/1000)}k'))
+
+    # Annotate key points
+    ax.annotate(f'$\\epsilon_{{start}}$ = {eps_start}',
+                xy=(0, eps_start), xytext=(total_timesteps * 0.08, eps_start - 0.1),
+                fontsize=10, arrowprops=dict(arrowstyle='->', color='gray'),
+                bbox=dict(boxstyle='round,pad=0.3', facecolor='wheat', alpha=0.7))
+    ax.annotate(f'$\\epsilon_{{final}}$ = {eps_final}',
+                xy=(exploration_steps, eps_final),
+                xytext=(exploration_steps + total_timesteps * 0.05, eps_final + 0.15),
+                fontsize=10, arrowprops=dict(arrowstyle='->', color='gray'),
+                bbox=dict(boxstyle='round,pad=0.3', facecolor='wheat', alpha=0.7))
+
+    fig.tight_layout()
+    path = os.path.join(output_dir, 'fig9_epsilon_decay_schedule.png')
+    fig.savefig(path, dpi=300, bbox_inches='tight')
+    plt.close(fig)
+    print(f"  Saved: {path}")
+
+
+# ──────────────────────────────────────────────────────────────────
+#  FIG 10: DQN Training Convergence (from trained model)
+# ──────────────────────────────────────────────────────────────────
+
+def generate_fig10(output_dir):
+    """Plot training convergence: episode rewards over episodes from the trained DQN model."""
+    if not HAS_MPL:
+        return
+
+    config, model_dir = load_training_config()
+    if config is None:
+        print("  Skipping Fig 10: no trained model found")
+        return
+
+    results = config.get('training_results', {})
+    rewards = results.get('episode_rewards', [])
+    if not rewards:
+        print("  Skipping Fig 10: no episode rewards in training config")
+        return
+
+    episodes = np.arange(1, len(rewards) + 1)
+    rewards_arr = np.array(rewards)
+
+    # Compute rolling average (window=10)
+    window = 10
+    rolling_avg = np.convolve(rewards_arr, np.ones(window) / window, mode='valid')
+    rolling_episodes = episodes[window - 1:]
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+    # Raw episode rewards
+    ax.plot(episodes, rewards_arr / 1000, color='#A5A5A5', alpha=0.4, linewidth=0.8,
+            label='Episode Reward')
+    # Rolling average
+    ax.plot(rolling_episodes, rolling_avg / 1000, color='#ED7D31', linewidth=2,
+            label=f'Rolling Avg (window={window})')
+
+    # Mark exploration / exploitation phases
+    eps_cfg = config.get('epsilon_schedule', {})
+    total_timesteps = config.get('total_timesteps', 200000)
+    exploration_fraction = eps_cfg.get('exploration_fraction', 0.3)
+    steps_per_episode = results.get('episode_rewards', [0])
+    # Each episode is ~1000 steps according to the config
+    env_cfg = config.get('environment', {})
+    horizon = env_cfg.get('horizon', 1000)
+    exploration_episodes = int(total_timesteps * exploration_fraction / horizon) if horizon else 60
+
+    ax.axvline(x=exploration_episodes, color='#4472C4', linestyle='--', linewidth=1.2,
+               label=f'Exploration → Exploitation (ep {exploration_episodes})')
+
+    # Final average annotation
+    final_avg = results.get('final_avg_reward_last10', np.mean(rewards_arr[-10:]))
+    ax.axhline(y=final_avg / 1000, color='#548235', linestyle=':', linewidth=1,
+               alpha=0.7, label=f'Final Avg (last 10): {final_avg/1000:.1f}k')
+
+    ax.set_xlabel('Episode', fontsize=12)
+    ax.set_ylabel('Episode Reward (×1000)', fontsize=12)
+    ax.set_title('DQN Training Convergence', fontsize=14, fontweight='bold')
+    ax.legend(fontsize=10, loc='lower right')
+    ax.grid(alpha=0.3)
+    ax.set_xlim(1, len(rewards))
+
+    fig.tight_layout()
+    path = os.path.join(output_dir, 'fig10_training_convergence.png')
+    fig.savefig(path, dpi=300, bbox_inches='tight')
+    plt.close(fig)
+    print(f"  Saved: {path}")
+
+
+# ──────────────────────────────────────────────────────────────────
 #  MAIN
 # ──────────────────────────────────────────────────────────────────
 
@@ -689,6 +845,8 @@ def main():
     generate_fig6(data, output_dir)
     generate_fig7(data, output_dir)
     generate_fig8(data, output_dir)
+    generate_fig9(output_dir)
+    generate_fig10(output_dir)
     
     print("\n" + "="*70)
     print("  ALL DONE")
