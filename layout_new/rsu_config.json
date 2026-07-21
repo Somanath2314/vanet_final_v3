@@ -1,0 +1,754 @@
+{
+  "generated_at": "2026-07-20T17:33:33.281842+00:00",
+  "source_net": "map.net.xml",
+  "rsus": [
+    {
+      "rsu_id": "RSU_1070314190",
+      "position": [
+        684.05,
+        1139.91
+      ],
+      "tier": "TIER1",
+      "junction_id": "1070314190",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 1070314190"
+    },
+    {
+      "rsu_id": "RSU_11294646345",
+      "position": [
+        2996.07,
+        1174.34
+      ],
+      "tier": "TIER1",
+      "junction_id": "11294646345",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 11294646345"
+    },
+    {
+      "rsu_id": "RSU_11294646347",
+      "position": [
+        2996.26,
+        1162.49
+      ],
+      "tier": "TIER1",
+      "junction_id": "11294646347",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 11294646347"
+    },
+    {
+      "rsu_id": "RSU_11294646352",
+      "position": [
+        3020.42,
+        1174.17
+      ],
+      "tier": "TIER1",
+      "junction_id": "11294646352",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 11294646352"
+    },
+    {
+      "rsu_id": "RSU_11294646355",
+      "position": [
+        3020.31,
+        1162.07
+      ],
+      "tier": "TIER1",
+      "junction_id": "11294646355",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 11294646355"
+    },
+    {
+      "rsu_id": "RSU_11302971567",
+      "position": [
+        2007.37,
+        28.06
+      ],
+      "tier": "TIER1",
+      "junction_id": "11302971567",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 11302971567"
+    },
+    {
+      "rsu_id": "RSU_11302992907",
+      "position": [
+        1979.05,
+        459.87
+      ],
+      "tier": "TIER1",
+      "junction_id": "11302992907",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 11302992907"
+    },
+    {
+      "rsu_id": "RSU_11302992908",
+      "position": [
+        2012.41,
+        452.27
+      ],
+      "tier": "TIER1",
+      "junction_id": "11302992908",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 11302992908"
+    },
+    {
+      "rsu_id": "RSU_11302992909",
+      "position": [
+        2001.03,
+        474.49
+      ],
+      "tier": "TIER1",
+      "junction_id": "11302992909",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 11302992909"
+    },
+    {
+      "rsu_id": "RSU_11302992910",
+      "position": [
+        1993.37,
+        441.21
+      ],
+      "tier": "TIER1",
+      "junction_id": "11302992910",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 11302992910"
+    },
+    {
+      "rsu_id": "RSU_11303526456",
+      "position": [
+        1405.91,
+        1202.42
+      ],
+      "tier": "TIER1",
+      "junction_id": "11303526456",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 11303526456"
+    },
+    {
+      "rsu_id": "RSU_11303526457",
+      "position": [
+        1418.37,
+        1177.03
+      ],
+      "tier": "TIER1",
+      "junction_id": "11303526457",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 11303526457"
+    },
+    {
+      "rsu_id": "RSU_11303526458",
+      "position": [
+        1377.23,
+        1190.43
+      ],
+      "tier": "TIER1",
+      "junction_id": "11303526458",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 11303526458"
+    },
+    {
+      "rsu_id": "RSU_1148895344",
+      "position": [
+        2417.11,
+        1170.75
+      ],
+      "tier": "TIER1",
+      "junction_id": "1148895344",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 1148895344"
+    },
+    {
+      "rsu_id": "RSU_12123831581",
+      "position": [
+        1414.77,
+        1494.1
+      ],
+      "tier": "TIER1",
+      "junction_id": "12123831581",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12123831581"
+    },
+    {
+      "rsu_id": "RSU_12123831582",
+      "position": [
+        1400.63,
+        1504.45
+      ],
+      "tier": "TIER1",
+      "junction_id": "12123831582",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12123831582"
+    },
+    {
+      "rsu_id": "RSU_12123831583",
+      "position": [
+        1389.51,
+        1482.9
+      ],
+      "tier": "TIER1",
+      "junction_id": "12123831583",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12123831583"
+    },
+    {
+      "rsu_id": "RSU_12123831584",
+      "position": [
+        1373.34,
+        1494.65
+      ],
+      "tier": "TIER1",
+      "junction_id": "12123831584",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12123831584"
+    },
+    {
+      "rsu_id": "RSU_12459218189",
+      "position": [
+        3191.84,
+        1171.94
+      ],
+      "tier": "TIER1",
+      "junction_id": "12459218189",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12459218189"
+    },
+    {
+      "rsu_id": "RSU_12459243351",
+      "position": [
+        3193.44,
+        1159.47
+      ],
+      "tier": "TIER1",
+      "junction_id": "12459243351",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12459243351"
+    },
+    {
+      "rsu_id": "RSU_12459243352",
+      "position": [
+        3193.74,
+        1171.93
+      ],
+      "tier": "TIER1",
+      "junction_id": "12459243352",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12459243352"
+    },
+    {
+      "rsu_id": "RSU_12492308032",
+      "position": [
+        2005.83,
+        1166.97
+      ],
+      "tier": "TIER1",
+      "junction_id": "12492308032",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12492308032"
+    },
+    {
+      "rsu_id": "RSU_12492308040",
+      "position": [
+        1999.11,
+        1190.93
+      ],
+      "tier": "TIER1",
+      "junction_id": "12492308040",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12492308040"
+    },
+    {
+      "rsu_id": "RSU_12492308041",
+      "position": [
+        2006.08,
+        1190.82
+      ],
+      "tier": "TIER1",
+      "junction_id": "12492308041",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12492308041"
+    },
+    {
+      "rsu_id": "RSU_12492308046",
+      "position": [
+        1998.67,
+        1161.38
+      ],
+      "tier": "TIER1",
+      "junction_id": "12492308046",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12492308046"
+    },
+    {
+      "rsu_id": "RSU_12492308047",
+      "position": [
+        2015.05,
+        1172.16
+      ],
+      "tier": "TIER1",
+      "junction_id": "12492308047",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12492308047"
+    },
+    {
+      "rsu_id": "RSU_12492308048",
+      "position": [
+        1990.77,
+        1185.52
+      ],
+      "tier": "TIER1",
+      "junction_id": "12492308048",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12492308048"
+    },
+    {
+      "rsu_id": "RSU_12492308061",
+      "position": [
+        1994.04,
+        1172.39
+      ],
+      "tier": "TIER1",
+      "junction_id": "12492308061",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12492308061"
+    },
+    {
+      "rsu_id": "RSU_12492308063",
+      "position": [
+        2011.2,
+        1172.2
+      ],
+      "tier": "TIER1",
+      "junction_id": "12492308063",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12492308063"
+    },
+    {
+      "rsu_id": "RSU_12492308064",
+      "position": [
+        2010.96,
+        1185.16
+      ],
+      "tier": "TIER1",
+      "junction_id": "12492308064",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12492308064"
+    },
+    {
+      "rsu_id": "RSU_12492308147",
+      "position": [
+        2992.41,
+        1174.37
+      ],
+      "tier": "TIER1",
+      "junction_id": "12492308147",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12492308147"
+    },
+    {
+      "rsu_id": "RSU_12492308150",
+      "position": [
+        3024.5,
+        1162.01
+      ],
+      "tier": "TIER1",
+      "junction_id": "12492308150",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12492308150"
+    },
+    {
+      "rsu_id": "RSU_12612408133",
+      "position": [
+        3017.65,
+        436.16
+      ],
+      "tier": "TIER1",
+      "junction_id": "12612408133",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12612408133"
+    },
+    {
+      "rsu_id": "RSU_12625079624",
+      "position": [
+        758.57,
+        1571.17
+      ],
+      "tier": "TIER1",
+      "junction_id": "12625079624",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 12625079624"
+    },
+    {
+      "rsu_id": "RSU_13072765088",
+      "position": [
+        2402.44,
+        1217.03
+      ],
+      "tier": "TIER1",
+      "junction_id": "13072765088",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 13072765088"
+    },
+    {
+      "rsu_id": "RSU_13072765092",
+      "position": [
+        2414.72,
+        1191.24
+      ],
+      "tier": "TIER1",
+      "junction_id": "13072765092",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 13072765092"
+    },
+    {
+      "rsu_id": "RSU_13072765094",
+      "position": [
+        2415.03,
+        1171.02
+      ],
+      "tier": "TIER1",
+      "junction_id": "13072765094",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 13072765094"
+    },
+    {
+      "rsu_id": "RSU_17327106",
+      "position": [
+        2006.13,
+        1198.18
+      ],
+      "tier": "TIER1",
+      "junction_id": "17327106",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 17327106"
+    },
+    {
+      "rsu_id": "RSU_1835344809",
+      "position": [
+        240.21,
+        993.11
+      ],
+      "tier": "TIER1",
+      "junction_id": "1835344809",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 1835344809"
+    },
+    {
+      "rsu_id": "RSU_248839215",
+      "position": [
+        680.14,
+        1157.93
+      ],
+      "tier": "TIER1",
+      "junction_id": "248839215",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 248839215"
+    },
+    {
+      "rsu_id": "RSU_249075973",
+      "position": [
+        2402.44,
+        1221.36
+      ],
+      "tier": "TIER1",
+      "junction_id": "249075973",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 249075973"
+    },
+    {
+      "rsu_id": "RSU_364626139",
+      "position": [
+        715.42,
+        1221.38
+      ],
+      "tier": "TIER1",
+      "junction_id": "364626139",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 364626139"
+    },
+    {
+      "rsu_id": "RSU_4582284826",
+      "position": [
+        673.27,
+        1243.11
+      ],
+      "tier": "TIER1",
+      "junction_id": "4582284826",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 4582284826"
+    },
+    {
+      "rsu_id": "RSU_4872132537",
+      "position": [
+        248.19,
+        994.36
+      ],
+      "tier": "TIER1",
+      "junction_id": "4872132537",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 4872132537"
+    },
+    {
+      "rsu_id": "RSU_493556454",
+      "position": [
+        1998.71,
+        1167.08
+      ],
+      "tier": "TIER1",
+      "junction_id": "493556454",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 493556454"
+    },
+    {
+      "rsu_id": "RSU_5346843788",
+      "position": [
+        2394.11,
+        1196.79
+      ],
+      "tier": "TIER1",
+      "junction_id": "5346843788",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 5346843788"
+    },
+    {
+      "rsu_id": "RSU_5354313548",
+      "position": [
+        2816.9,
+        426.51
+      ],
+      "tier": "TIER1",
+      "junction_id": "5354313548",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 5354313548"
+    },
+    {
+      "rsu_id": "RSU_699576768",
+      "position": [
+        673.84,
+        1156.58
+      ],
+      "tier": "TIER1",
+      "junction_id": "699576768",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 699576768"
+    },
+    {
+      "rsu_id": "RSU_699576794",
+      "position": [
+        658.08,
+        1250.55
+      ],
+      "tier": "TIER1",
+      "junction_id": "699576794",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 699576794"
+    },
+    {
+      "rsu_id": "RSU_7287518216",
+      "position": [
+        1994.07,
+        1185.42
+      ],
+      "tier": "TIER1",
+      "junction_id": "7287518216",
+      "coverage_radius": 300.0,
+      "description": "Primary RSU at traffic light 7287518216"
+    },
+    {
+      "rsu_id": "RSU_EDGE_1",
+      "position": [
+        1342.125,
+        1690.625
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge -1044521116"
+    },
+    {
+      "rsu_id": "RSU_EDGE_2",
+      "position": [
+        1445.2652056728057,
+        1798.130574001882
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge -23075332#0"
+    },
+    {
+      "rsu_id": "RSU_EDGE_3",
+      "position": [
+        1438.785,
+        2098.06
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge -23075332#0"
+    },
+    {
+      "rsu_id": "RSU_EDGE_4",
+      "position": [
+        1432.3047943271945,
+        2397.989425998118
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge -23075332#0"
+    },
+    {
+      "rsu_id": "RSU_EDGE_5",
+      "position": [
+        2189.615,
+        1809.47
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge -28187232"
+    },
+    {
+      "rsu_id": "RSU_EDGE_6",
+      "position": [
+        1550.552799046065,
+        2280.0339996234466
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge -40633859#8"
+    },
+    {
+      "rsu_id": "RSU_EDGE_7",
+      "position": [
+        1557.45,
+        1980.125
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge -40633859#8"
+    },
+    {
+      "rsu_id": "RSU_EDGE_8",
+      "position": [
+        1564.347200953935,
+        1680.2160003765532
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge -40633859#8"
+    },
+    {
+      "rsu_id": "RSU_EDGE_9",
+      "position": [
+        119.41000000000001,
+        902.71
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge -41189494#0"
+    },
+    {
+      "rsu_id": "RSU_EDGE_10",
+      "position": [
+        374.05,
+        1054.625
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge -41189494#2"
+    },
+    {
+      "rsu_id": "RSU_EDGE_11",
+      "position": [
+        1138.5500000000002,
+        1780.73
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge -799788864#5"
+    },
+    {
+      "rsu_id": "RSU_EDGE_12",
+      "position": [
+        1996.45,
+        181.015
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge 1219836994#0"
+    },
+    {
+      "rsu_id": "RSU_EDGE_13",
+      "position": [
+        1395.5,
+        1687.975
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge 1390291153#0"
+    },
+    {
+      "rsu_id": "RSU_EDGE_14",
+      "position": [
+        2892.21,
+        1171.5149999999999
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge 1458899349"
+    },
+    {
+      "rsu_id": "RSU_EDGE_15",
+      "position": [
+        2592.5266461159063,
+        1178.0106843403205
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge 1458899349"
+    },
+    {
+      "rsu_id": "RSU_EDGE_16",
+      "position": [
+        1770.4650000000001,
+        1721.735
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge 146449643#0"
+    },
+    {
+      "rsu_id": "RSU_EDGE_17",
+      "position": [
+        2776.935,
+        1174.935
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge 332243839#6"
+    },
+    {
+      "rsu_id": "RSU_EDGE_18",
+      "position": [
+        2817.705,
+        1165.085
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on edge 40633857#4"
+    }
+  ]
+}

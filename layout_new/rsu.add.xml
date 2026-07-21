@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+  <poi id="RSU_1070314190" type="tier1_rsu" x="684.05" y="1139.91" color="0,0,1" layer="10"/>
+  <poly id="RSU_1070314190_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="684.05,1155.91 700.05,1139.91 684.05,1123.91 668.05,1139.91 684.05,1155.91"/>
+  <poi id="RSU_11294646345" type="tier1_rsu" x="2996.07" y="1174.34" color="0,0,1" layer="10"/>
+  <poly id="RSU_11294646345_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2996.07,1190.34 3012.07,1174.34 2996.07,1158.34 2980.07,1174.34 2996.07,1190.34"/>
+  <poi id="RSU_11294646347" type="tier1_rsu" x="2996.26" y="1162.49" color="0,0,1" layer="10"/>
+  <poly id="RSU_11294646347_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2996.26,1178.49 3012.26,1162.49 2996.26,1146.49 2980.26,1162.49 2996.26,1178.49"/>
+  <poi id="RSU_11294646352" type="tier1_rsu" x="3020.42" y="1174.17" color="0,0,1" layer="10"/>
+  <poly id="RSU_11294646352_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="3020.42,1190.17 3036.42,1174.17 3020.42,1158.17 3004.42,1174.17 3020.42,1190.17"/>
+  <poi id="RSU_11294646355" type="tier1_rsu" x="3020.31" y="1162.07" color="0,0,1" layer="10"/>
+  <poly id="RSU_11294646355_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="3020.31,1178.07 3036.31,1162.07 3020.31,1146.07 3004.31,1162.07 3020.31,1178.07"/>
+  <poi id="RSU_11302971567" type="tier1_rsu" x="2007.37" y="28.06" color="0,0,1" layer="10"/>
+  <poly id="RSU_11302971567_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2007.37,44.06 2023.37,28.06 2007.37,12.06 1991.37,28.06 2007.37,44.06"/>
+  <poi id="RSU_11302992907" type="tier1_rsu" x="1979.05" y="459.87" color="0,0,1" layer="10"/>
+  <poly id="RSU_11302992907_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="1979.05,475.87 1995.05,459.87 1979.05,443.87 1963.05,459.87 1979.05,475.87"/>
+  <poi id="RSU_11302992908" type="tier1_rsu" x="2012.41" y="452.27" color="0,0,1" layer="10"/>
+  <poly id="RSU_11302992908_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2012.41,468.27 2028.41,452.27 2012.41,436.27 1996.41,452.27 2012.41,468.27"/>
+  <poi id="RSU_11302992909" type="tier1_rsu" x="2001.03" y="474.49" color="0,0,1" layer="10"/>
+  <poly id="RSU_11302992909_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2001.03,490.49 2017.03,474.49 2001.03,458.49 1985.03,474.49 2001.03,490.49"/>
+  <poi id="RSU_11302992910" type="tier1_rsu" x="1993.37" y="441.21" color="0,0,1" layer="10"/>
+  <poly id="RSU_11302992910_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="1993.37,457.21 2009.37,441.21 1993.37,425.21 1977.37,441.21 1993.37,457.21"/>
+  <poi id="RSU_11303526456" type="tier1_rsu" x="1405.91" y="1202.42" color="0,0,1" layer="10"/>
+  <poly id="RSU_11303526456_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="1405.91,1218.42 1421.91,1202.42 1405.91,1186.42 1389.91,1202.42 1405.91,1218.42"/>
+  <poi id="RSU_11303526457" type="tier1_rsu" x="1418.37" y="1177.03" color="0,0,1" layer="10"/>
+  <poly id="RSU_11303526457_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="1418.37,1193.03 1434.37,1177.03 1418.37,1161.03 1402.37,1177.03 1418.37,1193.03"/>
+  <poi id="RSU_11303526458" type="tier1_rsu" x="1377.23" y="1190.43" color="0,0,1" layer="10"/>
+  <poly id="RSU_11303526458_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="1377.23,1206.43 1393.23,1190.43 1377.23,1174.43 1361.23,1190.43 1377.23,1206.43"/>
+  <poi id="RSU_1148895344" type="tier1_rsu" x="2417.11" y="1170.75" color="0,0,1" layer="10"/>
+  <poly id="RSU_1148895344_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2417.11,1186.75 2433.11,1170.75 2417.11,1154.75 2401.11,1170.75 2417.11,1186.75"/>
+  <poi id="RSU_12123831581" type="tier1_rsu" x="1414.77" y="1494.10" color="0,0,1" layer="10"/>
+  <poly id="RSU_12123831581_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="1414.77,1510.10 1430.77,1494.10 1414.77,1478.10 1398.77,1494.10 1414.77,1510.10"/>
+  <poi id="RSU_12123831582" type="tier1_rsu" x="1400.63" y="1504.45" color="0,0,1" layer="10"/>
+  <poly id="RSU_12123831582_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="1400.63,1520.45 1416.63,1504.45 1400.63,1488.45 1384.63,1504.45 1400.63,1520.45"/>
+  <poi id="RSU_12123831583" type="tier1_rsu" x="1389.51" y="1482.90" color="0,0,1" layer="10"/>
+  <poly id="RSU_12123831583_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="1389.51,1498.90 1405.51,1482.90 1389.51,1466.90 1373.51,1482.90 1389.51,1498.90"/>
+  <poi id="RSU_12123831584" type="tier1_rsu" x="1373.34" y="1494.65" color="0,0,1" layer="10"/>
+  <poly id="RSU_12123831584_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="1373.34,1510.65 1389.34,1494.65 1373.34,1478.65 1357.34,1494.65 1373.34,1510.65"/>
+  <poi id="RSU_12459218189" type="tier1_rsu" x="3191.84" y="1171.94" color="0,0,1" layer="10"/>
+  <poly id="RSU_12459218189_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="3191.84,1187.94 3207.84,1171.94 3191.84,1155.94 3175.84,1171.94 3191.84,1187.94"/>
+  <poi id="RSU_12459243351" type="tier1_rsu" x="3193.44" y="1159.47" color="0,0,1" layer="10"/>
+  <poly id="RSU_12459243351_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="3193.44,1175.47 3209.44,1159.47 3193.44,1143.47 3177.44,1159.47 3193.44,1175.47"/>
+  <poi id="RSU_12459243352" type="tier1_rsu" x="3193.74" y="1171.93" color="0,0,1" layer="10"/>
+  <poly id="RSU_12459243352_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="3193.74,1187.93 3209.74,1171.93 3193.74,1155.93 3177.74,1171.93 3193.74,1187.93"/>
+  <poi id="RSU_12492308032" type="tier1_rsu" x="2005.83" y="1166.97" color="0,0,1" layer="10"/>
+  <poly id="RSU_12492308032_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2005.83,1182.97 2021.83,1166.97 2005.83,1150.97 1989.83,1166.97 2005.83,1182.97"/>
+  <poi id="RSU_12492308040" type="tier1_rsu" x="1999.11" y="1190.93" color="0,0,1" layer="10"/>
+  <poly id="RSU_12492308040_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="1999.11,1206.93 2015.11,1190.93 1999.11,1174.93 1983.11,1190.93 1999.11,1206.93"/>
+  <poi id="RSU_12492308041" type="tier1_rsu" x="2006.08" y="1190.82" color="0,0,1" layer="10"/>
+  <poly id="RSU_12492308041_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2006.08,1206.82 2022.08,1190.82 2006.08,1174.82 1990.08,1190.82 2006.08,1206.82"/>
+  <poi id="RSU_12492308046" type="tier1_rsu" x="1998.67" y="1161.38" color="0,0,1" layer="10"/>
+  <poly id="RSU_12492308046_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="1998.67,1177.38 2014.67,1161.38 1998.67,1145.38 1982.67,1161.38 1998.67,1177.38"/>
+  <poi id="RSU_12492308047" type="tier1_rsu" x="2015.05" y="1172.16" color="0,0,1" layer="10"/>
+  <poly id="RSU_12492308047_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2015.05,1188.16 2031.05,1172.16 2015.05,1156.16 1999.05,1172.16 2015.05,1188.16"/>
+  <poi id="RSU_12492308048" type="tier1_rsu" x="1990.77" y="1185.52" color="0,0,1" layer="10"/>
+  <poly id="RSU_12492308048_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="1990.77,1201.52 2006.77,1185.52 1990.77,1169.52 1974.77,1185.52 1990.77,1201.52"/>
+  <poi id="RSU_12492308061" type="tier1_rsu" x="1994.04" y="1172.39" color="0,0,1" layer="10"/>
+  <poly id="RSU_12492308061_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="1994.04,1188.39 2010.04,1172.39 1994.04,1156.39 1978.04,1172.39 1994.04,1188.39"/>
+  <poi id="RSU_12492308063" type="tier1_rsu" x="2011.20" y="1172.20" color="0,0,1" layer="10"/>
+  <poly id="RSU_12492308063_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2011.20,1188.20 2027.20,1172.20 2011.20,1156.20 1995.20,1172.20 2011.20,1188.20"/>
+  <poi id="RSU_12492308064" type="tier1_rsu" x="2010.96" y="1185.16" color="0,0,1" layer="10"/>
+  <poly id="RSU_12492308064_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2010.96,1201.16 2026.96,1185.16 2010.96,1169.16 1994.96,1185.16 2010.96,1201.16"/>
+  <poi id="RSU_12492308147" type="tier1_rsu" x="2992.41" y="1174.37" color="0,0,1" layer="10"/>
+  <poly id="RSU_12492308147_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2992.41,1190.37 3008.41,1174.37 2992.41,1158.37 2976.41,1174.37 2992.41,1190.37"/>
+  <poi id="RSU_12492308150" type="tier1_rsu" x="3024.50" y="1162.01" color="0,0,1" layer="10"/>
+  <poly id="RSU_12492308150_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="3024.50,1178.01 3040.50,1162.01 3024.50,1146.01 3008.50,1162.01 3024.50,1178.01"/>
+  <poi id="RSU_12612408133" type="tier1_rsu" x="3017.65" y="436.16" color="0,0,1" layer="10"/>
+  <poly id="RSU_12612408133_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="3017.65,452.16 3033.65,436.16 3017.65,420.16 3001.65,436.16 3017.65,452.16"/>
+  <poi id="RSU_12625079624" type="tier1_rsu" x="758.57" y="1571.17" color="0,0,1" layer="10"/>
+  <poly id="RSU_12625079624_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="758.57,1587.17 774.57,1571.17 758.57,1555.17 742.57,1571.17 758.57,1587.17"/>
+  <poi id="RSU_13072765088" type="tier1_rsu" x="2402.44" y="1217.03" color="0,0,1" layer="10"/>
+  <poly id="RSU_13072765088_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2402.44,1233.03 2418.44,1217.03 2402.44,1201.03 2386.44,1217.03 2402.44,1233.03"/>
+  <poi id="RSU_13072765092" type="tier1_rsu" x="2414.72" y="1191.24" color="0,0,1" layer="10"/>
+  <poly id="RSU_13072765092_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2414.72,1207.24 2430.72,1191.24 2414.72,1175.24 2398.72,1191.24 2414.72,1207.24"/>
+  <poi id="RSU_13072765094" type="tier1_rsu" x="2415.03" y="1171.02" color="0,0,1" layer="10"/>
+  <poly id="RSU_13072765094_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2415.03,1187.02 2431.03,1171.02 2415.03,1155.02 2399.03,1171.02 2415.03,1187.02"/>
+  <poi id="RSU_17327106" type="tier1_rsu" x="2006.13" y="1198.18" color="0,0,1" layer="10"/>
+  <poly id="RSU_17327106_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2006.13,1214.18 2022.13,1198.18 2006.13,1182.18 1990.13,1198.18 2006.13,1214.18"/>
+  <poi id="RSU_1835344809" type="tier1_rsu" x="240.21" y="993.11" color="0,0,1" layer="10"/>
+  <poly id="RSU_1835344809_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="240.21,1009.11 256.21,993.11 240.21,977.11 224.21,993.11 240.21,1009.11"/>
+  <poi id="RSU_248839215" type="tier1_rsu" x="680.14" y="1157.93" color="0,0,1" layer="10"/>
+  <poly id="RSU_248839215_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="680.14,1173.93 696.14,1157.93 680.14,1141.93 664.14,1157.93 680.14,1173.93"/>
+  <poi id="RSU_249075973" type="tier1_rsu" x="2402.44" y="1221.36" color="0,0,1" layer="10"/>
+  <poly id="RSU_249075973_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2402.44,1237.36 2418.44,1221.36 2402.44,1205.36 2386.44,1221.36 2402.44,1237.36"/>
+  <poi id="RSU_364626139" type="tier1_rsu" x="715.42" y="1221.38" color="0,0,1" layer="10"/>
+  <poly id="RSU_364626139_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="715.42,1237.38 731.42,1221.38 715.42,1205.38 699.42,1221.38 715.42,1237.38"/>
+  <poi id="RSU_4582284826" type="tier1_rsu" x="673.27" y="1243.11" color="0,0,1" layer="10"/>
+  <poly id="RSU_4582284826_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="673.27,1259.11 689.27,1243.11 673.27,1227.11 657.27,1243.11 673.27,1259.11"/>
+  <poi id="RSU_4872132537" type="tier1_rsu" x="248.19" y="994.36" color="0,0,1" layer="10"/>
+  <poly id="RSU_4872132537_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="248.19,1010.36 264.19,994.36 248.19,978.36 232.19,994.36 248.19,1010.36"/>
+  <poi id="RSU_493556454" type="tier1_rsu" x="1998.71" y="1167.08" color="0,0,1" layer="10"/>
+  <poly id="RSU_493556454_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="1998.71,1183.08 2014.71,1167.08 1998.71,1151.08 1982.71,1167.08 1998.71,1183.08"/>
+  <poi id="RSU_5346843788" type="tier1_rsu" x="2394.11" y="1196.79" color="0,0,1" layer="10"/>
+  <poly id="RSU_5346843788_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2394.11,1212.79 2410.11,1196.79 2394.11,1180.79 2378.11,1196.79 2394.11,1212.79"/>
+  <poi id="RSU_5354313548" type="tier1_rsu" x="2816.90" y="426.51" color="0,0,1" layer="10"/>
+  <poly id="RSU_5354313548_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="2816.90,442.51 2832.90,426.51 2816.90,410.51 2800.90,426.51 2816.90,442.51"/>
+  <poi id="RSU_699576768" type="tier1_rsu" x="673.84" y="1156.58" color="0,0,1" layer="10"/>
+  <poly id="RSU_699576768_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="673.84,1172.58 689.84,1156.58 673.84,1140.58 657.84,1156.58 673.84,1172.58"/>
+  <poi id="RSU_699576794" type="tier1_rsu" x="658.08" y="1250.55" color="0,0,1" layer="10"/>
+  <poly id="RSU_699576794_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="658.08,1266.55 674.08,1250.55 658.08,1234.55 642.08,1250.55 658.08,1266.55"/>
+  <poi id="RSU_7287518216" type="tier1_rsu" x="1994.07" y="1185.42" color="0,0,1" layer="10"/>
+  <poly id="RSU_7287518216_SYMBOL" type="rsu_symbol" color="0,0,1" fill="false" lineWidth="2.0" layer="11" shape="1994.07,1201.42 2010.07,1185.42 1994.07,1169.42 1978.07,1185.42 1994.07,1201.42"/>
+  <poi id="RSU_EDGE_1" type="tier2_rsu" x="1342.12" y="1690.62" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_1_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="1342.12,1702.62 1354.12,1690.62 1342.12,1678.62 1330.12,1690.62 1342.12,1702.62"/>
+  <poi id="RSU_EDGE_2" type="tier2_rsu" x="1445.27" y="1798.13" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_2_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="1445.27,1810.13 1457.27,1798.13 1445.27,1786.13 1433.27,1798.13 1445.27,1810.13"/>
+  <poi id="RSU_EDGE_3" type="tier2_rsu" x="1438.79" y="2098.06" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_3_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="1438.79,2110.06 1450.79,2098.06 1438.79,2086.06 1426.79,2098.06 1438.79,2110.06"/>
+  <poi id="RSU_EDGE_4" type="tier2_rsu" x="1432.30" y="2397.99" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_4_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="1432.30,2409.99 1444.30,2397.99 1432.30,2385.99 1420.30,2397.99 1432.30,2409.99"/>
+  <poi id="RSU_EDGE_5" type="tier2_rsu" x="2189.61" y="1809.47" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_5_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="2189.61,1821.47 2201.61,1809.47 2189.61,1797.47 2177.61,1809.47 2189.61,1821.47"/>
+  <poi id="RSU_EDGE_6" type="tier2_rsu" x="1550.55" y="2280.03" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_6_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="1550.55,2292.03 1562.55,2280.03 1550.55,2268.03 1538.55,2280.03 1550.55,2292.03"/>
+  <poi id="RSU_EDGE_7" type="tier2_rsu" x="1557.45" y="1980.12" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_7_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="1557.45,1992.12 1569.45,1980.12 1557.45,1968.12 1545.45,1980.12 1557.45,1992.12"/>
+  <poi id="RSU_EDGE_8" type="tier2_rsu" x="1564.35" y="1680.22" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_8_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="1564.35,1692.22 1576.35,1680.22 1564.35,1668.22 1552.35,1680.22 1564.35,1692.22"/>
+  <poi id="RSU_EDGE_9" type="tier2_rsu" x="119.41" y="902.71" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_9_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="119.41,914.71 131.41,902.71 119.41,890.71 107.41,902.71 119.41,914.71"/>
+  <poi id="RSU_EDGE_10" type="tier2_rsu" x="374.05" y="1054.62" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_10_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="374.05,1066.62 386.05,1054.62 374.05,1042.62 362.05,1054.62 374.05,1066.62"/>
+  <poi id="RSU_EDGE_11" type="tier2_rsu" x="1138.55" y="1780.73" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_11_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="1138.55,1792.73 1150.55,1780.73 1138.55,1768.73 1126.55,1780.73 1138.55,1792.73"/>
+  <poi id="RSU_EDGE_12" type="tier2_rsu" x="1996.45" y="181.01" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_12_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="1996.45,193.01 2008.45,181.01 1996.45,169.01 1984.45,181.01 1996.45,193.01"/>
+  <poi id="RSU_EDGE_13" type="tier2_rsu" x="1395.50" y="1687.97" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_13_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="1395.50,1699.97 1407.50,1687.97 1395.50,1675.97 1383.50,1687.97 1395.50,1699.97"/>
+  <poi id="RSU_EDGE_14" type="tier2_rsu" x="2892.21" y="1171.51" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_14_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="2892.21,1183.51 2904.21,1171.51 2892.21,1159.51 2880.21,1171.51 2892.21,1183.51"/>
+  <poi id="RSU_EDGE_15" type="tier2_rsu" x="2592.53" y="1178.01" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_15_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="2592.53,1190.01 2604.53,1178.01 2592.53,1166.01 2580.53,1178.01 2592.53,1190.01"/>
+  <poi id="RSU_EDGE_16" type="tier2_rsu" x="1770.47" y="1721.73" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_16_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="1770.47,1733.73 1782.47,1721.73 1770.47,1709.73 1758.47,1721.73 1770.47,1733.73"/>
+  <poi id="RSU_EDGE_17" type="tier2_rsu" x="2776.93" y="1174.93" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_17_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="2776.93,1186.93 2788.93,1174.93 2776.93,1162.93 2764.93,1174.93 2776.93,1186.93"/>
+  <poi id="RSU_EDGE_18" type="tier2_rsu" x="2817.70" y="1165.09" color="0,0.6,0.2" layer="10"/>
+  <poly id="RSU_EDGE_18_SYMBOL" type="rsu_symbol" color="0,0.6,0.2" fill="false" lineWidth="1.4" layer="11" shape="2817.70,1177.09 2829.70,1165.09 2817.70,1153.09 2805.70,1165.09 2817.70,1177.09"/>
+</additional>

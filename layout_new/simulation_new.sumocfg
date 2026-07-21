@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+  <input>
+    <net-file value="map.net.xml"/>
+    <route-files value="routes_new.rou.xml"/>
+    <additional-files value="rsu.add.xml"/>
+  </input>
+
+  <output>
+    <summary-output value="output/summary_new.xml"/>
+    <tripinfo-output value="output/tripinfo_new.xml"/>
+  </output>
+
+  <time>
+    <begin value="0"/>
+    <end value="3600"/>
+    <step-length value="1"/>
+  </time>
+
+  <processing>
+    <time-to-teleport value="300"/>
+  </processing>
+
+  <gui_only>
+    <gui-settings-file value="../sumo_simulation/maps/gui-settings.cfg"/>
+    <start value="true"/>
+    <quit-on-end value="false"/>
+  </gui_only>
+</configuration>

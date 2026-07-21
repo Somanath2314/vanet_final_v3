@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2026-07-21T14:21:12.074906+05:30 by Eclipse SUMO sumo 1.27.1
+<sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="../layout_new/map.net.xml"/>
+        <route-files value="c:/SAPDevelop/Myproject/capstone/vanet/rl_module/trained_models\ppo_traffic_20260721_140244\logs\randomized_routes\routes_ep_00007.rou.xml"/>
+        <additional-files value="../layout_new/rsu.add.xml"/>
+    </input>
+
+    <output>
+        <summary-output value="../layout_new/output/summary_new.xml"/>
+        <tripinfo-output value="../layout_new/output/tripinfo_new.xml"/>
+    </output>
+
+    <time>
+        <begin value="0"/>
+        <end value="3600"/>
+        <step-length value="1"/>
+    </time>
+
+    <processing>
+        <scale value="1.400"/>
+        <time-to-teleport value="300"/>
+    </processing>
+
+    <report>
+        <no-warnings value="true"/>
+    </report>
+
+    <traci_server>
+        <remote-port value="63154"/>
+    </traci_server>
+
+    <random_number>
+        <seed value="2047625120"/>
+    </random_number>
+
+    <gui_only>
+        <gui-settings-file value="../layout_new/../sumo_simulation/maps/gui-settings.cfg"/>
+        <quit-on-end value="false"/>
+        <start value="true"/>
+    </gui_only>
+
+</sumoConfiguration>
+-->
+
+<tripinfos xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/tripinfo_file.xsd">
