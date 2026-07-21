@@ -15,6 +15,19 @@ __pycache__/
 # sumo_simulation/output/*.log 
 output/integrated_simulation_results.json
 sumo_simulation/output/integrated_simulation_results.json
+layout_new/output/
+output/
+output_rule/
+output_rule_edge/
+sumo_simulation/output/
+sumo_simulation/output_rule/
+sumo_simulation/output_rule_edge/
+
+# Generated RL run artifacts
+rl_module/trained_models/**/logs/
+rl_module/trained_models/**/tensorboard/
+rl_module/trained_models/**/checkpoints/
+rl_module/trained_models_timeprobe/
 
 # # RL Models
 # rl_module/models/*.pth

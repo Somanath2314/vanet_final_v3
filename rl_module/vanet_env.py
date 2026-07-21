@@ -10,6 +10,7 @@ import numpy as np
 import traci
 from collections import OrderedDict
 import itertools
+import struct
 
 # Import with proper path handling
 import sys
@@ -72,6 +73,7 @@ class VANETTrafficEnv(gym.Env):
         self.sim_step = self.config['sim_step']
         self.algorithm = self.config['algorithm']
         self.horizon = self.config['horizon']
+        self.max_discrete_actions = self.config.get('max_discrete_actions', 1_000_000)
         
         # Initialize RL components
         self.rewards = Rewards(self.action_spec)
@@ -93,6 +95,10 @@ class VANETTrafficEnv(gym.Env):
         # Episode tracking
         self.current_step = 0
         self.episode_reward = 0
+
+        # Connection-health tracking to avoid noisy per-TL errors on shutdown.
+        self._traci_connection_broken = False
+        self._traci_connection_error_logged = False
         
         # Emergency vehicle tracking
         self.emergency_vehicle_delays = []  # Track delays caused to emergency vehicles
@@ -106,14 +112,18 @@ class VANETTrafficEnv(gym.Env):
         # Action space
         if self.algorithm == "DQN":
             num_actions = self.get_num_actions()
+            if num_actions > self.max_discrete_actions:
+                raise ValueError(
+                    f"DQN action space too large: {num_actions} > {self.max_discrete_actions}. "
+                    "Reduce controlled traffic lights or use a different RL action design."
+                )
             self.action_space = spaces.Discrete(num_actions)
         elif self.algorithm == "PPO":
-            num_intersections = len(self.action_spec.keys())
-            self.action_space = spaces.Box(
-                low=0, high=1, 
-                shape=(num_intersections,), 
-                dtype=np.float32
-            )
+            phase_counts = [max(1, len(v)) for v in self.action_spec.values()]
+            if phase_counts:
+                self.action_space = spaces.MultiDiscrete(phase_counts)
+            else:
+                self.action_space = spaces.Discrete(1)
         else:
             raise NotImplementedError(f"Algorithm {self.algorithm} not supported")
         
@@ -252,10 +262,15 @@ class VANETTrafficEnv(gym.Env):
             else:
                 new_state = all_actions[0]
         elif self.algorithm == "PPO":
-            new_state = [
-                v[int(rl_actions[i])] 
-                for i, v in enumerate(list(self.action_spec.values()))
-            ]
+            ppo_actions = np.asarray(rl_actions, dtype=int).flatten()
+            new_state = []
+            for i, v in enumerate(list(self.action_spec.values())):
+                if not v:
+                    new_state.append("")
+                    continue
+                act_idx = int(ppo_actions[i]) if i < len(ppo_actions) else 0
+                act_idx = max(0, min(act_idx, len(v) - 1))
+                new_state.append(v[act_idx])
         else:
             raise NotImplementedError
 
@@ -296,6 +311,9 @@ class VANETTrafficEnv(gym.Env):
         """Apply RL actions to traffic lights."""
         if not self.action_spec:
             return
+
+        if self._traci_connection_broken:
+            return
         
         new_tl_states = self.map_action_to_tl_states(rl_actions)
         
@@ -304,6 +322,25 @@ class VANETTrafficEnv(gym.Env):
                 if counter < len(new_tl_states):
                     traci.trafficlight.setRedYellowGreenState(tl_id, new_tl_states[counter])
             except Exception as e:
+                msg = str(e).lower()
+                is_connection_error = isinstance(e, (struct.error, OSError)) or (
+                    "unpack requires a buffer" in msg
+                    or "connection closed" in msg
+                    or "peer shutdown" in msg
+                    or "connection reset" in msg
+                    or "socket" in msg
+                )
+
+                if is_connection_error:
+                    self._traci_connection_broken = True
+                    if not self._traci_connection_error_logged:
+                        print(
+                            "TraCI connection lost while applying actions; "
+                            "ending current episode gracefully."
+                        )
+                        self._traci_connection_error_logged = True
+                    break
+
                 print(f"Error setting traffic light {tl_id}: {e}")
     
     def _update_obs_wait_steps(self):
@@ -487,6 +524,8 @@ class VANETTrafficEnv(gym.Env):
 
         self.current_step = 0
         self.episode_reward = 0
+        self._traci_connection_broken = False
+        self._traci_connection_error_logged = False
 
         # Reset tracking variables
         self._init_obs_veh_acc()
@@ -658,12 +697,27 @@ class VANETTrafficEnv(gym.Env):
 
     def step(self, action):
         """Execute one step in the environment."""
+        if self._traci_connection_broken:
+            state = np.zeros(self.observation_space.shape[0], dtype=np.float32)
+            reward = -10.0
+            terminated = True
+            truncated = False
+            info = {'episode_reward': self.episode_reward, 'mean_speed': 0, 'mean_emission': 0}
+            return state, reward, terminated, truncated, info
+
         # Apply emergency override or density-based override before RL actions
         self.emergency_override()
         self.density_based_override()
 
         # Apply RL actions
         self._apply_rl_actions(action)
+        if self._traci_connection_broken:
+            state = np.zeros(self.observation_space.shape[0], dtype=np.float32)
+            reward = -10.0
+            terminated = True
+            truncated = False
+            info = {'episode_reward': self.episode_reward, 'mean_speed': 0, 'mean_emission': 0}
+            return state, reward, terminated, truncated, info
 
         # Advance simulation
         try:

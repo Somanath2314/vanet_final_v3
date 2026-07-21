@@ -43,6 +43,28 @@ except ImportError as e:
     print("   Make sure stable-baselines3 is installed and rl_module is accessible")
 
 
+def resolve_sumo_config_path(config_arg):
+    """Resolve SUMO config path from CLI argument or default location."""
+    if config_arg:
+        return os.path.abspath(config_arg)
+    return os.path.join(os.path.dirname(__file__), "simulation.sumocfg")
+
+
+def activate_dynamic_rsu_config(config_path):
+    """Use layout-specific RSU definitions when they are available."""
+    existing = os.environ.get("VANET_RSU_CONFIG_FILE")
+    if existing:
+        print(f"✓ Using RSU config from environment: {existing}")
+        return
+
+    candidate = os.path.join(os.path.dirname(config_path), "rsu_config.json")
+    if os.path.exists(candidate):
+        os.environ["VANET_RSU_CONFIG_FILE"] = candidate
+        print(f"✓ Using dynamic RSU config: {candidate}")
+    else:
+        print("✓ Using built-in RSU configuration")
+
+
 def load_trained_model(model_path):
     """Load trained DQN model"""
     if not os.path.exists(model_path):
@@ -310,6 +332,8 @@ Examples:
                        help='Proximity threshold for RL activation (meters)')
     parser.add_argument('--steps', type=int, default=1000,
                        help='Number of simulation steps')
+    parser.add_argument('--config', type=str, default=None,
+                       help='Path to SUMO .sumocfg file (default: sumo_simulation/simulation.sumocfg)')
     parser.add_argument('--gui', action='store_true',
                        help='Use SUMO-GUI for visualization')
     parser.add_argument('--output', default='./output',
@@ -322,6 +346,13 @@ Examples:
                        help='Random seed for SUMO reproducibility')
     
     args = parser.parse_args()
+
+    config_path = resolve_sumo_config_path(args.config)
+    if not os.path.exists(config_path):
+        print(f"❌ Error: SUMO config not found: {config_path}")
+        sys.exit(1)
+
+    activate_dynamic_rsu_config(config_path)
 
     # Normalize mode: 'rule' is alias for 'density'
     if args.mode == 'rule':
@@ -365,6 +396,7 @@ Examples:
     print(f"Security: {'✅ RSA Encryption' if args.security else '❌ Disabled'}")
     print(f"Edge Computing: {'✅ Smart RSUs' if args.edge else '❌ Disabled'}")
     print(f"Output: {output_dir}")
+    print(f"SUMO Config: {config_path}")
     print("="*70)
     print()
 
@@ -406,11 +438,6 @@ Examples:
     traffic_controller.set_ns3_bridge(ns3_bridge)
     
     # Connect to SUMO
-    config_path = os.path.join(os.path.dirname(__file__), "simulation.sumocfg")
-    if not os.path.exists(config_path):
-        print(f"❌ Error: SUMO config not found: {config_path}")
-        return
-
     print(f"📁 Using SUMO config: {config_path}")
     
     if not traffic_controller.connect_to_sumo(config_path, use_gui=args.gui, seed=args.seed):
@@ -475,7 +502,7 @@ Examples:
     print("🌐 Network Simulation:")
     print(f"  V2V: WiFi 802.11p (Range: {ns3_bridge.wifi_range}m)")
     print(f"  V2I: WiMAX emergency (Range: {ns3_bridge.wimax_range}m)")
-    print(f"  RSUs: {len(rsu_positions)} at intersections")
+    print(f"  RSUs: {len(rsu_positions)} from active RSU configuration")
     print()
     print("🚀 Starting simulation...")
     print("-"*70)

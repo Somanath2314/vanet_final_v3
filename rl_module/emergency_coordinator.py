@@ -8,6 +8,7 @@ from typing import Dict, List, Tuple, Optional, Set
 from dataclasses import dataclass
 from collections import defaultdict
 import numpy as np
+import time
 from rsu_config import get_junction_rsus, get_rsu_positions
 
 
@@ -82,65 +83,84 @@ class EmergencyVehicleCoordinator:
     def initialize_network_topology(self):
         """Initialize network topology from SUMO."""
         try:
-            # Get all junctions
-            junction_ids = traci.junction.getIDList()
-            
-            for junc_id in junction_ids:
-                # Get junction position
-                x, y = traci.junction.getPosition(junc_id)
-                
-                # Get incoming and outgoing edges
-                # Use edge API instead of junction API for compatibility
-                incoming = []
-                outgoing = []
-                
-                # Get all edges and check which ones connect to this junction
-                try:
-                    all_edges = traci.edge.getIDList()
-                    for edge_id in all_edges:
-                        # Skip internal edges (they start with ':')
-                        if edge_id.startswith(':'):
-                            continue
-                        
-                        try:
-                            # Get edge's to and from junctions
-                            from_junc = traci.edge.getFromJunction(edge_id) if hasattr(traci.edge, 'getFromJunction') else None
-                            to_junc = traci.edge.getToJunction(edge_id) if hasattr(traci.edge, 'getToJunction') else None
-                            
-                            if to_junc == junc_id:
-                                incoming.append(edge_id)
-                            if from_junc == junc_id:
-                                outgoing.append(edge_id)
-                        except:
-                            continue
-                except Exception as e:
-                    # If edge API doesn't work, use a simple approach
-                    pass
-                
-                # Try to find associated traffic light
-                tl_id = None
-                tl_ids = traci.trafficlight.getIDList()
-                for tl in tl_ids:
+            start_t = time.time()
+
+            # Reset cached topology each time this is called.
+            self.junction_info.clear()
+            self.rsu_positions.clear()
+
+            junction_ids = list(traci.junction.getIDList())
+            junction_set = set(junction_ids)
+
+            # Build incoming/outgoing maps in O(E) instead of O(J*E).
+            incoming_by_junction = defaultdict(list)
+            outgoing_by_junction = defaultdict(list)
+            try:
+                all_edges = list(traci.edge.getIDList())
+            except Exception:
+                all_edges = []
+
+            if all_edges and hasattr(traci.edge, 'getFromJunction') and hasattr(traci.edge, 'getToJunction'):
+                for edge_id in all_edges:
+                    if edge_id.startswith(':'):
+                        continue
                     try:
-                        tl_junctions = traci.trafficlight.getControlledJunctions(tl) if hasattr(traci.trafficlight, 'getControlledJunctions') else []
-                        if junc_id in tl_junctions or tl == junc_id:
-                            tl_id = tl
-                            break
-                    except:
-                        # If junction doesn't match, try matching by name
-                        if tl == junc_id:
-                            tl_id = tl
-                            break
-                
+                        from_junc = traci.edge.getFromJunction(edge_id)
+                        to_junc = traci.edge.getToJunction(edge_id)
+                    except Exception:
+                        continue
+
+                    if to_junc in junction_set:
+                        incoming_by_junction[to_junc].append(edge_id)
+                    if from_junc in junction_set:
+                        outgoing_by_junction[from_junc].append(edge_id)
+
+            # Build traffic-light -> junction map in O(T) calls.
+            tl_for_junction = {}
+            try:
+                tl_ids = list(traci.trafficlight.getIDList())
+            except Exception:
+                tl_ids = []
+
+            has_controlled_junctions = hasattr(traci.trafficlight, 'getControlledJunctions')
+            for tl_id in tl_ids:
+                mapped = False
+
+                if has_controlled_junctions:
+                    try:
+                        controlled_junctions = traci.trafficlight.getControlledJunctions(tl_id) or []
+                    except Exception:
+                        controlled_junctions = []
+
+                    for junc_id in controlled_junctions:
+                        if junc_id in junction_set and junc_id not in tl_for_junction:
+                            tl_for_junction[junc_id] = tl_id
+                            mapped = True
+
+                # Fallback for IDs that match directly.
+                if not mapped and tl_id in junction_set and tl_id not in tl_for_junction:
+                    tl_for_junction[tl_id] = tl_id
+
+            # Materialize junction objects.
+            for junc_id in junction_ids:
+                try:
+                    x, y = traci.junction.getPosition(junc_id)
+                except Exception:
+                    x, y = 0.0, 0.0
+
                 self.junction_info[junc_id] = Junction(
                     junction_id=junc_id,
-                    tl_id=tl_id,
+                    tl_id=tl_for_junction.get(junc_id),
                     position=(x, y),
-                    incoming_edges=incoming,
-                    outgoing_edges=outgoing
+                    incoming_edges=list(incoming_by_junction.get(junc_id, [])),
+                    outgoing_edges=list(outgoing_by_junction.get(junc_id, [])),
                 )
-            
-            print(f"✓ Emergency coordinator initialized: {len(self.junction_info)} junctions")
+
+            elapsed = time.time() - start_t
+            print(
+                f"✓ Emergency coordinator initialized: {len(self.junction_info)} junctions "
+                f"in {elapsed:.2f}s"
+            )
             
             # Initialize RSU positions from unified configuration
             # Use centralized RSU config for consistency across all modules

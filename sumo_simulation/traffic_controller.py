@@ -37,7 +37,7 @@ except ImportError:
     from wimax.secure_wimax import SecureWiMAXBaseStation, SecureWiMAXMobileStation
 
 # Edge computing imports
-from edge_computing import EdgeRSU, RSUPlacementManager
+from edge_computing import EdgeRSU
 from edge_computing.metrics.edge_metrics import EdgeMetricsTracker
 
 class AdaptiveTrafficController:
@@ -96,11 +96,12 @@ class AdaptiveTrafficController:
         self.wimax_last_beacon_step = 0
         self.wimax_metrics_snapshot: Dict = {}
 
-        # Traffic light program - OPTIMIZED
-        self.default_phases = {
-            "J2": ["rrrGGG", "rrryyy", "GGGrrr", "yyyrrr"],
-            "J3": ["rrrGGG", "rrryyy", "GGGrrr", "yyyrrr"]
-        }
+        # Traffic-light phase data is populated dynamically from the loaded SUMO net.
+        self.default_phases: Dict[str, List[str]] = {}
+        self.phase_durations: Dict[str, List[float]] = {}
+        self.tl_positions: Dict[str, Tuple[float, float]] = {}
+        self.tl_incoming_links: Dict[str, Dict[str, List[int]]] = {}
+        self._edge_phase_cache: Dict[str, Dict[str, Optional[int]]] = defaultdict(dict)
         # Optimized timing parameters for better flow
         self.min_green_time = 10      # Reduced from 15 (faster response)
         self.max_green_time = 45      # Reduced from 60 (prevent starvation)
@@ -173,120 +174,262 @@ class AdaptiveTrafficController:
         print("  ✓ NS3 bridge reference set for accurate V2I metrics")
 
     def _initialize_intersections(self):
+        self.intersections.clear()
+        self.default_phases.clear()
+        self.phase_durations.clear()
+        self.tl_positions.clear()
+        self.tl_incoming_links.clear()
+        self._edge_phase_cache.clear()
+
         tl_ids = traci.trafficlight.getIDList()
         for tl in tl_ids:
+            phase_states = []
+            phase_durations = []
+
+            try:
+                programs = traci.trafficlight.getAllProgramLogics(tl)
+                if programs:
+                    for phase in programs[0].getPhases():
+                        state = getattr(phase, "state", None)
+                        if state is None and hasattr(phase, "getRedYellowGreenState"):
+                            state = phase.getRedYellowGreenState()
+                        duration = float(getattr(phase, "duration", 0) or 0)
+                        if duration <= 0 and hasattr(phase, "getDuration"):
+                            duration = float(phase.getDuration())
+                        if state:
+                            phase_states.append(state)
+                            phase_durations.append(max(duration, 1.0))
+            except Exception:
+                pass
+
+            if not phase_states:
+                try:
+                    fallback_state = traci.trafficlight.getRedYellowGreenState(tl)
+                except Exception:
+                    continue
+                phase_states = [fallback_state]
+                phase_durations = [float(self.fixed_green_time)]
+
+            current_phase = int(traci.trafficlight.getPhase(tl))
+            if current_phase >= len(phase_states):
+                current_phase = 0
+
+            try:
+                spent = int(traci.trafficlight.getSpentDuration(tl))
+            except Exception:
+                spent = 0
+
+            controlled_lanes = list(dict.fromkeys(traci.trafficlight.getControlledLanes(tl)))
             self.intersections[tl] = {
-                "current_phase": 0, 
-                "time_in_phase": 0,
-                "lanes": traci.trafficlight.getControlledLanes(tl)
+                "current_phase": current_phase,
+                "time_in_phase": spent,
+                "lanes": controlled_lanes,
             }
-    
+            self.default_phases[tl] = phase_states
+            self.phase_durations[tl] = phase_durations
+            self.tl_positions[tl] = self._get_traffic_light_position(tl, controlled_lanes)
+            self.tl_incoming_links[tl] = self._build_incoming_link_index(tl)
+
+        print(f"  ✓ Initialized {len(self.intersections)} traffic lights from active network")
+
+    def _get_traffic_light_position(self, tl_id, controlled_lanes):
+        """Resolve a stable position for a traffic light."""
+        try:
+            return traci.junction.getPosition(tl_id)
+        except Exception:
+            pass
+
+        points = []
+        for lane in controlled_lanes[:10]:
+            try:
+                lane_shape = traci.lane.getShape(lane)
+                if lane_shape:
+                    points.append(lane_shape[-1])
+            except Exception:
+                continue
+
+        if not points:
+            return (0.0, 0.0)
+
+        x = sum(p[0] for p in points) / len(points)
+        y = sum(p[1] for p in points) / len(points)
+        return (x, y)
+
+    def _build_incoming_link_index(self, tl_id):
+        """Map incoming edges to controlled-link indices for a traffic light."""
+        incoming = defaultdict(list)
+        try:
+            controlled_links = traci.trafficlight.getControlledLinks(tl_id)
+            for link_idx, links in enumerate(controlled_links):
+                if not links:
+                    continue
+                incoming_lane = links[0][0]
+                if not incoming_lane:
+                    continue
+                edge_id = incoming_lane.rsplit('_', 1)[0]
+                incoming[edge_id].append(link_idx)
+        except Exception:
+            pass
+        return dict(incoming)
+
+    def _determine_emergency_phase(self, tl_id, edge_id):
+        """Find a green phase at tl_id that serves edge_id incoming links."""
+        if edge_id in self._edge_phase_cache[tl_id]:
+            return self._edge_phase_cache[tl_id][edge_id]
+
+        phase_states = self.default_phases.get(tl_id, [])
+        incoming_links = self.tl_incoming_links.get(tl_id, {}).get(edge_id, [])
+        if not phase_states or not incoming_links:
+            self._edge_phase_cache[tl_id][edge_id] = None
+            return None
+
+        best_phase = None
+        best_score = 0
+        for phase_idx, phase_state in enumerate(phase_states):
+            state_lower = phase_state.lower()
+            if 'y' in state_lower:
+                continue
+
+            score = sum(
+                1 for link_idx in incoming_links
+                if link_idx < len(phase_state) and phase_state[link_idx] in ('G', 'g')
+            )
+            if score > best_score:
+                best_score = score
+                best_phase = phase_idx
+
+        self._edge_phase_cache[tl_id][edge_id] = best_phase if best_score > 0 else None
+        return self._edge_phase_cache[tl_id][edge_id]
+
+    @staticmethod
+    def _position_too_close(position, existing_positions, min_distance=150.0):
+        for ex, ey in existing_positions:
+            dx = position[0] - ex
+            dy = position[1] - ey
+            if (dx * dx + dy * dy) ** 0.5 < min_distance:
+                return True
+        return False
+
     def _get_lane_density(self, tl_id, phase_index):
         """Get vehicle density on lanes with green light in current phase"""
         try:
             if tl_id not in self.intersections:
                 return 0
-            
-            phase_state = self.default_phases[tl_id][phase_index]
+
+            phase_states = self.default_phases.get(tl_id, [])
+            if not phase_states:
+                return 0
+
+            phase_index = phase_index % len(phase_states)
+            phase_state = phase_states[phase_index]
             controlled_lanes = self.intersections[tl_id]["lanes"]
-            
+
             total_vehicles = 0
             green_lanes = 0
-            
-            # Count vehicles on lanes that have green ('G') in current phase
+
+            # Count vehicles on lanes that have green in current phase.
             for i, signal in enumerate(phase_state):
-                if signal == 'G' and i < len(controlled_lanes):
+                if signal in ('G', 'g') and i < len(controlled_lanes):
                     lane = controlled_lanes[i]
-                    # Count vehicles on this lane
                     vehicles = traci.lane.getLastStepVehicleNumber(lane)
-                    # Also consider waiting/halting vehicles (queue length)
                     halting = traci.lane.getLastStepHaltingNumber(lane)
-                    total_vehicles += vehicles + (halting * 0.5)  # Weight halting vehicles more
+                    total_vehicles += vehicles + (halting * 0.5)
                     green_lanes += 1
-            
-            # Return average density across green lanes
+
             return total_vehicles / max(green_lanes, 1)
-            
-        except Exception as e:
-            # If error getting density, return medium value
+
+        except Exception:
             return 5
 
     def _initialize_wimax(self):
-        coords = {"J2": (500,500), "J3": (1000,500)}
-        for tl, (x,y) in coords.items():
-            if tl in self.intersections:
-                # Use secure WiMAX if security is enabled
-                if self.security_enabled:
-                    rsu_id = f"RSU_{tl}"
-                    if rsu_id in self.rsu_managers:
-                        self.wimax_base_stations[tl] = SecureWiMAXBaseStation(
-                            bs_id=rsu_id,  # Changed from station_id to bs_id
-                            x=x,
-                            y=y,
-                            config=self.wimax_config,
-                            key_manager=self.rsu_managers[rsu_id]
-                        )
-                        print(f"  🔐 Secure RSU initialized: {rsu_id} at ({x}, {y})")
-                    else:
-                        print(f"  ⚠️  No key manager for {rsu_id}, using insecure WiMAX")
-                        self.wimax_base_stations[tl] = WiMAXBaseStation(tl, x, y, self.wimax_config)
-                else:
-                    self.wimax_base_stations[tl] = WiMAXBaseStation(tl, x, y, self.wimax_config)
+        self.wimax_base_stations.clear()
+        for tl_id, (x, y) in self.tl_positions.items():
+            rsu_id = f"RSU_{tl_id}"
+
+            # Use secure WiMAX when security is enabled and key managers are available.
+            if self.security_enabled and rsu_id in self.rsu_managers:
+                self.wimax_base_stations[tl_id] = SecureWiMAXBaseStation(
+                    bs_id=rsu_id,
+                    x=x,
+                    y=y,
+                    config=self.wimax_config,
+                    key_manager=self.rsu_managers[rsu_id]
+                )
+                print(f"  🔐 Secure RSU initialized: {rsu_id} at ({x:.1f}, {y:.1f})")
+            else:
+                if self.security_enabled and rsu_id not in self.rsu_managers:
+                    print(f"  ⚠️  No key manager for {rsu_id}, using insecure WiMAX")
+                self.wimax_base_stations[tl_id] = WiMAXBaseStation(rsu_id, x, y, self.wimax_config)
 
     def _initialize_edge_rsus(self):
-        """Initialize edge computing RSUs at regular intervals"""
+        """Initialize edge RSUs from the active SUMO network (no hardcoded map assumptions)."""
         if not self.edge_enabled:
             return
-        
+
         print("\n🔷 Initializing Edge Computing Infrastructure...")
-        
-        # Define network bounds from SUMO network
-        # Based on simple_network.net.xml: X: 0-2000, Y: 0-1000
-        network_bounds = (0, 0, 2000, 1000)
-        
-        # Define junction positions (traffic light intersections)
-        junction_positions = [
-            (500, 500),   # J2
-            (1000, 500)   # J3
-        ]
-        
-        # Define edge definitions for RSU placement along roads
-        edge_definitions = [
-            {'id': 'E1', 'from_pos': (0, 500), 'to_pos': (500, 500)},      # J1 to J2
-            {'id': 'E2', 'from_pos': (500, 500), 'to_pos': (1000, 500)},   # J2 to J3
-            {'id': 'E3', 'from_pos': (1000, 500), 'to_pos': (1500, 500)},  # J3 to J4
-            {'id': 'E4', 'from_pos': (1500, 500), 'to_pos': (2000, 500)},  # J4 to J5
-            {'id': 'E5', 'from_pos': (500, 0), 'to_pos': (500, 500)},      # J6 to J2
-            {'id': 'E6', 'from_pos': (500, 500), 'to_pos': (500, 1000)},   # J2 to J7
-            {'id': 'E7', 'from_pos': (1000, 0), 'to_pos': (1000, 500)},    # J8 to J3
-            {'id': 'E8', 'from_pos': (1000, 500), 'to_pos': (1000, 1000)}  # J3 to J9
-        ]
-        
-        # Calculate RSU positions
-        placement_manager = RSUPlacementManager(interval_meters=400)
-        rsu_positions = placement_manager.calculate_rsu_positions(
-            network_bounds,
-            junction_positions,
-            edge_definitions
-        )
-        
-        # Create edge RSUs
-        for rsu_def in rsu_positions:
-            rsu_id = rsu_def['id']
-            position = rsu_def['position']
-            tier = rsu_def['tier']
-            compute_capacity = rsu_def['compute_capacity']
-            
-            # Create EdgeRSU instance
-            edge_rsu = EdgeRSU(
+        self.edge_rsus.clear()
+
+        tier1_positions = []
+        for tl_id, pos in self.tl_positions.items():
+            rsu_id = f"EDGE_RSU_{tl_id}"
+            self.edge_rsus[rsu_id] = EdgeRSU(
                 rsu_id=rsu_id,
-                position=position,
-                tier=tier,
-                compute_capacity=compute_capacity
+                position=pos,
+                tier=1,
+                compute_capacity='high'
             )
-            
-            self.edge_rsus[rsu_id] = edge_rsu
-        
+            tier1_positions.append(pos)
+
+        edge_candidates = []
+        tl_ids = set(self.tl_positions.keys())
+        for edge_id in traci.edge.getIDList():
+            if edge_id.startswith(':'):
+                continue
+
+            lane_id = f"{edge_id}_0"
+            try:
+                shape = traci.lane.getShape(lane_id)
+                if len(shape) < 2:
+                    continue
+                start = shape[0]
+                end = shape[-1]
+                length = float(traci.lane.getLength(lane_id))
+            except Exception:
+                continue
+
+            try:
+                from_j = traci.edge.getFromJunction(edge_id)
+                to_j = traci.edge.getToJunction(edge_id)
+            except Exception:
+                from_j = None
+                to_j = None
+
+            bonus = 1000.0 if (from_j in tl_ids or to_j in tl_ids) else 0.0
+            edge_candidates.append((length + bonus, edge_id, start, end))
+
+        edge_candidates.sort(reverse=True)
+        max_tier2 = max(20, min(40, len(edge_candidates) // 30 + 20))
+
+        placed_positions = list(tier1_positions)
+        tier2_count = 0
+        for _, edge_id, start, end in edge_candidates:
+            if tier2_count >= max_tier2:
+                break
+
+            midpoint = ((start[0] + end[0]) / 2.0, (start[1] + end[1]) / 2.0)
+            if self._position_too_close(midpoint, placed_positions, min_distance=180.0):
+                continue
+
+            rsu_id = f"EDGE_RSU_{edge_id}"
+            self.edge_rsus[rsu_id] = EdgeRSU(
+                rsu_id=rsu_id,
+                position=midpoint,
+                tier=2,
+                compute_capacity='medium'
+            )
+            placed_positions.append(midpoint)
+            tier2_count += 1
+
         print(f"\n✅ Edge infrastructure ready:")
         print(f"   - Total RSUs: {len(self.edge_rsus)}")
         print(f"   - Tier 1 (Intersection): {sum(1 for r in self.edge_rsus.values() if r.tier == 1)}")
@@ -384,12 +527,11 @@ class AdaptiveTrafficController:
                 
                 # Find nearest RSU and send encrypted emergency message
                 for tl_id, bs in self.wimax_base_stations.items():
-                    # Get RSU position
-                    coords = {"J2": (500, 500), "J3": (1000, 500)}
-                    if tl_id not in coords:
+                    position = self.tl_positions.get(tl_id)
+                    if position is None:
                         continue
-                    
-                    rsu_x, rsu_y = coords[tl_id]
+
+                    rsu_x, rsu_y = position
                     distance = ((x - rsu_x)**2 + (y - rsu_y)**2)**0.5
                     
                     # If within emergency detection range, send encrypted request
@@ -460,71 +602,58 @@ class AdaptiveTrafficController:
         
         try:
             all_vehicles = traci.vehicle.getIDList()
-            junction_coords = {"J2": (500, 500), "J3": (1000, 500)}
-            
-            # Track which emergency vehicles are currently near each junction
+
+            # Track which emergency vehicles are currently near each junction.
             current_emergencies_near_junction = defaultdict(list)
-            
+
             for vehicle_id in all_vehicles:
-                # Check if this is an emergency vehicle
                 try:
                     vehicle_type = traci.vehicle.getTypeID(vehicle_id)
                     is_emergency = "ambulance" in vehicle_type.lower() or "emergency" in vehicle_type.lower()
-                    
+
                     if not is_emergency:
                         continue
-                    
-                    # Get vehicle position and route
+
                     x, y = traci.vehicle.getPosition(vehicle_id)
                     route = traci.vehicle.getRoute(vehicle_id)
                     route_index = traci.vehicle.getRouteIndex(vehicle_id)
-                    
-                    # Check distance to each controlled junction
-                    for junc_id, (junc_x, junc_y) in junction_coords.items():
+                    current_edge = route[route_index] if route_index < len(route) else None
+
+                    for junc_id, position in self.tl_positions.items():
                         if junc_id not in self.intersections:
                             continue
-                        
-                        distance = ((x - junc_x)**2 + (y - junc_y)**2)**0.5
-                        
-                        # Check if emergency vehicle has passed through the junction
-                        # Once vehicle passes 30m mark, immediately return to density-based control
-                        if distance < 30.0:  # Within 30m = passed through junction
-                            # Mark this emergency as served at this junction
+
+                        junc_x, junc_y = position
+                        distance = ((x - junc_x) ** 2 + (y - junc_y) ** 2) ** 0.5
+
+                        # Within 30 m means the vehicle has effectively passed this junction.
+                        if distance < 30.0:
                             if vehicle_id not in self.served_emergencies[junc_id]:
                                 self.served_emergencies[junc_id].add(vehicle_id)
-                                if junc_id in self.junction_priority_vehicle and self.junction_priority_vehicle[junc_id] == vehicle_id:
+                                if (
+                                    junc_id in self.junction_priority_vehicle
+                                    and self.junction_priority_vehicle[junc_id] == vehicle_id
+                                ):
                                     print(f"✅ EMERGENCY CLEARED: {vehicle_id} passed 30m mark at {junc_id}, returning to density-based control")
                                     del self.junction_priority_vehicle[junc_id]
-                            continue  # Don't give priority if already passed through
-                        
-                        # If emergency is beyond detection range, clean up tracking for future passes
-                        if distance > self.emergency_detection_range:
-                            # Reset served status if vehicle has left the area completely
-                            if vehicle_id in self.served_emergencies[junc_id]:
-                                self.served_emergencies[junc_id].discard(vehicle_id)
                             continue
-                        
-                        # Emergency vehicle is within detection range and hasn't been served yet
-                        if distance < self.emergency_detection_range and vehicle_id not in self.served_emergencies[junc_id]:
-                            current_edge = route[route_index] if route_index < len(route) else None
-                            
-                            if current_edge:
-                                # Determine which phase the emergency vehicle needs
-                                required_phase = None
-                                # East-West edges: E1, E2, E3, E4
-                                if current_edge in ['E1', 'E2', 'E3', 'E4']:
-                                    required_phase = 0  # EW green phase
-                                # North-South edges: E5, E6, E7, E8
-                                elif current_edge in ['E5', 'E6', 'E7', 'E8']:
-                                    required_phase = 2  # NS green phase
-                                
-                                if required_phase is not None:
-                                    current_emergencies_near_junction[junc_id].append({
-                                        'vehicle_id': vehicle_id,
-                                        'distance': distance,
-                                        'phase': required_phase
-                                    })
-                
+
+                        # Once vehicle leaves detection range, allow future priority checks.
+                        if distance > self.emergency_detection_range:
+                            self.served_emergencies[junc_id].discard(vehicle_id)
+                            continue
+
+                        if vehicle_id in self.served_emergencies[junc_id] or not current_edge:
+                            continue
+
+                        required_phase = self._determine_emergency_phase(junc_id, current_edge)
+                        if required_phase is not None:
+                            current_emergencies_near_junction[junc_id].append({
+                                'vehicle_id': vehicle_id,
+                                'distance': distance,
+                                'phase': required_phase,
+                            })
+
                 except traci.exceptions.TraCIException:
                     continue
             
@@ -593,6 +722,19 @@ class AdaptiveTrafficController:
             # Traffic light control (skip if RL mode)
             if self.mode != "rl":
                 for tl_id, data in self.intersections.items():
+                    phase_states = self.default_phases.get(tl_id, [])
+                    if not phase_states:
+                        continue
+
+                    # Keep controller state aligned with SUMO if another module changes phases.
+                    try:
+                        live_phase = int(traci.trafficlight.getPhase(tl_id))
+                        if live_phase != data["current_phase"]:
+                            data["current_phase"] = live_phase % len(phase_states)
+                            data["time_in_phase"] = 0
+                    except Exception:
+                        pass
+
                     # EMERGENCY OVERRIDE: If emergency vehicle detected at this junction
                     if tl_id in emergency_at_junction:
                         emergency_phase, vehicle_id = emergency_at_junction[tl_id]
@@ -603,19 +745,19 @@ class AdaptiveTrafficController:
                             print(f"🚨 EMERGENCY PRIORITY: {tl_id} → {vehicle_id} switching to phase {emergency_phase}")
                             data["current_phase"] = emergency_phase
                             data["time_in_phase"] = 0
-                            traci.trafficlight.setRedYellowGreenState(
-                                tl_id, self.default_phases[tl_id][emergency_phase])
+                            traci.trafficlight.setPhase(tl_id, emergency_phase)
                         # If already in correct phase, extend green time
                         else:
                             data["time_in_phase"] = max(0, data["time_in_phase"] - 5)  # Reset timer
                         continue  # Skip normal adaptive control for this junction
                     
                     data["time_in_phase"] += 1
-                    current_phase = data["current_phase"]
-                    phase_state = self.default_phases[tl_id][current_phase]
+                    current_phase = data["current_phase"] % len(phase_states)
+                    phase_state = phase_states[current_phase]
+                    phase_state_lower = phase_state.lower()
                     
                     # Check if in green phase (contains 'G')
-                    if 'G' in phase_state:
+                    if 'g' in phase_state_lower:
                         if self.mode == 'fixed':
                             # FIXED-TIME: constant green duration, no adaptation
                             target_duration = self.fixed_green_time
@@ -633,20 +775,28 @@ class AdaptiveTrafficController:
                                 target_duration = int(self.min_green_time + 
                                                     scale * (self.max_green_time - self.min_green_time))
                         
-                        # Switch to yellow when target duration reached
+                        # Advance phase when target duration reached.
                         if data["time_in_phase"] >= target_duration:
-                            data["current_phase"] = (current_phase + 1) % len(self.default_phases[tl_id])
+                            data["current_phase"] = (current_phase + 1) % len(phase_states)
                             data["time_in_phase"] = 0
-                            traci.trafficlight.setRedYellowGreenState(
-                                tl_id, self.default_phases[tl_id][data["current_phase"]])
+                            traci.trafficlight.setPhase(tl_id, data["current_phase"])
                     
-                    elif 'y' in phase_state:
-                        # Yellow phase: fixed duration
-                        if data["time_in_phase"] >= self.yellow_time:
-                            data["current_phase"] = (current_phase + 1) % len(self.default_phases[tl_id])
+                    else:
+                        # Preserve transition phases from the loaded program (yellow/all-red).
+                        phase_durations = self.phase_durations.get(tl_id, [])
+                        fallback_duration = max(1, self.yellow_time)
+                        if current_phase < len(phase_durations):
+                            transition_duration = max(1, int(round(phase_durations[current_phase])))
+                        else:
+                            transition_duration = fallback_duration
+
+                        if 'y' in phase_state_lower:
+                            transition_duration = min(transition_duration, fallback_duration)
+
+                        if data["time_in_phase"] >= transition_duration:
+                            data["current_phase"] = (current_phase + 1) % len(phase_states)
                             data["time_in_phase"] = 0
-                            traci.trafficlight.setRedYellowGreenState(
-                                tl_id, self.default_phases[tl_id][data["current_phase"]])
+                            traci.trafficlight.setPhase(tl_id, data["current_phase"])
 
             # Update edge RSUs with vehicle data
             if self.edge_enabled:
@@ -914,8 +1064,8 @@ class AdaptiveTrafficController:
                                 print(f"║   Active Vehicles: {len(all_vehicles):3d}                                 ║")
                                 print(f"║   Mean Speed: {avg_speed:5.2f} m/s                            ║")
                                 
-                                # Show traffic light states
-                                for tl_id in ['J2', 'J3']:
+                                # Show a small sample of traffic light states
+                                for tl_id in sorted(self.intersections.keys())[:3]:
                                     if tl_id in self.intersections:
                                         phase = self.intersections[tl_id]['current_phase']
                                         time_in_phase = self.intersections[tl_id]['time_in_phase']
