@@ -4,7 +4,7 @@ Complete Integrated SUMO + NS3 + RL VANET Simulation
 Combines all features:
 - SUMO: Vehicle movements, traffic control
 - NS3 Bridge: WiFi (802.11p) for V2V, WiMAX for emergency V2I
-- RL: Proximity-based hybrid DQN control
+- RL: Proximity-based hybrid PPO/DQN control
 - Edge Computing: Smart RSU processing
 - Security: RSA encryption and CA authentication
 """
@@ -34,7 +34,7 @@ from v2v_communication.key_management import initialize_vanet_security
 
 # RL module
 try:
-    from stable_baselines3 import DQN
+    from stable_baselines3 import DQN, PPO
     from rl_module.vanet_env import VANETTrafficEnv
     RL_AVAILABLE = True
 except ImportError as e:
@@ -66,29 +66,58 @@ def activate_dynamic_rsu_config(config_path):
 
 
 def load_trained_model(model_path):
-    """Load trained DQN model"""
+    """Load a trained stable-baselines3 model (PPO or DQN)."""
     if not os.path.exists(model_path):
         print(f"⚠️  Model not found: {model_path}")
         return None
-    
-    try:
-        model = DQN.load(model_path)
-        print(f"✅ Loaded trained model from: {model_path}")
-        return model
-    except Exception as e:
-        print(f"⚠️  Standard load failed ({e}), trying with custom_objects...")
-        try:
-            # Handle Python version incompatibility (e.g., model trained on 3.8, loading on 3.11)
-            custom_objects = {
+
+    file_hint = os.path.basename(model_path).lower()
+    if "ppo" in file_hint:
+        load_order = ["PPO", "DQN"]
+    elif "dqn" in file_hint:
+        load_order = ["DQN", "PPO"]
+    else:
+        load_order = ["DQN", "PPO"]
+
+    loaders = {
+        "DQN": (
+            DQN,
+            {
                 "lr_schedule": lambda _: 1e-4,
                 "exploration_schedule": lambda _: 0.05,
-            }
-            model = DQN.load(model_path, custom_objects=custom_objects)
-            print(f"✅ Loaded trained model (with custom_objects) from: {model_path}")
+            },
+        ),
+        "PPO": (
+            PPO,
+            {
+                "lr_schedule": lambda _: 1e-4,
+            },
+        ),
+    }
+
+    errors = []
+    for algo_name in load_order:
+        algo_class, custom_objects = loaders[algo_name]
+
+        try:
+            model = algo_class.load(model_path)
+            print(f"✅ Loaded trained {algo_name} model from: {model_path}")
             return model
-        except Exception as e2:
-            print(f"❌ Failed to load model: {e2}")
-            return None
+        except Exception as e:
+            errors.append(f"{algo_name} standard load failed: {e}")
+            print(f"⚠️  {algo_name} standard load failed ({e}), trying custom_objects...")
+
+        try:
+            model = algo_class.load(model_path, custom_objects=custom_objects)
+            print(f"✅ Loaded trained {algo_name} model (with custom_objects) from: {model_path}")
+            return model
+        except Exception as e:
+            errors.append(f"{algo_name} custom_objects load failed: {e}")
+
+    print("❌ Failed to load model as PPO or DQN.")
+    for err in errors[-4:]:
+        print(f"   - {err}")
+    return None
 
 
 class ProximityHybridController:
@@ -318,8 +347,8 @@ Examples:
   # RL hybrid with GUI, security, and edge computing
   %(prog)s --mode hybrid --gui --security --edge --steps 1000
   
-  # RL proximity-based with trained model
-  %(prog)s --mode proximity --model rl_module/trained_models/.../dqn_traffic_final.zip --proximity 250 --gui
+    # RL proximity-based with trained model (PPO or DQN)
+    %(prog)s --mode proximity --model rl_module/trained_models/.../ppo_traffic_final.zip --proximity 250 --gui
         """
     )
     
@@ -327,7 +356,7 @@ Examples:
                        default='rule',
                        help='Control mode: fixed (fixed-time), density (adaptive), rule (same as density), rl (trained model), hybrid (global switching), proximity (junction-specific)')
     parser.add_argument('--model', type=str, default=None,
-                       help='Path to trained DQN model (.zip file)')
+                       help='Path to trained PPO/DQN model (.zip file)')
     parser.add_argument('--proximity', type=float, default=250.0,
                        help='Proximity threshold for RL activation (meters)')
     parser.add_argument('--steps', type=int, default=1000,
@@ -374,7 +403,7 @@ Examples:
         
         if args.mode in ['rl', 'proximity'] and not args.model:
             print("❌ RL/Proximity mode requires --model argument")
-            print("   Example: --model rl_module/trained_models/.../dqn_traffic_final.zip")
+            print("   Example: --model rl_module/trained_models/.../ppo_traffic_final.zip")
             sys.exit(1)
 
     # Create output directory

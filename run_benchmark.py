@@ -7,6 +7,9 @@ with and without security, and produces comparison tables.
 Usage:
     python run_benchmark.py --seeds 30 --steps 1000
     python run_benchmark.py --seeds 5 --steps 500 --quick   # Quick test
+    python run_benchmark.py --seeds 30 --seed-start 42 --steps 1000 \
+        --config layout_new/simulation_new.sumocfg \
+        --model rl_module/trained_models/<run>/ppo_traffic_final.zip
 """
 
 import os
@@ -21,7 +24,15 @@ import numpy as np
 import pandas as pd
 
 
-def run_single_simulation(mode, seed, steps, security=False, model_path=None, proximity=250):
+def run_single_simulation(
+    mode,
+    seed,
+    steps,
+    security=False,
+    model_path=None,
+    proximity=250,
+    config_path=None,
+):
     """Run a single simulation and return the benchmark metrics JSON."""
     
     project_root = os.path.dirname(os.path.abspath(__file__))
@@ -49,6 +60,9 @@ def run_single_simulation(mode, seed, steps, security=False, model_path=None, pr
         "--output", output_dir,
         "--edge",
     ]
+
+    if config_path:
+        cmd.extend(["--config", config_path])
     
     if security:
         cmd.append("--security")
@@ -202,9 +216,12 @@ def main():
                        help='Starting seed value (default: 42)')
     parser.add_argument('--steps', type=int, default=1000,
                        help='Simulation steps per run (default: 1000)')
-    parser.add_argument('--model', type=str, 
-                       default='rl_module/trained_models/dqn_traffic_20260304_222100/dqn_traffic_final.zip',
-                       help='Path to trained DQN model for proximity mode')
+    parser.add_argument('--model', type=str, default=None,
+                       help='Path to trained PPO/DQN model for proximity mode')
+    parser.add_argument('--config', type=str, default=None,
+                       help='Path to SUMO .sumocfg file (default from integrated runner)')
+    parser.add_argument('--proximity', type=float, default=250.0,
+                       help='Proximity threshold in meters for proximity mode')
     parser.add_argument('--quick', action='store_true',
                        help='Quick test with fewer seeds and steps')
     parser.add_argument('--modes', type=str, default='fixed,density,proximity',
@@ -222,6 +239,11 @@ def main():
     
     modes = [m.strip() for m in args.modes.split(',')]
     seeds = list(range(args.seed_start, args.seed_start + args.seeds))
+
+    if 'proximity' in modes and not args.model:
+        print("ERROR: proximity mode requires --model")
+        print("Example: --model rl_module/trained_models/<run>/ppo_traffic_final.zip")
+        sys.exit(1)
     
     project_root = os.path.dirname(os.path.abspath(__file__))
     output_base = os.path.join(project_root, "benchmark_results")
@@ -234,6 +256,9 @@ def main():
     print(f"  Seeds: {seeds[0]}–{seeds[-1]} ({len(seeds)} runs per mode)")
     print(f"  Steps: {args.steps}")
     print(f"  Model: {args.model}")
+    if args.config:
+        print(f"  SUMO config: {args.config}")
+    print(f"  Proximity threshold: {args.proximity}")
     print(f"  Security runs: {'No-Security' if not args.skip_nosec else 'SKIPPED'}"
           f" + {'Security' if not args.skip_sec else 'SKIPPED'}")
     total_runs = len(modes) * len(seeds) * (
@@ -274,6 +299,8 @@ def main():
                     steps=args.steps,
                     security=security_enabled,
                     model_path=args.model,
+                    proximity=args.proximity,
+                    config_path=args.config,
                 )
                 
                 dt = time.time() - t0
