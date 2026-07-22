@@ -56,7 +56,7 @@ class SUMOResetCallback(BaseCallback):
     def __init__(
         self,
         verbose: int = 0,
-        heartbeat_steps: int = 100,
+        heartbeat_steps: int = 500,
         total_timesteps: Optional[int] = None,
     ):
         super().__init__(verbose)
@@ -285,6 +285,25 @@ def resolve_route_files_from_config(config_path: str) -> list[str]:
         return route_files
     except Exception:
         return []
+
+
+def activate_dynamic_rsu_config(config_path: str) -> Optional[str]:
+    """Activate layout-specific rsu_config.json when available."""
+    existing = os.environ.get("VANET_RSU_CONFIG_FILE")
+    if existing:
+        existing_abs = os.path.abspath(existing)
+        print(f"  RSU config  : {existing_abs} (from environment)")
+        return existing_abs
+
+    config_dir = os.path.dirname(os.path.abspath(config_path))
+    candidate = os.path.join(config_dir, "rsu_config.json")
+    if os.path.exists(candidate):
+        os.environ["VANET_RSU_CONFIG_FILE"] = candidate
+        print(f"  RSU config  : {candidate} (auto from SUMO config directory)")
+        return candidate
+
+    print("  RSU config  : built-in default (13 RSUs)")
+    return None
 
 
 def randomize_route_flow_file(
@@ -601,6 +620,9 @@ def train(
     print(f"  Heartbeat   : {heartbeat_steps} steps")
     print("=" * 70)
     print()
+
+    # Ensure RSU topology follows the selected SUMO layout when possible.
+    activate_dynamic_rsu_config(config_path)
 
     # ---- environment ----
     print("Setting up SUMO environment …")
@@ -926,9 +948,11 @@ def main():
     parser.add_argument("--no-route-preserve-total", dest="route_preserve_total", action="store_false", help="Do not normalize randomized route multipliers; total demand can drift")
     parser.set_defaults(route_preserve_total=True)
     parser.add_argument("--progress-bar", action="store_true", help="Show SB3 progress bar (requires tqdm and rich)")
-    parser.add_argument("--heartbeat-steps", type=int, default=100, help="Print live training heartbeat every N steps")
+    parser.add_argument("--heartbeat-steps", type=int, default=500, help="Print live training heartbeat every N steps")
 
     args = parser.parse_args()
+
+    args.config = os.path.abspath(args.config)
 
     if not os.path.exists(args.config):
         print(f"❌ SUMO config not found: {args.config}")
