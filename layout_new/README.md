@@ -10,6 +10,10 @@ Generate layout assets
 - From repo root:
   .venv\Scripts\python.exe layout_new\generate_layout_assets.py
 
+Generate denser, map-wide tier-2 RSU coverage (300m directional + short-road midpoint fallback)
+- From repo root:
+  .venv\Scripts\python.exe layout_new\generate_layout_assets.py --rsu-interval 300 --ensure-short-road-coverage --short-road-min-length 120
+
 Generated files
 - layout_new\routes_new.rou.xml
 - layout_new\rsu.add.xml

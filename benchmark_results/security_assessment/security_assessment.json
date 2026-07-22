@@ -1,0 +1,53 @@
+{
+  "messages": 300,
+  "attack_trials": 100,
+  "payload_pad_bytes": 64,
+  "timestamp": "2026-07-22 16:14:35",
+  "results": {
+    "no_security": {
+      "tx_ms_mean": 0.0009106681682169437,
+      "rx_ms_mean": 0.0010483349130178492,
+      "e2e_ms_mean": 0.0021133366196105876,
+      "e2e_ms_p95": 0.002100015990436077,
+      "throughput_msg_s": 80645.16175024993,
+      "payload_bytes_mean": 193.17,
+      "wire_bytes_mean": 336.9,
+      "expansion_ratio": 1.7440596365895324,
+      "spoof_block_rate": 0.0,
+      "replay_block_rate": 0.0,
+      "tamper_block_rate": 0.0,
+      "flood_drop_rate": 0.0,
+      "flood_process_rate_msg_s": 1647446.5519390728
+    },
+    "rsa_signature_only": {
+      "tx_ms_mean": 0.6379513322220495,
+      "rx_ms_mean": 0.0744353331780682,
+      "e2e_ms_mean": 0.7127076655160636,
+      "e2e_ms_p95": 1.6958999913185835,
+      "throughput_msg_s": 1356.5471714697494,
+      "payload_bytes_mean": 193.17,
+      "wire_bytes_mean": 729.9,
+      "expansion_ratio": 3.7785370399130302,
+      "spoof_block_rate": 100.0,
+      "replay_block_rate": 100.0,
+      "tamper_block_rate": 100.0,
+      "flood_drop_rate": 100.0,
+      "flood_process_rate_msg_s": 38417.21132795782
+    },
+    "hybrid_rsa_aes": {
+      "tx_ms_mean": 0.6406063330359757,
+      "rx_ms_mean": 0.660365666456831,
+      "e2e_ms_mean": 1.3012816675473005,
+      "e2e_ms_p95": 2.8688000165857375,
+      "throughput_msg_s": 752.1349350271373,
+      "payload_bytes_mean": 193.17,
+      "wire_bytes_mean": 1188.1633333333334,
+      "expansion_ratio": 6.1508688374661356,
+      "spoof_block_rate": 100.0,
+      "replay_block_rate": 100.0,
+      "tamper_block_rate": 100.0,
+      "flood_drop_rate": 100.0,
+      "flood_process_rate_msg_s": 33913.250082711056
+    }
+  }
+}

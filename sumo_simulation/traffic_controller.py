@@ -68,7 +68,7 @@ class AdaptiveTrafficController:
         if security_managers:
             self.ca, self.rsu_managers, self.vehicle_managers = security_managers
             self.security_enabled = True
-            print("🔐 Security enabled: RSA encryption + CA authentication")
+            print("🔐 Security enabled: Hybrid RSA-AES encryption + CA authentication")
         else:
             self.ca = None
             self.rsu_managers = {}

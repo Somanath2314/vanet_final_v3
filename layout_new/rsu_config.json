@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-20T17:33:33.281842+00:00",
+  "generated_at": "2026-07-22T10:33:06.727191+00:00",
   "source_net": "map.net.xml",
   "rsus": [
     {
@@ -555,200 +555,4754 @@
     {
       "rsu_id": "RSU_EDGE_1",
       "position": [
-        1342.125,
-        1690.625
+        1388.745,
+        1600.83
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge -1044521116"
+      "description": "Short-road midpoint RSU on directional road +1044521113 (edge 1044521113)"
     },
     {
       "rsu_id": "RSU_EDGE_2",
       "position": [
-        1445.2652056728057,
-        1798.130574001882
+        1394.1041152162493,
+        1342.214320784451
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge -23075332#0"
+      "description": "Short-road midpoint RSU on directional road +1044521114 (edge 1044521114#0)"
     },
     {
       "rsu_id": "RSU_EDGE_3",
       "position": [
-        1438.785,
-        2098.06
+        1343.6494326241134,
+        1350.835
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge -23075332#0"
+      "description": "Short-road midpoint RSU on directional road +1044521115 (edge 1044521115#2)"
     },
     {
       "rsu_id": "RSU_EDGE_4",
       "position": [
-        1432.3047943271945,
-        2397.989425998118
+        1340.4896607337064,
+        1579.0918310830525
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge -23075332#0"
+      "description": "Road RSU at 300m spacing on directional road +1044521116 (edge 1044521116)"
     },
     {
       "rsu_id": "RSU_EDGE_5",
       "position": [
-        2189.615,
-        1809.47
+        1746.9145276690888,
+        343.99903297931803
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge -28187232"
+      "description": "Short-road midpoint RSU on directional road +1063788032 (edge 1063788032#4)"
     },
     {
       "rsu_id": "RSU_EDGE_6",
       "position": [
-        1550.552799046065,
-        2280.0339996234466
+        1793.9295370451557,
+        911.3225778167471
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge -40633859#8"
+      "description": "Short-road midpoint RSU on directional road +1102792429 (edge 1102792429#0)"
     },
     {
       "rsu_id": "RSU_EDGE_7",
       "position": [
-        1557.45,
-        1980.125
+        1077.545,
+        1090.405
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge -40633859#8"
+      "description": "Short-road midpoint RSU on directional road +1102815945 (edge 1102815945)"
     },
     {
       "rsu_id": "RSU_EDGE_8",
       "position": [
-        1564.347200953935,
-        1680.2160003765532
+        521.7157557386697,
+        1520.0348793407888
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge -40633859#8"
+      "description": "Short-road midpoint RSU on directional road +1102819441 (edge 1102819441#0)"
     },
     {
       "rsu_id": "RSU_EDGE_9",
       "position": [
-        119.41000000000001,
-        902.71
+        2704.205,
+        958.02
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge -41189494#0"
+      "description": "Short-road midpoint RSU on directional road +1109943646 (edge 1109943646)"
     },
     {
       "rsu_id": "RSU_EDGE_10",
       "position": [
-        374.05,
-        1054.625
+        2113.7179449838186,
+        927.3962686084142
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge -41189494#2"
+      "description": "Short-road midpoint RSU on directional road +1109943650 (edge 1109943650#1)"
     },
     {
       "rsu_id": "RSU_EDGE_11",
       "position": [
-        1138.5500000000002,
-        1780.73
+        1955.5294710467706,
+        389.5751035634744
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge -799788864#5"
+      "description": "Short-road midpoint RSU on directional road +1109944791 (edge 1109944791#1)"
     },
     {
       "rsu_id": "RSU_EDGE_12",
       "position": [
-        1996.45,
-        181.015
+        1621.315,
+        1490.0425916810239
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge 1219836994#0"
+      "description": "Short-road midpoint RSU on directional road +1125669870 (edge 1125669870#4)"
     },
     {
       "rsu_id": "RSU_EDGE_13",
       "position": [
-        1395.5,
-        1687.975
+        933.8655215795911,
+        1440.8986458151319
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge 1390291153#0"
+      "description": "Short-road midpoint RSU on directional road +1148415187 (edge 1148415187#1)"
     },
     {
       "rsu_id": "RSU_EDGE_14",
       "position": [
-        2892.21,
-        1171.5149999999999
+        719.1973826860842,
+        1159.6497208737865
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge 1458899349"
+      "description": "Short-road midpoint RSU on directional road +1160442878 (edge 1160442878#2)"
     },
     {
       "rsu_id": "RSU_EDGE_15",
       "position": [
-        2592.5266461159063,
-        1178.0106843403205
+        2531.843649769585,
+        1283.297267281106
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge 1458899349"
+      "description": "Short-road midpoint RSU on directional road +1197023753 (edge 1197023753#1)"
     },
     {
       "rsu_id": "RSU_EDGE_16",
       "position": [
-        1770.4650000000001,
-        1721.735
+        2007.0501580581429,
+        1349.11
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge 146449643#0"
+      "description": "Road RSU at 300m spacing on directional road +1215831943 (edge 1215831943#4)"
     },
     {
       "rsu_id": "RSU_EDGE_17",
       "position": [
-        2776.935,
-        1174.935
+        1994.972543486333,
+        305.95286252891947
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge 332243839#6"
+      "description": "Road RSU at 300m spacing on directional road +1219836994 (edge 1219836994#0)"
     },
     {
       "rsu_id": "RSU_EDGE_18",
       "position": [
-        2817.705,
-        1165.085
+        1839.65,
+        721.385
       ],
       "tier": "TIER2",
       "junction_id": null,
       "coverage_radius": 300.0,
-      "description": "Road RSU at 300m spacing on edge 40633857#4"
+      "description": "Short-road midpoint RSU on directional road +1219843735 (edge 1219843735)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_19",
+      "position": [
+        1047.2296045704045,
+        1217.2159572084688
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +1222891447 (edge 1222891447#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_20",
+      "position": [
+        706.0800533390228,
+        1204.644079368466
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +1222891447 (edge 1222891447#10)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_21",
+      "position": [
+        1401.8735699226984,
+        1342.3203513703443
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +1222891448 (edge 1222891448#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_22",
+      "position": [
+        1767.827839539978,
+        1338.995
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +1222891450 (edge 1222891450#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_23",
+      "position": [
+        630.6047783738736,
+        202.00615917495702
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +1259462032 (edge 1259462032#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_24",
+      "position": [
+        1888.7628275582026,
+        1175.7074810503518
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +1259589337 (edge 1259589337#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_25",
+      "position": [
+        1434.87,
+        1178.6155611463575
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +1259589338 (edge 1259589338#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_26",
+      "position": [
+        2405.744515602692,
+        1688.790010197838
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +1283858405 (edge 1283858405#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_27",
+      "position": [
+        1499.8902042007,
+        679.7811668611436
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +1286310836 (edge 1286310836#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_28",
+      "position": [
+        1841.26,
+        358.78999999999996
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +1314833482 (edge 1314833482)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_29",
+      "position": [
+        2535.4264752906975,
+        590.4842223837209
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +133256936 (edge 133256936#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_30",
+      "position": [
+        924.6327323923582,
+        431.41861633875106
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +133882619 (edge 133882619#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_31",
+      "position": [
+        736.4000178633169,
+        455.2291782874265
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +133882772 (edge 133882772#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_32",
+      "position": [
+        929.2163872832369,
+        636.3709537572255
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +133883892 (edge 133883892#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_33",
+      "position": [
+        816.4779160882308,
+        602.2105830633966
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +133883896 (edge 133883896#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_34",
+      "position": [
+        887.6987622903413,
+        600.4415824175824
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +133883898 (edge 133883898#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_35",
+      "position": [
+        1077.6062634408602,
+        542.3906720430108
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +133883899 (edge 133883899#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_36",
+      "position": [
+        998.5278234460417,
+        607.2558817574408
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +133951304 (edge 133951304#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_37",
+      "position": [
+        1096.1336558337773,
+        609.4454704315398
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +133951479 (edge 133951479#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_38",
+      "position": [
+        1062.2262780361757,
+        605.5620527131783
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +133951480 (edge 133951480#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_39",
+      "position": [
+        1127.7601375149472,
+        674.7947407326883
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +133951483 (edge 133951483#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_40",
+      "position": [
+        1891.6687283460756,
+        1185.2702322655568
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +1347255635 (edge 1347255635#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_41",
+      "position": [
+        1750.6102225199077,
+        1185.915798913448
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +1347260864 (edge 1347260864#5)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_42",
+      "position": [
+        1499.911310366041,
+        1532.3625202501796
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +1350390280 (edge 1350390280#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_43",
+      "position": [
+        1397.7426901062959,
+        1571.44723630417
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +1390291153 (edge 1390291153#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_44",
+      "position": [
+        2114.680933166771,
+        1187.629831355403
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +1416769968 (edge 1416769968#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_45",
+      "position": [
+        2254.315,
+        1169.885
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +1422513620 (edge 1422513620)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_46",
+      "position": [
+        2323.0699999999997,
+        1182.8
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +1422513621 (edge 1422513621)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_47",
+      "position": [
+        2322.885,
+        1190.355
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +1422513622 (edge 1422513622)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_48",
+      "position": [
+        3098.8666461159064,
+        1167.0356843403206
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +1458899349 (edge 1458899349)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_49",
+      "position": [
+        2799.1832922318126,
+        1173.5313686806412
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +1458899349 (edge 1458899349)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_50",
+      "position": [
+        2499.499938347719,
+        1180.0270530209618
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +1458899349 (edge 1458899349)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_51",
+      "position": [
+        2684.766906930615,
+        1182.9968206803312
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +1458899351 (edge 1458899351)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_52",
+      "position": [
+        2984.4738138612297,
+        1176.4836413606624
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +1458899351 (edge 1458899351)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_53",
+      "position": [
+        3284.1807207918446,
+        1169.9704620409937
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +1458899351 (edge 1458899351)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_54",
+      "position": [
+        1768.7511708052152,
+        1574.3794830636177
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +146449643 (edge 146449643#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_55",
+      "position": [
+        2509.470010449321,
+        1409.1758516196446
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +1521244404 (edge 1521244404#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_56",
+      "position": [
+        2684.02,
+        1433.775
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +1521244407 (edge 1521244407)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_57",
+      "position": [
+        1088.2611522693996,
+        1059.678598828697
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +169817047 (edge 169817047#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_58",
+      "position": [
+        1573.6574334140437,
+        931.4443471782455
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +172930620 (edge 172930620#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_59",
+      "position": [
+        1473.1054752373327,
+        956.9194092416791
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +172930625 (edge 172930625#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_60",
+      "position": [
+        1579.4638927587882,
+        807.1404446784384
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +172930627 (edge 172930627#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_61",
+      "position": [
+        1697.1701153523488,
+        859.7858808724833
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +172930631 (edge 172930631#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_62",
+      "position": [
+        1635.6157980871412,
+        1028.0917364505844
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +172930633 (edge 172930633#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_63",
+      "position": [
+        1742.7125325325326,
+        804.7738138138138
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +172930638 (edge 172930638#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_64",
+      "position": [
+        746.931082787652,
+        1506.155598690365
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +173153088 (edge 173153088#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_65",
+      "position": [
+        706.445,
+        1358.62
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +173153089 (edge 173153089)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_66",
+      "position": [
+        1429.2102056728056,
+        2393.050574001882
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +23075332 (edge 23075332#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_67",
+      "position": [
+        1435.690411345611,
+        2093.121148003764
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +23075332 (edge 23075332#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_68",
+      "position": [
+        1442.1706170184166,
+        1793.1917220056457
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +23075332 (edge 23075332#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_69",
+      "position": [
+        1449.1510293360782,
+        1470.942735093008
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +23075332 (edge 23075332#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_70",
+      "position": [
+        1609.7418467798732,
+        1564.4850156506768
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +238507646 (edge 238507646#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_71",
+      "position": [
+        1882.6137624551616,
+        1347.77
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +259484452 (edge 259484452#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_72",
+      "position": [
+        2481.176992174209,
+        1584.2778904389247
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +27673552 (edge 27673552#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_73",
+      "position": [
+        1087.73,
+        1494.954115735067
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +27673609 (edge 27673609#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_74",
+      "position": [
+        1636.598028713418,
+        1113.5755494202099
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +27791621 (edge 27791621#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_75",
+      "position": [
+        2132.1589124767224,
+        624.2395232774675
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +27791643 (edge 27791643#7)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_76",
+      "position": [
+        1036.2602637086648,
+        504.1968354960234
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +27791667 (edge 27791667#11)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_77",
+      "position": [
+        1402.8156511647187,
+        483.77836524910884
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +27791667 (edge 27791667#17)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_78",
+      "position": [
+        1758.7289916173572,
+        464.0586575443787
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +27791667 (edge 27791667#22)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_79",
+      "position": [
+        2111.8708157389633,
+        457.55096928982726
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +27791667 (edge 27791667#29)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_80",
+      "position": [
+        2484.8640579044118,
+        441.2440073529412
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +27791667 (edge 27791667#35)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_81",
+      "position": [
+        1590.3896300954355,
+        574.085
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +27791738 (edge 27791738#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_82",
+      "position": [
+        1515.8898225291452,
+        579.2866481027697
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +27792010 (edge 27792010#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_83",
+      "position": [
+        1387.5126834597095,
+        540.5013526539004
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +27792014 (edge 27792014#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_84",
+      "position": [
+        1363.283454308094,
+        589.2331107049608
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +27792033 (edge 27792033#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_85",
+      "position": [
+        1356.2173721224108,
+        625.5675298060546
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +27792035 (edge 27792035#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_86",
+      "position": [
+        1375.025,
+        657.13
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +27792043 (edge 27792043)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_87",
+      "position": [
+        1885.7035581395348,
+        756.4291511627907
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +27792060 (edge 27792060#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_88",
+      "position": [
+        1928.6678078703703,
+        704.88
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +27792063 (edge 27792063#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_89",
+      "position": [
+        1342.4334641833811,
+        812.7082893982808
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +28087618 (edge 28087618#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_90",
+      "position": [
+        1019.0183955223881,
+        300.72679678530426
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +28087737 (edge 28087737#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_91",
+      "position": [
+        2623.601567492875,
+        811.9519474911477
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +28087935 (edge 28087935#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_92",
+      "position": [
+        1022.4772271685238,
+        1425.935185264168
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +28104713 (edge 28104713#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_93",
+      "position": [
+        1023.1956871633513,
+        1381.5155879686417
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +28104724 (edge 28104724#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_94",
+      "position": [
+        1023.8112812850205,
+        1339.7437542024654
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +28104729 (edge 28104729#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_95",
+      "position": [
+        1024.5555815939786,
+        1286.8595740137725
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +28104740 (edge 28104740#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_96",
+      "position": [
+        1820.685,
+        1338.195
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +28113051 (edge 28113051)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_97",
+      "position": [
+        1666.674965637707,
+        1377.8426917129602
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +28113105 (edge 28113105#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_98",
+      "position": [
+        2297.7655239179953,
+        313.85980637813213
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +28186987 (edge 28186987#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_99",
+      "position": [
+        2523.6806092998395,
+        315.6459593800107
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +28186990 (edge 28186990#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_100",
+      "position": [
+        2563.0879614609703,
+        378.5367908250245
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +28186992 (edge 28186992#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_101",
+      "position": [
+        2356.087605991004,
+        337.5278318499378
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +28187049 (edge 28187049#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_102",
+      "position": [
+        2355.7424996463433,
+        305.35245673598337
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +28187050 (edge 28187050#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_103",
+      "position": [
+        2163.015635514019,
+        366.23182376502
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +28187061 (edge 28187061#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_104",
+      "position": [
+        2091.1949999999997,
+        400.7085307531123
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +28187062 (edge 28187062#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_105",
+      "position": [
+        2074.9735847605375,
+        205.0005199466721
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +28187068 (edge 28187068#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_106",
+      "position": [
+        2186.0833776879585,
+        1729.670436431345
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +28187232 (edge 28187232)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_107",
+      "position": [
+        2117.77,
+        1527.8966200404682
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +28187260 (edge 28187260#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_108",
+      "position": [
+        2136.561862221544,
+        1647.2620437900518
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +28187263 (edge 28187263#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_109",
+      "position": [
+        2094.817764645427,
+        891.4650770811922
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +28188011 (edge 28188011#5)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_110",
+      "position": [
+        2383.3848048731506,
+        836.7518434968873
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +289608202 (edge 289608202#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_111",
+      "position": [
+        2201.085,
+        1583.6539245118042
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +290642381 (edge 290642381#5)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_112",
+      "position": [
+        2510.2314964086195,
+        916.233018754988
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +294559021 (edge 294559021#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_113",
+      "position": [
+        2308.4446766848814,
+        1147.8717714025502
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +294559726 (edge 294559726#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_114",
+      "position": [
+        2465.669951558551,
+        545.6034456613311
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +309566730 (edge 309566730#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_115",
+      "position": [
+        781.5600000000001,
+        865.5773298656263
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +309584105 (edge 309584105#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_116",
+      "position": [
+        784.513248,
+        1007.301104
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +309584107 (edge 309584107#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_117",
+      "position": [
+        435.20706363974693,
+        315.4219531075549
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +309592649 (edge 309592649#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_118",
+      "position": [
+        526.27,
+        301.175
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +309592653 (edge 309592653)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_119",
+      "position": [
+        515.0649999999999,
+        268.96000000000004
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +309592654 (edge 309592654)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_120",
+      "position": [
+        511.2498610110471,
+        858.7634501080692
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +309592664 (edge 309592664#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_121",
+      "position": [
+        469.64674744458483,
+        962.220022970024
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +309592672 (edge 309592672#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_122",
+      "position": [
+        1666.650005726393,
+        1329.2302748668615
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +31560813 (edge 31560813#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_123",
+      "position": [
+        1666.7299771009846,
+        1430.0420952599038
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +31561305 (edge 31561305#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_124",
+      "position": [
+        1666.3850057438253,
+        1277.2346266513498
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +31561309 (edge 31561309#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_125",
+      "position": [
+        535.1550730291209,
+        783.4709675224531
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +318404673 (edge 318404673#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_126",
+      "position": [
+        1793.6348079487864,
+        650.0521459055749
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32258206 (edge 32258206#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_127",
+      "position": [
+        1842.7718154957322,
+        547.6800000000001
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32258242 (edge 32258242#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_128",
+      "position": [
+        1732.4715264114293,
+        521.9884062284605
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32258294 (edge 32258294#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_129",
+      "position": [
+        1647.16,
+        591.175
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32258315 (edge 32258315)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_130",
+      "position": [
+        1758.79,
+        615.66
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32258474 (edge 32258474)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_131",
+      "position": [
+        1757.73,
+        568.025
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32258522 (edge 32258522)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_132",
+      "position": [
+        1566.2555971381398,
+        346.7434067143643
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32258598 (edge 32258598#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_133",
+      "position": [
+        1928.035619581846,
+        336.8
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32258638 (edge 32258638#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_134",
+      "position": [
+        1725.895,
+        396.1754384788835
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32258652 (edge 32258652#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_135",
+      "position": [
+        1886.77,
+        252.8813703318868
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +32258685 (edge 32258685#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_136",
+      "position": [
+        1888.0900000000001,
+        288.3414743668175
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +32258690 (edge 32258690#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_137",
+      "position": [
+        1658.33,
+        357.585
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32258694 (edge 32258694)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_138",
+      "position": [
+        1888.99,
+        323.49485427381825
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +32258696 (edge 32258696#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_139",
+      "position": [
+        2711.81,
+        760.605
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32263470 (edge 32263470)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_140",
+      "position": [
+        2273.545,
+        1203.575
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32263616 (edge 32263616)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_141",
+      "position": [
+        2222.4347459807072,
+        661.0331575562701
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +32263659 (edge 32263659#8)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_142",
+      "position": [
+        2122.3219239651803,
+        706.5062155800321
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32263711 (edge 32263711#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_143",
+      "position": [
+        2121.8566715732964,
+        735.9688362628799
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32263752 (edge 32263752#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_144",
+      "position": [
+        2122.0750000000003,
+        765.4338701532141
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32263758 (edge 32263758#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_145",
+      "position": [
+        2129.507774862463,
+        797.6658121032585
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32263769 (edge 32263769#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_146",
+      "position": [
+        2139.9890881458964,
+        949.5610551454624
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32263803 (edge 32263803#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_147",
+      "position": [
+        2265.7449017337217,
+        609.9752312731605
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32263943 (edge 32263943#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_148",
+      "position": [
+        2414.8733572236893,
+        906.6963523198793
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32264007 (edge 32264007#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_149",
+      "position": [
+        2416.4417949951876,
+        775.7415447545717
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32264024 (edge 32264024#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_150",
+      "position": [
+        2503.064963051321,
+        555.9442482252997
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32264070 (edge 32264070#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_151",
+      "position": [
+        2381.8609036881667,
+        718.9622950533123
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32264151 (edge 32264151#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_152",
+      "position": [
+        2380.6499999999996,
+        688.1600000000001
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32264172 (edge 32264172)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_153",
+      "position": [
+        2380.8199999999997,
+        651.38
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32264184 (edge 32264184)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_154",
+      "position": [
+        2337.7381787784216,
+        540.9514953187695
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32264234 (edge 32264234#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_155",
+      "position": [
+        2400.2298321342923,
+        935.7305995203837
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32264269 (edge 32264269#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_156",
+      "position": [
+        2424.2349999999997,
+        1036.4
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32264353 (edge 32264353)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_157",
+      "position": [
+        2462.63,
+        1036.98
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32264371 (edge 32264371)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_158",
+      "position": [
+        2546.706707148772,
+        858.665834943417
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32264459 (edge 32264459#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_159",
+      "position": [
+        2580.675,
+        896.11
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32264477 (edge 32264477)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_160",
+      "position": [
+        1241.365,
+        1239.0349999999999
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32424806 (edge 32424806)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_161",
+      "position": [
+        2505.995,
+        1729.625
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32425772 (edge 32425772)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_162",
+      "position": [
+        2111.69,
+        1492.3972942236235
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32425871 (edge 32425871#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_163",
+      "position": [
+        2253.3405021097046,
+        1382.6988333333334
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32425897 (edge 32425897#9)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_164",
+      "position": [
+        2171.522183283176,
+        1334.6010411610523
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32426003 (edge 32426003#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_165",
+      "position": [
+        2390.335183863886,
+        1228.455403402854
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32426007 (edge 32426007#5)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_166",
+      "position": [
+        2057.133935266038,
+        1376.1809838165095
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32426067 (edge 32426067#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_167",
+      "position": [
+        2509.82501043569,
+        1436.2262679363423
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32426132 (edge 32426132#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_168",
+      "position": [
+        2552.0933222198887,
+        1480.904347894571
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32426136 (edge 32426136#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_169",
+      "position": [
+        2729.157016206521,
+        1527.0423355326373
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +32426138 (edge 32426138#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_170",
+      "position": [
+        2530.4,
+        1381.8716202057997
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +32426189 (edge 32426189#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_171",
+      "position": [
+        607.0086534116584,
+        322.8195797559873
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +328774394 (edge 328774394#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_172",
+      "position": [
+        623.5531034482759,
+        724.3331034482758
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +328774394 (edge 328774394#12)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_173",
+      "position": [
+        680.8359928443649,
+        1075.6323911747168
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +328774394 (edge 328774394#18)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_174",
+      "position": [
+        2581.228178651868,
+        1176.9028390647131
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +332243839 (edge 332243839#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_175",
+      "position": [
+        2881.20031509044,
+        1173.8866085401814
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +332243839 (edge 332243839#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_176",
+      "position": [
+        3181.993389612666,
+        1170.4754156686333
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +332243839 (edge 332243839#9)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_177",
+      "position": [
+        2215.1555939577042,
+        530.9018513595166
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +33278945 (edge 33278945#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_178",
+      "position": [
+        2109.9828230409967,
+        558.088162947587
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +33278950 (edge 33278950#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_179",
+      "position": [
+        2234.72224753227,
+        1620.645
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +334455495 (edge 334455495#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_180",
+      "position": [
+        754.4561882420528,
+        1334.9381970509385
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +40633854 (edge 40633854#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_181",
+      "position": [
+        796.5253805175039,
+        1367.3023078386607
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +40633855 (edge 40633855#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_182",
+      "position": [
+        1035.183620111732,
+        1235.2331731843576
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +40633856 (edge 40633856#5)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_183",
+      "position": [
+        1364.2451179528189,
+        1189.157548980408
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +40633856 (edge 40633856#8)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_184",
+      "position": [
+        2894.567153906513,
+        1164.656372603968
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +40633857 (edge 40633857#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_185",
+      "position": [
+        2585.16695706285,
+        1165.8869446172992
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +40633857 (edge 40633857#5)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_186",
+      "position": [
+        2249.2991226245626,
+        1181.6178623428193
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +40633857 (edge 40633857#10)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_187",
+      "position": [
+        1238.0111832912144,
+        706.9726713245132
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +40633858 (edge 40633858#13)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_188",
+      "position": [
+        1569.7873730675092,
+        1582.894713918119
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +40633859 (edge 40633859#8)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_189",
+      "position": [
+        1562.8900278236858,
+        1882.8005736281666
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +40633859 (edge 40633859#8)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_190",
+      "position": [
+        1555.9926825798625,
+        2182.7064333382145
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +40633859 (edge 40633859#8)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_191",
+      "position": [
+        1143.012583081571,
+        1182.0128348439073
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +40633861 (edge 40633861#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_192",
+      "position": [
+        1186.3684141206952,
+        1006.966397225521
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +40633864 (edge 40633864#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_193",
+      "position": [
+        1362.635,
+        1021.665
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +40633867 (edge 40633867)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_194",
+      "position": [
+        235.6377920041808,
+        987.8283459628951
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +41189494 (edge 41189494#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_195",
+      "position": [
+        484.29921285667433,
+        1102.9033519186619
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +41189494 (edge 41189494#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_196",
+      "position": [
+        2400.9395624532535,
+        1403.875
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +453955862 (edge 453955862#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_197",
+      "position": [
+        655.9882834101383,
+        798.9230069124425
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +462900086 (edge 462900086#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_198",
+      "position": [
+        465.865,
+        1402.37
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +497108254 (edge 497108254)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_199",
+      "position": [
+        547.7886707566462,
+        1243.7331492842536
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +497108255 (edge 497108255#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_200",
+      "position": [
+        467.5486405511169,
+        1349.4458572476765
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +497108256 (edge 497108256#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_201",
+      "position": [
+        785.3037439195316,
+        617.5468142468465
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +513608922 (edge 513608922#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_202",
+      "position": [
+        442.82246541030537,
+        348.931601860687
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +513608923 (edge 513608923#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_203",
+      "position": [
+        1443.8149247170018,
+        302.55083635564347
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +554190414 (edge 554190414#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_204",
+      "position": [
+        969.1477040304793,
+        613.6948496089833
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +554192901 (edge 554192901#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_205",
+      "position": [
+        1215.0506456934136,
+        631.1916495817132
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +554194356 (edge 554194356#12)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_206",
+      "position": [
+        1316.5090257048091,
+        893.7903275290216
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +554198053 (edge 554198053#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_207",
+      "position": [
+        948.5052742508888,
+        414.57931945149824
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +554198054 (edge 554198054#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_208",
+      "position": [
+        726.8670701125895,
+        317.20792988741044
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +554198056 (edge 554198056#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_209",
+      "position": [
+        747.0891163540446,
+        357.07869797772565
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +554793880 (edge 554793880#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_210",
+      "position": [
+        2724.4069304900554,
+        429.6696421980726
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +554838264 (edge 554838264#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_211",
+      "position": [
+        2386.3870843955456,
+        441.1873950087213
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +554838264 (edge 554838264#5)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_212",
+      "position": [
+        2047.5476431361983,
+        451.888188064125
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +554838264 (edge 554838264#8)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_213",
+      "position": [
+        1625.51,
+        458.069010771326
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +554838265 (edge 554838265#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_214",
+      "position": [
+        1298.1883447894932,
+        487.9206695716215
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +554838265 (edge 554838265#8)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_215",
+      "position": [
+        926.3840960313572,
+        502.18980891719747
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +554838265 (edge 554838265#14)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_216",
+      "position": [
+        2006.243518576897,
+        113.13233686106733
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +554838275 (edge 554838275#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_217",
+      "position": [
+        2001.6780856760377,
+        808.0225390450693
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +554838277 (edge 554838277#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_218",
+      "position": [
+        937.0455794542536,
+        160.4932131621188
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +55675976 (edge 55675976#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_219",
+      "position": [
+        2229.8242194357367,
+        1478.4085446708464
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +679110593 (edge 679110593#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_220",
+      "position": [
+        2620.203694355209,
+        1261.709605323543
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +719660849 (edge 719660849#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_221",
+      "position": [
+        1997.3943224421103,
+        794.9282670767802
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +760106566 (edge 760106566#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_222",
+      "position": [
+        2000.257806665091,
+        1159.68
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +760106566 (edge 760106566#9)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_223",
+      "position": [
+        1141.395,
+        832.4200000000001
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +763589765 (edge 763589765)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_224",
+      "position": [
+        1175.497843417047,
+        883.0288660578386
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +763589766 (edge 763589766#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_225",
+      "position": [
+        885.8804218620116,
+        214.40269118869492
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +764039654 (edge 764039654#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_226",
+      "position": [
+        902.64,
+        224.95
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +765170520 (edge 765170520)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_227",
+      "position": [
+        721.795,
+        252.07
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +765183180 (edge 765183180)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_228",
+      "position": [
+        460.96,
+        1446.655
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +772140283 (edge 772140283)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_229",
+      "position": [
+        461.88,
+        1489.475
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +772140285 (edge 772140285)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_230",
+      "position": [
+        461.99,
+        1509.185
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +772140286 (edge 772140286)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_231",
+      "position": [
+        917.995,
+        776.76
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +772157509 (edge 772157509)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_232",
+      "position": [
+        991.9470382165605,
+        855.9310350318472
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +772157519 (edge 772157519#10)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_233",
+      "position": [
+        1022.145,
+        191.675
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +780424166 (edge 780424166)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_234",
+      "position": [
+        2001.569665096808,
+        1634.88
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +780428217 (edge 780428217#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_235",
+      "position": [
+        1761.6410583145873,
+        1581.0387769510296
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +780428221 (edge 780428221#7)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_236",
+      "position": [
+        2572.820775903809,
+        571.2927997901872
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +780764871 (edge 780764871#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_237",
+      "position": [
+        2313.1432695295944,
+        531.8750211894335
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +780764872 (edge 780764872#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_238",
+      "position": [
+        837.73,
+        246.6
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +780896348 (edge 780896348)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_239",
+      "position": [
+        752.45,
+        387.56
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +780946487 (edge 780946487)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_240",
+      "position": [
+        1138.2559927324114,
+        271.2751862319572
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +799605024 (edge 799605024#9)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_241",
+      "position": [
+        1140.5012477461232,
+        1619.6479040750091
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +799788864 (edge 799788864#5)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_242",
+      "position": [
+        1142.827248467364,
+        1919.642494771006
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +799788864 (edge 799788864#5)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_243",
+      "position": [
+        2610.930402212167,
+        1550.92
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road +799788867 (edge 799788867#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_244",
+      "position": [
+        2213.898823077618,
+        334.235
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +92194643 (edge 92194643#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_245",
+      "position": [
+        1361.7793613933236,
+        232.400969521045
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +97091556 (edge 97091556#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_246",
+      "position": [
+        2087.6523863530724,
+        1450.975653992749
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road +995160697 (edge 995160697#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_247",
+      "position": [
+        1346.7105673758865,
+        1360.665
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -1044521115 (edge -1044521115#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_248",
+      "position": [
+        1340.5603392662936,
+        1802.1181689169473
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -1044521116 (edge -1044521116)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_249",
+      "position": [
+        1750.1454723309112,
+        340.57096702068196
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -1063788032 (edge -1063788032#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_250",
+      "position": [
+        1804.3534520259602,
+        978.1744079985967
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -1102792429 (edge -1102792429#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_251",
+      "position": [
+        1079.95,
+        1089.4650000000001
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -1102815945 (edge -1102815945)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_252",
+      "position": [
+        424.031210355987,
+        1536.0211468078846
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -1102819441 (edge -1102819441#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_253",
+      "position": [
+        2703.345,
+        961.1
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -1109943646 (edge -1109943646)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_254",
+      "position": [
+        2116.772055016181,
+        933.3537313915858
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -1109943650 (edge -1109943650#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_255",
+      "position": [
+        1955.9694000413765,
+        389.15975449968965
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -1109944791 (edge -1109944791#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_256",
+      "position": [
+        1658.945,
+        1493.057408318976
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -1125669870 (edge -1125669870#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_257",
+      "position": [
+        937.3644784204089,
+        1482.6
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -1148415187 (edge -1148415187#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_258",
+      "position": [
+        1842.8400000000001,
+        721.185
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -1219843735 (edge -1219843735)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_259",
+      "position": [
+        1489.6197957993,
+        677.5952917152858
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -1286310836 (edge -1286310836#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_260",
+      "position": [
+        1841.32,
+        361.99
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -1314833482 (edge -1314833482)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_261",
+      "position": [
+        2535.180157613967,
+        516.6556619786616
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -133256936 (edge -133256936#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_262",
+      "position": [
+        936.2102798692996,
+        491.15744423923854
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -133882619 (edge -133882619#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_263",
+      "position": [
+        808.5408796136599,
+        460.72733528803036
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -133882772 (edge -133882772#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_264",
+      "position": [
+        934.9150289017341,
+        647.8110982658959
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -133883892 (edge -133883892#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_265",
+      "position": [
+        818.751632433264,
+        581.1543676436648
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -133883896 (edge -133883896#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_266",
+      "position": [
+        883.27352818129,
+        514.5997350377687
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -133883898 (edge -133883898#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_267",
+      "position": [
+        1082.3737365591398,
+        539.3030645161291
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -133883899 (edge -133883899#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_268",
+      "position": [
+        1001.317817222842,
+        586.8191261791256
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -133951304 (edge -133951304#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_269",
+      "position": [
+        1098.8260194174757,
+        581.0845353675451
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -133951479 (edge -133951479#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_270",
+      "position": [
+        1065.233572463768,
+        586.6029518633541
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -133951480 (edge -133951480#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_271",
+      "position": [
+        1133.8481239804241,
+        722.9352398042414
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -133951483 (edge -133951483#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_272",
+      "position": [
+        1493.578689633959,
+        1668.9489756997846
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -1350390280 (edge -1350390280#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_273",
+      "position": [
+        2509.6949947753396,
+        1412.3741483803553
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -1521244404 (edge -1521244404#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_274",
+      "position": [
+        2684.075,
+        1436.975
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -1521244407 (edge -1521244407)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_275",
+      "position": [
+        1121.5616746107403,
+        1104.2640451223388
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -169817047 (edge -169817047#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_276",
+      "position": [
+        1492.9625665859564,
+        941.5044365803687
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -172930620 (edge -172930620#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_277",
+      "position": [
+        1486.923633192268,
+        1027.4905907583209
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -172930625 (edge -172930625#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_278",
+      "position": [
+        1564.6144504292888,
+        725.8778985096387
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -172930627 (edge -172930627#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_279",
+      "position": [
+        1691.0595763422818,
+        838.755855704698
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -172930631 (edge -172930631#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_280",
+      "position": [
+        1690.6492316684378,
+        1018.8488076514346
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -172930633 (edge -172930633#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_281",
+      "position": [
+        1729.673345845846,
+        810.3291591591592
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -172930638 (edge -172930638#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_282",
+      "position": [
+        1445.1597943271945,
+        1803.0094259981179
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -23075332 (edge -23075332#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_283",
+      "position": [
+        1438.6795886543891,
+        2102.938851996236
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -23075332 (edge -23075332#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_284",
+      "position": [
+        1432.1993829815835,
+        2402.8682779943542
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -23075332 (edge -23075332#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_285",
+      "position": [
+        1454.8889706639218,
+        1353.637264906992
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -23075332 (edge -23075332#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_286",
+      "position": [
+        1612.9381532201267,
+        1564.7449843493232
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -238507646 (edge -238507646#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_287",
+      "position": [
+        1885.2865842965325,
+        1302.12
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -259484452 (edge -259484452#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_288",
+      "position": [
+        2492.83,
+        1581.0223001020754
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -27673552 (edge -27673552#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_289",
+      "position": [
+        986.08,
+        1498.825884264933
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -27673609 (edge -27673609#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_290",
+      "position": [
+        1676.8984835720303,
+        1106.0049295944157
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -27791621 (edge -27791621#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_291",
+      "position": [
+        2206.7810763500934,
+        618.9892911235257
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -27791643 (edge -27791643#7)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_292",
+      "position": [
+        1593.3503699045646,
+        613.545
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -27791738 (edge -27791738#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_293",
+      "position": [
+        1519.6501774708547,
+        623.6333518972302
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -27792010 (edge -27792010#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_294",
+      "position": [
+        1463.6473165402906,
+        530.0587135329649
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -27792014 (edge -27792014#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_295",
+      "position": [
+        1285.966545691906,
+        593.1268892950392
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -27792033 (edge -27792033#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_296",
+      "position": [
+        1388.5026278775892,
+        619.2165705181034
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -27792035 (edge -27792035#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_297",
+      "position": [
+        1374.6599999999999,
+        653.95
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -27792043 (edge -27792043)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_298",
+      "position": [
+        1881.050434108527,
+        679.6760620155038
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -27792060 (edge -27792060#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_299",
+      "position": [
+        1932.2821921296297,
+        818.17
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -27792063 (edge -27792063#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_300",
+      "position": [
+        1342.6812951289398,
+        832.0435369627507
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -28087618 (edge -28087618#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_301",
+      "position": [
+        1004.4204764292878,
+        299.4877081243731
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -28087737 (edge -28087737#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_302",
+      "position": [
+        2628.098432507125,
+        865.4880525088522
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -28087935 (edge -28087935#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_303",
+      "position": [
+        1050.2627728314762,
+        1422.234814735832
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -28104713 (edge -28104713#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_304",
+      "position": [
+        1048.9443128366486,
+        1378.1644120313583
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -28104724 (edge -28104724#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_305",
+      "position": [
+        1047.7787187149795,
+        1336.2362457975346
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -28104729 (edge -28104729#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_306",
+      "position": [
+        1046.308836812043,
+        1283.4304259862274
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -28104740 (edge -28104740#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_307",
+      "position": [
+        1823.885,
+        1338.19
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -28113051 (edge -28113051)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_308",
+      "position": [
+        1666.565034362293,
+        1374.6373082870398
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -28113105 (edge -28113105#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_309",
+      "position": [
+        2296.0614236902047,
+        328.3587129840547
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -28186987 (edge -28186987#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_310",
+      "position": [
+        2520.5093907001606,
+        319.26
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -28186990 (edge -28186990#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_311",
+      "position": [
+        2690.1120385390295,
+        378.25320917497544
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -28186992 (edge -28186992#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_312",
+      "position": [
+        2464.962394008996,
+        333.0821681500622
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -28187049 (edge -28187049#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_313",
+      "position": [
+        2461.697500353657,
+        300.3175432640166
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -28187050 (edge -28187050#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_314",
+      "position": [
+        2166.3943644859814,
+        379.84817623498
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -28187061 (edge -28187061#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_315",
+      "position": [
+        2143.295,
+        397.43146924688773
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -28187062 (edge -28187062#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_316",
+      "position": [
+        2073.6364630018975,
+        112.51711040459463
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -28187068 (edge -28187068#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_317",
+      "position": [
+        2189.946395895294,
+        1889.229567280405
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -28187232 (edge -28187232)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_318",
+      "position": [
+        2029.43,
+        1530.925663763526
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -28187260 (edge -28187260#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_319",
+      "position": [
+        2140.428171668362,
+        1727.5979560020346
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -28187263 (edge -28187263#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_320",
+      "position": [
+        2091.331553038105,
+        843.53
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -28188011 (edge -28188011#5)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_321",
+      "position": [
+        2382.165195126849,
+        876.4318321172769
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -289608202 (edge -289608202#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_322",
+      "position": [
+        2221.7450000000003,
+        1580.4960754881959
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -290642381 (edge -290642381#5)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_323",
+      "position": [
+        2513.3085035913805,
+        917.486981245012
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -294559021 (edge -294559021#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_324",
+      "position": [
+        2369.2253154179,
+        1144.408198588021
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -294559726 (edge -294559726#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_325",
+      "position": [
+        2465.939789385004,
+        613.2165543386689
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -309566730 (edge -309566730#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_326",
+      "position": [
+        767.46,
+        868.5560078023407
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -309584105 (edge -309584105#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_327",
+      "position": [
+        704.909493740611,
+        1015.0182073109664
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -309584107 (edge -309584107#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_328",
+      "position": [
+        798.935,
+        820.5699999999999
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -309584109 (edge -309584109)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_329",
+      "position": [
+        526.39,
+        304.375
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -309592653 (edge -309592653)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_330",
+      "position": [
+        515.305,
+        272.15999999999997
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -309592654 (edge -309592654)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_331",
+      "position": [
+        467.41066088777706,
+        815.6774099714934
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -309592664 (edge -309592664#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_332",
+      "position": [
+        449.14997358447226,
+        969.7353322039738
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -309592672 (edge -309592672#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_333",
+      "position": [
+        1666.4599942736072,
+        1326.0297251331385
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -31560813 (edge -31560813#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_334",
+      "position": [
+        1666.6000228990154,
+        1426.8379047400963
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -31561305 (edge -31561305#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_335",
+      "position": [
+        1666.17,
+        1274.0353733486502
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -31561309 (edge -31561309#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_336",
+      "position": [
+        478.35548989395454,
+        790.7820674340614
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -318404673 (edge -318404673#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_337",
+      "position": [
+        1713.8804394505203,
+        648.1172946118965
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32258206 (edge -32258206#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_338",
+      "position": [
+        1845.838184504268,
+        539.9462606697308
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32258242 (edge -32258242#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_339",
+      "position": [
+        1781.2184735885708,
+        519.2615937715395
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32258294 (edge -32258294#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_340",
+      "position": [
+        1650.36,
+        591.165
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32258315 (edge -32258315)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_341",
+      "position": [
+        1758.7350000000001,
+        612.46
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32258474 (edge -32258474)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_342",
+      "position": [
+        1757.73,
+        564.825
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32258522 (edge -32258522)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_343",
+      "position": [
+        1569.2644028618602,
+        340.85659328563565
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32258598 (edge -32258598#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_344",
+      "position": [
+        1924.8043963321447,
+        346.99
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32258638 (edge -32258638#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_345",
+      "position": [
+        1591.615,
+        393.92456152111646
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32258652 (edge -32258652#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_346",
+      "position": [
+        1790.01,
+        256.54862966811316
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -32258685 (edge -32258685#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_347",
+      "position": [
+        1787.8980655817936,
+        292.3385256331824
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -32258690 (edge -32258690#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_348",
+      "position": [
+        1658.3600000000001,
+        360.78499999999997
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32258694 (edge -32258694)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_349",
+      "position": [
+        1786.19,
+        327.4251457261817
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -32258696 (edge -32258696#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_350",
+      "position": [
+        2710.965,
+        763.685
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32263470 (edge -32263470)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_351",
+      "position": [
+        2225.535427652733,
+        655.26
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -32263659 (edge -32263659#8)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_352",
+      "position": [
+        2200.30806987909,
+        708.7433565967283
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32263711 (edge -32263711#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_353",
+      "position": [
+        2198.9516642133517,
+        737.8011637371201
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32263752 (edge -32263752#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_354",
+      "position": [
+        2198.315,
+        769.476129846786
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32263758 (edge -32263758#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_355",
+      "position": [
+        2190.659816758358,
+        802.2341878967414
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32263769 (edge -32263769#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_356",
+      "position": [
+        2143.63085106383,
+        913.2739437689969
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32263803 (edge -32263803#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_357",
+      "position": [
+        2260.685098266278,
+        465.8947687268396
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32263943 (edge -32263943#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_358",
+      "position": [
+        2416.508159185213,
+        925.3736476801207
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32264007 (edge -32264007#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_359",
+      "position": [
+        2403.05,
+        772.8684552454283
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32264024 (edge -32264024#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_360",
+      "position": [
+        2502.445036948679,
+        502.99575177470035
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32264070 (edge -32264070#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_361",
+      "position": [
+        2277.8390963118336,
+        723.6177049466877
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32264151 (edge -32264151#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_362",
+      "position": [
+        2380.6499999999996,
+        691.36
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32264172 (edge -32264172)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_363",
+      "position": [
+        2380.84,
+        654.58
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32264184 (edge -32264184)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_364",
+      "position": [
+        2341.371853832442,
+        574.463504456328
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32264234 (edge -32264234#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_365",
+      "position": [
+        2387.4601678657077,
+        939.5018165467626
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32264269 (edge -32264269#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_366",
+      "position": [
+        2427.425,
+        1036.55
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32264353 (edge -32264353)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_367",
+      "position": [
+        2459.45,
+        1036.6599999999999
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32264371 (edge -32264371)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_368",
+      "position": [
+        2551.123292851228,
+        922.0141650565829
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32264459 (edge -32264459#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_369",
+      "position": [
+        2583.875,
+        896.04
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32264477 (edge -32264477)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_370",
+      "position": [
+        1241.275,
+        1235.835
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32424806 (edge -32424806)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_371",
+      "position": [
+        2509.195,
+        1729.67
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32425772 (edge -32425772)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_372",
+      "position": [
+        2055.21,
+        1495.6927057763764
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32425871 (edge -32425871#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_373",
+      "position": [
+        2236.47945281018,
+        1389.1471071049841
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32425897 (edge -32425897#9)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_374",
+      "position": [
+        2176.6578167168236,
+        1389.5312853121056
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32426003 (edge -32426003#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_375",
+      "position": [
+        2374.37,
+        1225.0356586169046
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32426007 (edge -32426007#5)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_376",
+      "position": [
+        2060.3668052159737,
+        1305.61
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32426067 (edge -32426067#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_377",
+      "position": [
+        2510.069994782155,
+        1439.4237320636578
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32426132 (edge -32426132#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_378",
+      "position": [
+        2467.3666777801113,
+        1485.555652105429
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32426136 (edge -32426136#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_379",
+      "position": [
+        2666.21,
+        1530.4076644673628
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -32426138 (edge -32426138#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_380",
+      "position": [
+        2571.7599999999998,
+        1384.7583797942002
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -32426189 (edge -32426189#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_381",
+      "position": [
+        2217.8644060422957,
+        478.7681486404834
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -33278945 (edge -33278945#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_382",
+      "position": [
+        2059.0971769590037,
+        566.7218370524131
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -33278950 (edge -33278950#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_383",
+      "position": [
+        2238.37775246773,
+        1663.457966495824
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -334455495 (edge -334455495#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_384",
+      "position": [
+        748.3590977479636,
+        1255.2767053186392
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -40633854 (edge -40633854#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_385",
+      "position": [
+        793.4546194824961,
+        1355.135
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -40633855 (edge -40633855#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_386",
+      "position": [
+        1230.6488167087855,
+        646.9473286754868
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -40633858 (edge -40633858#13)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_387",
+      "position": [
+        1548.3125881762269,
+        2377.444442701142
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -40633859 (edge -40633859#8)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_388",
+      "position": [
+        1555.2097891301619,
+        2077.535443077695
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -40633859 (edge -40633859#8)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_389",
+      "position": [
+        1562.1069900840969,
+        1777.6264434542486
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -40633859 (edge -40633859#8)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_390",
+      "position": [
+        1139.3597885196375,
+        1181.5098791540786
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -40633861 (edge -40633861#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_391",
+      "position": [
+        1198.9115858793048,
+        1010.5836027744791
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -40633864 (edge -40633864#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_392",
+      "position": [
+        1362.495,
+        1024.855
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -40633867 (edge -40633867)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_393",
+      "position": [
+        4.653166639517849,
+        814.9811695715915
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -41189494 (edge -41189494#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_394",
+      "position": [
+        264.4080673316708,
+        1003.4095849192807
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -41189494 (edge -41189494#2)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_395",
+      "position": [
+        2404.1304375467466,
+        1391.675
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -453955862 (edge -453955862#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_396",
+      "position": [
+        466.105,
+        1405.55
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -497108254 (edge -497108254)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_397",
+      "position": [
+        541.257970749543,
+        1215.6843692870202
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -497108255 (edge -497108255#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_398",
+      "position": [
+        466.2113592272579,
+        1346.3290895011412
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -497108256 (edge -497108256#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_399",
+      "position": [
+        787.2370601794682,
+        570.6581563348975
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -513608922 (edge -513608922#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_400",
+      "position": [
+        417.6524182967557,
+        332.29417163645036
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -513608923 (edge -513608923#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_401",
+      "position": [
+        1445.7914101413508,
+        245.29175959165357
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -554190414 (edge -554190414#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_402",
+      "position": [
+        971.9181765061455,
+        582.8918053596615
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -554192901 (edge -554192901#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_403",
+      "position": [
+        1139.4871768587252,
+        645.3682620478379
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -554194356 (edge -554194356#12)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_404",
+      "position": [
+        1323.6006260364843,
+        910.4740713101161
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -554198053 (edge -554198053#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_405",
+      "position": [
+        934.3347257491113,
+        419.63068054850174
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -554198054 (edge -554198054#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_406",
+      "position": [
+        715.3629605936541,
+        314.00203940634594
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -554198056 (edge -554198056#4)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_407",
+      "position": [
+        685.8041408812205,
+        352.4874148010837
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -554793880 (edge -554793880#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_408",
+      "position": [
+        931.8769757521329,
+        288.2277009429726
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -55675976 (edge -55675976#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_409",
+      "position": [
+        851.435,
+        964.85
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -661799346 (edge -661799346)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_410",
+      "position": [
+        2234.811366749422,
+        1473.388320349285
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -679110593 (edge -679110593#3)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_411",
+      "position": [
+        2599.4401610331633,
+        1228.428997927296
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -719660849 (edge -719660849#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_412",
+      "position": [
+        1141.4450000000002,
+        832.415
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -763589765 (edge -763589765)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_413",
+      "position": [
+        1244.0170020808562,
+        872.5749014070551
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -763589766 (edge -763589766#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_414",
+      "position": [
+        885.3156140163453,
+        229.82126435553658
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -764039654 (edge -764039654#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_415",
+      "position": [
+        905.84,
+        225.0
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -765170520 (edge -765170520)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_416",
+      "position": [
+        721.875,
+        255.265
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -765183180 (edge -765183180)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_417",
+      "position": [
+        461.42499999999995,
+        1449.8200000000002
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -772140283 (edge -772140283)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_418",
+      "position": [
+        462.21000000000004,
+        1492.655
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -772140285 (edge -772140285)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_419",
+      "position": [
+        462.375,
+        1512.365
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -772140286 (edge -772140286)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_420",
+      "position": [
+        916.7,
+        778.505
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -772157509 (edge -772157509)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_421",
+      "position": [
+        997.6183849703363,
+        881.3184706657878
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -772157519 (edge -772157519#9)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_422",
+      "position": [
+        1020.575,
+        193.465
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -780424166 (edge -780424166)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_423",
+      "position": [
+        2568.5291800500363,
+        535.7150811072553
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -780764871 (edge -780764871#0)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_424",
+      "position": [
+        2309.9467314487633,
+        532.1099858657244
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -780764872 (edge -780764872#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_425",
+      "position": [
+        752.39,
+        390.76
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -780946487 (edge -780946487)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_426",
+      "position": [
+        1123.7386805837048,
+        174.97338417105797
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -799605024 (edge -799605024#9)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_427",
+      "position": [
+        1139.7987522538767,
+        1941.784191849982
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -799788864 (edge -799788864#5)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_428",
+      "position": [
+        1137.4727515326363,
+        1641.7950104579877
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -799788864 (edge -799788864#5)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_429",
+      "position": [
+        2614.179836601307,
+        1561.25
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -799788867 (edge -799788867#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_430",
+      "position": [
+        2210.5511769223817,
+        317.065
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -92194643 (edge -92194643#1)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_431",
+      "position": [
+        1172.329726074896,
+        270.31457350901525
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Road RSU at 300m spacing on directional road -97091556 (edge -97091556#6)"
+    },
+    {
+      "rsu_id": "RSU_EDGE_432",
+      "position": [
+        2072.293853364269,
+        1458.0797252900231
+      ],
+      "tier": "TIER2",
+      "junction_id": null,
+      "coverage_radius": 300.0,
+      "description": "Short-road midpoint RSU on directional road -995160697 (edge -995160697#1)"
     }
   ]
 }

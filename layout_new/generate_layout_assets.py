@@ -80,15 +80,6 @@ def bfs_path(start: str, target: str, adjacency: Dict[str, Sequence[str]], max_h
     return None
 
 
-def position_too_close(position: Tuple[float, float], existing: Sequence[Tuple[float, float]], min_distance: float) -> bool:
-    for ex, ey in existing:
-        dx = position[0] - ex
-        dy = position[1] - ey
-        if (dx * dx + dy * dy) ** 0.5 < min_distance:
-            return True
-    return False
-
-
 def build_routes(
     edge_data: Dict[str, Dict[str, object]],
     adjacency: Dict[str, List[str]],
@@ -237,6 +228,8 @@ def write_rsu_config_files(
     traffic_light_positions: Dict[str, Tuple[float, float]],
     edge_data: Dict[str, Dict[str, object]],
     tier2_interval_m: float = 300.0,
+    ensure_short_road_coverage: bool = False,
+    short_road_min_length_m: float = 120.0,
 ) -> int:
     """Write rsu_config.json and rsu.add.xml."""
     rsus = []
@@ -254,51 +247,127 @@ def write_rsu_config_files(
             }
         )
 
-    # Place tier-2 road RSUs at regular spacing along drivable edges.
-    placed = [tuple(item["position"]) for item in rsus]
+    # Place tier-2 road RSUs every interval meters along each directional road chain.
+    # SUMO often splits one road into many short edge fragments; grouping by road-direction
+    # gives uniform 300m spacing across the full road direction instead of sparse placement.
     sorted_edges = sorted(edge_data.items(), key=lambda item: item[0])
-    tier2_added = 0
+    road_groups: Dict[str, List[Tuple[int, str, Dict[str, object]]]] = defaultdict(list)
+
+    def road_direction_key(edge_id: str) -> str:
+        sign = "-" if edge_id.startswith("-") else "+"
+        core = edge_id[1:] if sign == "-" else edge_id
+        base = core.split("#", 1)[0]
+        return f"{sign}{base}"
+
+    def edge_segment_index(edge_id: str) -> int:
+        core = edge_id[1:] if edge_id.startswith("-") else edge_id
+        if "#" not in core:
+            return 0
+
+        tail = core.rsplit("#", 1)[1]
+        sign = 1
+        if tail.startswith("-"):
+            sign = -1
+            tail = tail[1:]
+
+        digits = []
+        for ch in tail:
+            if ch.isdigit():
+                digits.append(ch)
+            else:
+                break
+
+        if not digits:
+            return 0
+        return sign * int("".join(digits))
+
     for edge_id, info in sorted_edges:
         start = info.get("start")
         end = info.get("end")
         length = float(info.get("length", 0.0))
-        if start is None or end is None:
-            continue
-        if length <= 0:
+        if start is None or end is None or length <= 0:
             continue
 
-        num_points = int(length // tier2_interval_m)
-        if num_points <= 0:
+        key = road_direction_key(edge_id)
+        idx = edge_segment_index(edge_id)
+        road_groups[key].append((idx, edge_id, info))
+
+    tier2_added = 0
+
+    def add_tier2_rsu(midpoint: Tuple[float, float], description: str) -> None:
+        nonlocal tier2_added
+        rsus.append(
+            {
+                "rsu_id": f"RSU_EDGE_{tier2_added + 1}",
+                "position": [midpoint[0], midpoint[1]],
+                "tier": "TIER2",
+                "junction_id": None,
+                "coverage_radius": tier2_interval_m,
+                "description": description,
+            }
+        )
+        tier2_added += 1
+
+    for road_key in sorted(road_groups.keys()):
+        segments = sorted(road_groups[road_key], key=lambda item: item[0])
+        total_length = sum(float(seg_info.get("length", 0.0)) for _, _, seg_info in segments)
+        if total_length <= 0:
             continue
 
-        # Center the first/last RSU on each edge while keeping interval spacing.
-        first_offset = (length - (num_points - 1) * tier2_interval_m) / 2.0
+        next_offset = tier2_interval_m
+        traversed = 0.0
+        placed_on_road = 0
 
-        for idx in range(num_points):
-            offset = first_offset + idx * tier2_interval_m
-            ratio = max(0.0, min(1.0, offset / length))
-
-            midpoint = (
-                start[0] + (end[0] - start[0]) * ratio,
-                start[1] + (end[1] - start[1]) * ratio,
-            )
-
-            # Keep only a tiny de-dup distance to avoid overlapping markers.
-            if position_too_close(midpoint, placed, min_distance=35.0):
+        for _, edge_id, info in segments:
+            start = info.get("start")
+            end = info.get("end")
+            length = float(info.get("length", 0.0))
+            if start is None or end is None or length <= 0:
                 continue
 
-            rsus.append(
-                {
-                    "rsu_id": f"RSU_EDGE_{tier2_added + 1}",
-                    "position": [midpoint[0], midpoint[1]],
-                    "tier": "TIER2",
-                    "junction_id": None,
-                    "coverage_radius": tier2_interval_m,
-                    "description": f"Road RSU at {tier2_interval_m:.0f}m spacing on edge {edge_id}",
-                }
-            )
-            placed.append(midpoint)
-            tier2_added += 1
+            while next_offset < (traversed + length):
+                local_offset = next_offset - traversed
+                ratio = max(0.0, min(1.0, local_offset / length))
+                midpoint = (
+                    start[0] + (end[0] - start[0]) * ratio,
+                    start[1] + (end[1] - start[1]) * ratio,
+                )
+
+                add_tier2_rsu(
+                    midpoint,
+                    f"Road RSU at {tier2_interval_m:.0f}m spacing on directional road {road_key} (edge {edge_id})",
+                )
+                placed_on_road += 1
+                next_offset += tier2_interval_m
+
+            traversed += length
+
+        if ensure_short_road_coverage and placed_on_road == 0 and total_length >= short_road_min_length_m:
+            target_offset = total_length / 2.0
+            traversed = 0.0
+
+            for _, edge_id, info in segments:
+                start = info.get("start")
+                end = info.get("end")
+                length = float(info.get("length", 0.0))
+                if start is None or end is None or length <= 0:
+                    continue
+
+                if target_offset <= (traversed + length):
+                    local_offset = max(0.0, min(length, target_offset - traversed))
+                    ratio = max(0.0, min(1.0, local_offset / length))
+                    midpoint = (
+                        start[0] + (end[0] - start[0]) * ratio,
+                        start[1] + (end[1] - start[1]) * ratio,
+                    )
+
+                    add_tier2_rsu(
+                        midpoint,
+                        f"Short-road midpoint RSU on directional road {road_key} (edge {edge_id})",
+                    )
+                    break
+
+                traversed += length
 
     config_payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -383,10 +452,23 @@ def main() -> None:
     parser.add_argument("--net-file", default="map.net.xml", help="SUMO network file name")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for route generation")
     parser.add_argument("--rsu-interval", type=float, default=300.0, help="Tier-2 RSU spacing along roads in meters")
+    parser.add_argument(
+        "--ensure-short-road-coverage",
+        action="store_true",
+        help="Place one midpoint tier-2 RSU on directional roads that have no 300m interval point",
+    )
+    parser.add_argument(
+        "--short-road-min-length",
+        type=float,
+        default=120.0,
+        help="Minimum directional road length (m) for midpoint short-road RSU placement",
+    )
     args = parser.parse_args()
 
     if args.rsu_interval <= 0:
         raise ValueError("--rsu-interval must be positive")
+    if args.short_road_min_length <= 0:
+        raise ValueError("--short-road-min-length must be positive")
 
     layout_dir = Path(args.layout_dir).resolve()
     net_path = layout_dir / args.net_file
@@ -461,6 +543,8 @@ def main() -> None:
         traffic_light_positions,
         edge_data,
         tier2_interval_m=args.rsu_interval,
+        ensure_short_road_coverage=args.ensure_short_road_coverage,
+        short_road_min_length_m=args.short_road_min_length,
     )
     write_sumocfg(layout_dir)
 
