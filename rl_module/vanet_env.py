@@ -425,6 +425,8 @@ class VANETTrafficEnv(gym.Env):
         # ========== EMERGENCY VEHICLE REWARDS (HIGHEST PRIORITY) ==========
         emergency_bonus = 0
         emergency_penalty = 0
+        active_emergencies = []
+        current_vehicles = set()
         
         try:
             # Get active emergency vehicles from coordinator
@@ -434,6 +436,12 @@ class VANETTrafficEnv(gym.Env):
             current_vehicles = set(traci.vehicle.getIDList())
             
             if active_emergencies:
+                emergency_ids = {
+                    emerg.vehicle_id
+                    for emerg in active_emergencies
+                    if hasattr(emerg, 'vehicle_id')
+                }
+
                 for emerg_veh in active_emergencies:
                     try:
                         # Get emergency vehicle metrics
@@ -468,6 +476,36 @@ class VANETTrafficEnv(gym.Env):
                     except Exception as e:
                         # Vehicle may have completed route
                         continue
+
+                # Explicitly optimize the target paper metric:
+                # emergency wait should be lower than normal wait.
+                emergency_wait_samples = []
+                normal_wait_samples = []
+
+                for veh_id in current_vehicles:
+                    try:
+                        wait_t = traci.vehicle.getWaitingTime(veh_id)
+                    except Exception:
+                        continue
+
+                    if veh_id in emergency_ids:
+                        emergency_wait_samples.append(wait_t)
+                    else:
+                        normal_wait_samples.append(wait_t)
+
+                if emergency_wait_samples:
+                    mean_emerg_wait = sum(emergency_wait_samples) / len(emergency_wait_samples)
+                    mean_normal_wait = (
+                        sum(normal_wait_samples) / len(normal_wait_samples)
+                        if normal_wait_samples
+                        else 0.0
+                    )
+
+                    wait_gap = mean_emerg_wait - mean_normal_wait
+                    if wait_gap > 0:
+                        emergency_penalty -= min(30.0 * wait_gap, 500.0)
+                    else:
+                        emergency_bonus += min(10.0 * abs(wait_gap), 150.0)
                         
         except Exception as e:
             pass
@@ -510,10 +548,9 @@ class VANETTrafficEnv(gym.Env):
         total_reward = base_reward + emergency_bonus + emergency_penalty + queue_penalty
 
         # Emergency vehicles have absolute priority - if emergency present, scale other rewards
-        active_emergencies = self.emergency_coordinator.get_active_emergency_vehicles()
         if len(active_emergencies) > 0:
             # Scale down base rewards when emergency is active
-            total_reward = (base_reward * 0.3) + emergency_bonus + emergency_penalty + (queue_penalty * 0.5)
+            total_reward = (base_reward * 0.2) + emergency_bonus + emergency_penalty + (queue_penalty * 0.3)
 
         # Ensure minimum reward to prevent agent from giving up
         return max(total_reward, -300)  # Allow larger negative rewards for emergencies

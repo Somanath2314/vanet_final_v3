@@ -48,6 +48,7 @@ class AdaptiveTrafficController:
         self.simulation_step = 0
         self.output_dir = output_dir
         self.mode = mode
+        self.externally_controlled_tls = set()
         
         # Emergency vehicle priority control
         self.emergency_priority_enabled = emergency_priority_enabled
@@ -101,6 +102,7 @@ class AdaptiveTrafficController:
         self.phase_durations: Dict[str, List[float]] = {}
         self.tl_positions: Dict[str, Tuple[float, float]] = {}
         self.tl_incoming_links: Dict[str, Dict[str, List[int]]] = {}
+        self.edge_to_tl: Dict[str, set] = defaultdict(set)
         self._edge_phase_cache: Dict[str, Dict[str, Optional[int]]] = defaultdict(dict)
         # Optimized timing parameters for better flow
         self.min_green_time = 10      # Reduced from 15 (faster response)
@@ -111,8 +113,15 @@ class AdaptiveTrafficController:
         # Emergency vehicle detection and control ranges (meters)
         # Detection range: When to start giving green light priority
         self.emergency_detection_range = 150.0  # meters - balanced for response time vs normal traffic flow
-        # Pass-through range: When to return to adaptive control (30m from junction center)
-        # This ensures minimal disruption to normal traffic flow
+        # Pass-through range: when an emergency has effectively cleared the junction.
+        self.emergency_pass_through_range = 30.0
+        # Proactive corridor preemption range and depth.
+        self.green_corridor_enabled = True
+        self.green_corridor_max_distance = 450.0
+        self.green_corridor_junction_lookahead = 3
+        self.green_corridor_edge_lookahead = 12
+        # Hold green after preemption to let emergency vehicle pass safely.
+        self.emergency_green_hold_time = 12
         
         # Track emergency vehicles that have been served at each junction
         # Format: {junction_id: {vehicle_id: 'served'}}
@@ -173,12 +182,40 @@ class AdaptiveTrafficController:
         self.ns3_bridge = ns3_bridge
         print("  ✓ NS3 bridge reference set for accurate V2I metrics")
 
+    def set_externally_controlled_tls(self, tl_ids):
+        """Allow an external controller (e.g., proximity RL) to drive selected TLs."""
+        self.externally_controlled_tls = set(tl_ids or [])
+
+    def configure_emergency_priority(
+        self,
+        detection_range=None,
+        pass_through_range=None,
+        corridor_depth=None,
+        corridor_max_distance=None,
+    ):
+        """Configure emergency preemption and proactive green-corridor behavior."""
+        if detection_range is not None:
+            self.emergency_detection_range = max(30.0, float(detection_range))
+
+        if pass_through_range is not None:
+            self.emergency_pass_through_range = max(10.0, float(pass_through_range))
+
+        if corridor_depth is not None:
+            depth = max(1, int(corridor_depth))
+            self.green_corridor_junction_lookahead = depth
+            # Approximate edge horizon from requested junction depth.
+            self.green_corridor_edge_lookahead = max(4, depth * 4)
+
+        if corridor_max_distance is not None:
+            self.green_corridor_max_distance = max(100.0, float(corridor_max_distance))
+
     def _initialize_intersections(self):
         self.intersections.clear()
         self.default_phases.clear()
         self.phase_durations.clear()
         self.tl_positions.clear()
         self.tl_incoming_links.clear()
+        self.edge_to_tl.clear()
         self._edge_phase_cache.clear()
 
         tl_ids = traci.trafficlight.getIDList()
@@ -229,6 +266,8 @@ class AdaptiveTrafficController:
             self.phase_durations[tl] = phase_durations
             self.tl_positions[tl] = self._get_traffic_light_position(tl, controlled_lanes)
             self.tl_incoming_links[tl] = self._build_incoming_link_index(tl)
+            for edge_id in self.tl_incoming_links[tl].keys():
+                self.edge_to_tl[edge_id].add(tl)
 
         print(f"  ✓ Initialized {len(self.intersections)} traffic lights from active network")
 
@@ -582,17 +621,12 @@ class AdaptiveTrafficController:
     def _check_emergency_priority(self):
         """
         Check if emergency vehicles are approaching intersections and need priority.
-        
-        Emergency Priority Control Logic:
-        1. Detection: Emergency within 150m → Grant green light (greenwave)
-        2. Pass-through: Emergency within 30m → IMMEDIATELY return to adaptive control
-        3. First-come-first-served: Multiple emergencies → Closest gets priority
-        
-        This ensures:
-        - Emergency vehicles get priority when approaching (150m-31m range)
-        - Normal traffic resumes quickly after emergency passes (at 30m mark)
-        - Minimal disruption to overall traffic flow
-        
+
+        Strategy:
+        1) Reactive preemption for nearby emergencies.
+        2) Proactive route-ahead preemption for a limited junction horizon.
+        3) Keep first-assigned vehicle priority until it clears pass-through range.
+
         Returns dict {junction_id: (required_phase, vehicle_id)}
         """
         # If emergency priority is disabled, return empty dict
@@ -603,8 +637,14 @@ class AdaptiveTrafficController:
         try:
             all_vehicles = traci.vehicle.getIDList()
 
-            # Track which emergency vehicles are currently near each junction.
+            # Track candidate emergency preemptions per junction.
             current_emergencies_near_junction = defaultdict(list)
+
+            all_junction_positions = [
+                (junc_id, pos)
+                for junc_id, pos in self.tl_positions.items()
+                if junc_id in self.intersections
+            ]
 
             for vehicle_id in all_vehicles:
                 try:
@@ -617,50 +657,119 @@ class AdaptiveTrafficController:
                     x, y = traci.vehicle.getPosition(vehicle_id)
                     route = traci.vehicle.getRoute(vehicle_id)
                     route_index = traci.vehicle.getRouteIndex(vehicle_id)
-                    current_edge = route[route_index] if route_index < len(route) else None
+                    if route_index < 0 or route_index >= len(route):
+                        continue
 
-                    for junc_id, position in self.tl_positions.items():
-                        if junc_id not in self.intersections:
-                            continue
+                    current_edge = route[route_index]
 
+                    # Housekeeping: mark served when emergency passes, and release stale serves
+                    # once emergency has moved far enough from a junction.
+                    release_range = max(self.emergency_detection_range, self.green_corridor_max_distance) + 50.0
+                    for junc_id, position in all_junction_positions:
                         junc_x, junc_y = position
                         distance = ((x - junc_x) ** 2 + (y - junc_y) ** 2) ** 0.5
 
-                        # Within 30 m means the vehicle has effectively passed this junction.
-                        if distance < 30.0:
+                        if distance < self.emergency_pass_through_range:
                             if vehicle_id not in self.served_emergencies[junc_id]:
                                 self.served_emergencies[junc_id].add(vehicle_id)
                                 if (
                                     junc_id in self.junction_priority_vehicle
                                     and self.junction_priority_vehicle[junc_id] == vehicle_id
                                 ):
-                                    print(f"✅ EMERGENCY CLEARED: {vehicle_id} passed 30m mark at {junc_id}, returning to density-based control")
+                                    print(
+                                        f"✅ EMERGENCY CLEARED: {vehicle_id} passed "
+                                        f"{self.emergency_pass_through_range:.0f}m at {junc_id}, "
+                                        "returning to adaptive control"
+                                    )
                                     del self.junction_priority_vehicle[junc_id]
                             continue
 
-                        # Once vehicle leaves detection range, allow future priority checks.
-                        if distance > self.emergency_detection_range:
+                        if distance > release_range:
                             self.served_emergencies[junc_id].discard(vehicle_id)
+
+                    # 1) Reactive preemption near current position.
+                    for junc_id, position in all_junction_positions:
+                        if vehicle_id in self.served_emergencies[junc_id]:
                             continue
 
-                        if vehicle_id in self.served_emergencies[junc_id] or not current_edge:
+                        junc_x, junc_y = position
+                        distance = ((x - junc_x) ** 2 + (y - junc_y) ** 2) ** 0.5
+                        if distance > self.emergency_detection_range:
                             continue
 
                         required_phase = self._determine_emergency_phase(junc_id, current_edge)
-                        if required_phase is not None:
-                            current_emergencies_near_junction[junc_id].append({
-                                'vehicle_id': vehicle_id,
-                                'distance': distance,
-                                'phase': required_phase,
-                            })
+                        if required_phase is None:
+                            continue
+
+                        current_emergencies_near_junction[junc_id].append({
+                            'vehicle_id': vehicle_id,
+                            'distance': distance,
+                            'phase': required_phase,
+                            'corridor_rank': 0,
+                            'source': 'nearby',
+                        })
+
+                    # 2) Proactive route-ahead corridor preemption.
+                    if self.green_corridor_enabled and self.green_corridor_edge_lookahead > 0:
+                        end_idx = min(len(route), route_index + self.green_corridor_edge_lookahead)
+                        upcoming_edges = route[route_index:end_idx]
+
+                        for edge_rank, edge_id in enumerate(upcoming_edges, start=1):
+                            target_tls = self.edge_to_tl.get(edge_id, set())
+                            if not target_tls:
+                                continue
+
+                            for junc_id in target_tls:
+                                if junc_id not in self.intersections:
+                                    continue
+                                if vehicle_id in self.served_emergencies[junc_id]:
+                                    continue
+
+                                pos = self.tl_positions.get(junc_id)
+                                if not pos:
+                                    continue
+
+                                junc_x, junc_y = pos
+                                distance = ((x - junc_x) ** 2 + (y - junc_y) ** 2) ** 0.5
+                                if distance > self.green_corridor_max_distance:
+                                    continue
+
+                                required_phase = self._determine_emergency_phase(junc_id, edge_id)
+                                if required_phase is None:
+                                    continue
+
+                                current_emergencies_near_junction[junc_id].append({
+                                    'vehicle_id': vehicle_id,
+                                    'distance': distance,
+                                    'phase': required_phase,
+                                    'corridor_rank': edge_rank,
+                                    'source': 'corridor',
+                                })
 
                 except traci.exceptions.TraCIException:
                     continue
             
-            # Process priorities: First-come-first-served for simultaneous emergencies
+            # Process priorities per junction: keep current assignment if still valid,
+            # otherwise choose best candidate (lower corridor_rank, then lower distance).
             for junc_id, emergencies in current_emergencies_near_junction.items():
                 if not emergencies:
                     continue
+
+                # Keep one best candidate per vehicle to avoid duplicate edge-derived entries.
+                by_vehicle = {}
+                for entry in emergencies:
+                    vid = entry['vehicle_id']
+                    prev = by_vehicle.get(vid)
+                    if prev is None:
+                        by_vehicle[vid] = entry
+                        continue
+
+                    prev_key = (prev.get('corridor_rank', 999), prev['distance'])
+                    new_key = (entry.get('corridor_rank', 999), entry['distance'])
+                    if new_key < prev_key:
+                        by_vehicle[vid] = entry
+
+                emergencies = list(by_vehicle.values())
                 
                 # Check if there's already a vehicle being served at this junction
                 if junc_id in self.junction_priority_vehicle:
@@ -675,9 +784,8 @@ class AdaptiveTrafficController:
                                 emergency_priorities[junc_id] = (e['phase'], e['vehicle_id'])
                                 break
                     else:
-                        # Current priority vehicle is gone, assign new priority
-                        # Sort by distance - closest gets priority
-                        emergencies.sort(key=lambda e: e['distance'])
+                        # Current priority vehicle is gone, assign new priority.
+                        emergencies.sort(key=lambda e: (e.get('corridor_rank', 999), e['distance']))
                         new_priority = emergencies[0]
                         self.junction_priority_vehicle[junc_id] = new_priority['vehicle_id']
                         emergency_priorities[junc_id] = (new_priority['phase'], new_priority['vehicle_id'])
@@ -687,12 +795,16 @@ class AdaptiveTrafficController:
                             print(f"🚦 {junc_id}: {new_priority['vehicle_id']} gets priority (first detected), "
                                   f"{len(emergencies)-1} waiting: {', '.join(waiting_vehicles)}")
                 else:
-                    # No current priority, assign to closest emergency (first-come-first-served)
-                    emergencies.sort(key=lambda e: e['distance'])
+                    # No current priority, assign best candidate.
+                    emergencies.sort(key=lambda e: (e.get('corridor_rank', 999), e['distance']))
                     first_emergency = emergencies[0]
                     self.junction_priority_vehicle[junc_id] = first_emergency['vehicle_id']
                     emergency_priorities[junc_id] = (first_emergency['phase'], first_emergency['vehicle_id'])
-                    print(f"🚨 EMERGENCY PRIORITY: {junc_id} → {first_emergency['vehicle_id']} at {first_emergency['distance']:.1f}m")
+                    src = first_emergency.get('source', 'nearby')
+                    print(
+                        f"🚨 EMERGENCY PRIORITY: {junc_id} → {first_emergency['vehicle_id']} "
+                        f"at {first_emergency['distance']:.1f}m ({src})"
+                    )
                     
                     if len(emergencies) > 1:
                         waiting_vehicles = [e['vehicle_id'] for e in emergencies[1:]]
@@ -746,10 +858,24 @@ class AdaptiveTrafficController:
                             data["current_phase"] = emergency_phase
                             data["time_in_phase"] = 0
                             traci.trafficlight.setPhase(tl_id, emergency_phase)
+                            try:
+                                traci.trafficlight.setPhaseDuration(tl_id, float(self.emergency_green_hold_time))
+                            except Exception:
+                                pass
                         # If already in correct phase, extend green time
                         else:
                             data["time_in_phase"] = max(0, data["time_in_phase"] - 5)  # Reset timer
+                            try:
+                                traci.trafficlight.setPhaseDuration(tl_id, float(self.emergency_green_hold_time))
+                            except Exception:
+                                pass
                         continue  # Skip normal adaptive control for this junction
+
+                    # External controllers can own selected traffic lights while still
+                    # preserving emergency override behavior above.
+                    if tl_id in self.externally_controlled_tls:
+                        data["time_in_phase"] += 1
+                        continue
                     
                     data["time_in_phase"] += 1
                     current_phase = data["current_phase"] % len(phase_states)

@@ -12,6 +12,7 @@ Combines all features:
 import os
 import sys
 import time
+import json
 import argparse
 import traceback
 from collections import defaultdict
@@ -126,10 +127,15 @@ class ProximityHybridController:
     Only activates RL for junctions near emergency vehicles
     """
     
-    def __init__(self, traffic_controller, model=None, proximity_threshold=250.0):
+    def __init__(self, traffic_controller, model=None, proximity_threshold=250.0, model_path=None):
         self.traffic_controller = traffic_controller
         self.model = model
+        self.model_path = model_path
         self.proximity_threshold = proximity_threshold
+        self.rl_env = None
+        self.rl_action_spec = {}
+        self.rl_algorithm = None
+        self.model_inference_failures = 0
         
         # Get controlled junctions
         import traci
@@ -173,6 +179,8 @@ class ProximityHybridController:
         self.density_steps = 0
         self.rl_steps = 0
         self.switches = 0
+
+        self._initialize_rl_inference_adapter()
         
         print(f"\n🔄 Proximity-Based Hybrid Controller Initialized")
         print(f"   Junctions: {len(self.junctions)}")
@@ -180,6 +188,153 @@ class ProximityHybridController:
         print(f"   Junction positions:")
         for junc_id, pos in self.junction_positions.items():
             print(f"     {junc_id}: ({pos[0]:.1f}, {pos[1]:.1f})")
+
+    def _load_model_metadata(self):
+        """Load optional training metadata from the model directory."""
+        if not self.model_path:
+            return {}
+
+        try:
+            model_dir = os.path.dirname(os.path.abspath(self.model_path))
+            metadata_path = os.path.join(model_dir, "training_config.json")
+            if not os.path.exists(metadata_path):
+                return {}
+
+            with open(metadata_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"⚠️  Could not read model metadata: {e}")
+            return {}
+
+    def _build_action_spec(self, preferred_junctions=None):
+        """Build action_spec from active SUMO traffic lights and phase programs."""
+        action_spec = {}
+        junction_candidates = preferred_junctions if preferred_junctions else self.junctions
+
+        for tl_id in junction_candidates:
+            phases = self.traffic_controller.default_phases.get(tl_id)
+            if phases:
+                action_spec[tl_id] = list(phases)
+
+        return action_spec
+
+    def _initialize_rl_inference_adapter(self):
+        """Create a lightweight VANET env adapter so model.predict can drive phases."""
+        if not self.model:
+            print("⚠️  Proximity controller running without RL model (density-only fallback)")
+            return
+
+        try:
+            metadata = self._load_model_metadata()
+            env_meta = metadata.get("environment", {}) if isinstance(metadata, dict) else {}
+
+            algo_hint = str(metadata.get("algorithm", "")).upper() if isinstance(metadata, dict) else ""
+            model_class_name = self.model.__class__.__name__.upper()
+
+            if algo_hint in {"PPO", "DQN"}:
+                self.rl_algorithm = algo_hint
+            elif "PPO" in model_class_name:
+                self.rl_algorithm = "PPO"
+            elif "DQN" in model_class_name:
+                self.rl_algorithm = "DQN"
+            else:
+                self.rl_algorithm = "PPO"
+
+            if self.rl_algorithm != "PPO":
+                print("⚠️  Proximity RL inference adapter currently supports PPO only; using density fallback for model actions")
+                return
+
+            preferred_tls = env_meta.get("controlled_traffic_lights")
+            if not isinstance(preferred_tls, list) or not preferred_tls:
+                preferred_tls = self.junctions
+
+            self.rl_action_spec = self._build_action_spec(preferred_tls)
+            if not self.rl_action_spec:
+                self.rl_action_spec = self._build_action_spec(self.junctions)
+
+            if not self.rl_action_spec:
+                print("⚠️  No valid traffic-light phase programs found for RL inference adapter")
+                return
+
+            tl_min = int(env_meta.get("tl_constraint_min", 5))
+            tl_max = int(env_meta.get("tl_constraint_max", 60))
+            beta = int(env_meta.get("beta", 20))
+            horizon = int(env_meta.get("horizon", 1000))
+
+            env_config = {
+                "beta": beta,
+                "action_spec": self.rl_action_spec,
+                "tl_constraint_min": tl_min,
+                "tl_constraint_max": tl_max,
+                "sim_step": 1.0,
+                "algorithm": "PPO",
+                "horizon": horizon,
+            }
+
+            self.rl_env = VANETTrafficEnv(config=env_config)
+            print(
+                f"✅ Proximity RL inference adapter ready: {len(self.rl_action_spec)} TLs "
+                f"(algorithm={self.rl_algorithm})"
+            )
+        except Exception as e:
+            self.rl_env = None
+            print(f"⚠️  Failed to initialize RL inference adapter: {e}")
+
+    def _predict_rl_phase_map(self):
+        """Predict target phase index for each RL-controlled junction."""
+        if not self.model or not self.rl_env or not self.rl_action_spec:
+            return {}
+
+        try:
+            # Keep env trackers in sync with current SUMO state before inference.
+            self.rl_env._update_obs_wait_steps()
+            self.rl_env._increment_obs_tl_wait_steps()
+            self.rl_env._update_obs_veh_acc()
+
+            obs_vec = self.rl_env.get_state()
+            action, _ = self.model.predict(obs_vec, deterministic=True)
+            predicted_states = self.rl_env.map_action_to_tl_states(action)
+
+            phase_map = {}
+            for i, tl_id in enumerate(self.rl_action_spec.keys()):
+                if i >= len(predicted_states):
+                    continue
+                target_state = predicted_states[i]
+                phases = self.traffic_controller.default_phases.get(tl_id, [])
+                if target_state in phases:
+                    phase_map[tl_id] = phases.index(target_state)
+
+            return phase_map
+        except Exception as e:
+            self.model_inference_failures += 1
+            if self.model_inference_failures <= 3 or self.model_inference_failures % 50 == 0:
+                print(f"⚠️  RL inference failed (attempt {self.model_inference_failures}): {e}")
+            return {}
+
+    def _apply_rl_phase_targets(self, target_junctions, phase_map):
+        """Apply predicted phase targets to emergency-adjacent junctions only."""
+        import traci
+
+        for tl_id in target_junctions:
+            if tl_id not in phase_map:
+                continue
+
+            target_phase = phase_map[tl_id]
+            try:
+                current_phase = int(traci.trafficlight.getPhase(tl_id))
+            except Exception:
+                continue
+
+            if current_phase == target_phase:
+                continue
+
+            try:
+                traci.trafficlight.setPhase(tl_id, target_phase)
+                if tl_id in self.traffic_controller.intersections:
+                    self.traffic_controller.intersections[tl_id]["current_phase"] = target_phase
+                    self.traffic_controller.intersections[tl_id]["time_in_phase"] = 0
+            except Exception:
+                continue
     
     def get_emergency_junction_proximity(self):
         """
@@ -234,6 +389,9 @@ class ProximityHybridController:
         
         # Get junctions near emergencies
         rl_junctions = self.get_emergency_junction_proximity()
+
+        if hasattr(self.traffic_controller, "set_externally_controlled_tls"):
+            self.traffic_controller.set_externally_controlled_tls(rl_junctions.keys())
         
         # Track emergency encounters
         for junc_id, (emerg_id, dist) in rl_junctions.items():
@@ -270,10 +428,14 @@ class ProximityHybridController:
             self.rl_steps += 1
         else:
             self.density_steps += 1
-        
-        # For now, just use the traffic controller's built-in step
-        # The RL integration would require more complex action mapping per junction
-        # This still provides the monitoring and switching logic
+
+        # Apply PPO decisions only to junctions currently near emergencies.
+        if rl_junctions and self.model and self.rl_env:
+            phase_map = self._predict_rl_phase_map()
+            if phase_map:
+                self._apply_rl_phase_targets(rl_junctions.keys(), phase_map)
+
+        # Advance simulation and run non-RL subsystems.
         self.traffic_controller.run_simulation_step()
     
     def print_stats(self):
@@ -359,6 +521,16 @@ Examples:
                        help='Path to trained PPO/DQN model (.zip file)')
     parser.add_argument('--proximity', type=float, default=250.0,
                        help='Proximity threshold for RL activation (meters)')
+    parser.add_argument('--emergency-priority', choices=['auto', 'on', 'off'], default='auto',
+                       help='Emergency priority mode: auto (on only in proximity), on (always), off (always disabled)')
+    parser.add_argument('--emergency-range', type=float, default=None,
+                       help='Emergency detection range in meters (default: controller default or proximity threshold in proximity mode)')
+    parser.add_argument('--corridor-depth', type=int, default=3,
+                       help='Proactive green-corridor depth in junctions ahead')
+    parser.add_argument('--corridor-distance', type=float, default=450.0,
+                       help='Maximum distance in meters for proactive corridor preemption')
+    parser.add_argument('--pass-through-range', type=float, default=30.0,
+                       help='Distance in meters considered as emergency cleared at a junction')
     parser.add_argument('--steps', type=int, default=1000,
                        help='Number of simulation steps')
     parser.add_argument('--config', type=str, default=None,
@@ -420,6 +592,7 @@ Examples:
         print(f"Model: {args.model}")
     if args.mode == 'proximity':
         print(f"Proximity Threshold: {args.proximity}m")
+    print(f"Emergency Priority Mode: {args.emergency_priority}")
     print(f"Steps: {args.steps}")
     print(f"GUI: {'✅ Enabled' if args.gui else '❌ Disabled'}")
     print(f"Security: {'✅ RSA Encryption' if args.security else '❌ Disabled'}")
@@ -440,8 +613,12 @@ Examples:
     # Initialize components
     print("🔧 Initializing simulation components...")
     
-    # Emergency priority only enabled when using proximity-based RL
-    emergency_priority_enabled = (args.mode == 'proximity')
+    if args.emergency_priority == 'on':
+        emergency_priority_enabled = True
+    elif args.emergency_priority == 'off':
+        emergency_priority_enabled = False
+    else:
+        emergency_priority_enabled = (args.mode == 'proximity')
     
     # Map mode to traffic controller mode
     # 'fixed' -> fixed-time, 'density' -> adaptive density, others -> rl/proximity
@@ -454,6 +631,26 @@ Examples:
         edge_computing_enabled=args.edge,
         emergency_priority_enabled=emergency_priority_enabled
     )
+
+    if args.mode == 'proximity':
+        default_detection = max(traffic_controller.emergency_detection_range, args.proximity)
+    else:
+        default_detection = traffic_controller.emergency_detection_range
+
+    effective_detection = args.emergency_range if args.emergency_range is not None else default_detection
+    traffic_controller.configure_emergency_priority(
+        detection_range=effective_detection,
+        pass_through_range=args.pass_through_range,
+        corridor_depth=args.corridor_depth,
+        corridor_max_distance=args.corridor_distance,
+    )
+
+    if emergency_priority_enabled:
+        print("✓ Emergency preemption configured:")
+        print(f"  Detection range: {traffic_controller.emergency_detection_range:.1f}m")
+        print(f"  Corridor depth: {traffic_controller.green_corridor_junction_lookahead} junctions")
+        print(f"  Corridor distance: {traffic_controller.green_corridor_max_distance:.1f}m")
+        print(f"  Pass-through range: {traffic_controller.emergency_pass_through_range:.1f}m")
     sensor_network = SensorNetwork()
     ns3_bridge = SUMONS3Bridge()
     
@@ -512,7 +709,8 @@ Examples:
         proximity_controller = ProximityHybridController(
             traffic_controller, 
             model=model,
-            proximity_threshold=args.proximity
+            proximity_threshold=args.proximity,
+            model_path=args.model,
         )
         print(f"\n🔀 HYBRID MODEL CONFIGURATION:")
         print(f"  Mode: Proximity-based RL activation")
@@ -875,7 +1073,7 @@ Examples:
             print(f"  Total Simulation Steps: {step}")
             print(f"  Steps with Vehicles: {metric_steps}")
             print(f"  Active Vehicles (still in network): {len(vehicle_accumulated_wait)}")
-            print(f"  Emergency Priority: {'✅ ENABLED' if args.mode == 'proximity' else '❌ DISABLED'}")
+            print(f"  Emergency Priority: {'✅ ENABLED' if emergency_priority_enabled else '❌ DISABLED'}")
             print("="*70)
         else:
             print("\n⚠️  No completed vehicles to analyze (simulation too short or no vehicles reached destination)")
@@ -899,6 +1097,12 @@ Examples:
             'mode': args.mode,
             'seed': args.seed,
             'security': args.security,
+            'emergency_priority_mode': args.emergency_priority,
+            'emergency_priority_enabled': emergency_priority_enabled,
+            'emergency_detection_range_m': traffic_controller.emergency_detection_range,
+            'emergency_corridor_depth_junctions': traffic_controller.green_corridor_junction_lookahead,
+            'emergency_corridor_distance_m': traffic_controller.green_corridor_max_distance,
+            'emergency_pass_through_range_m': traffic_controller.emergency_pass_through_range,
             'steps': step,
             'elapsed_time_s': elapsed_time,
             # Overall traffic metrics

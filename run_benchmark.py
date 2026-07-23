@@ -32,6 +32,11 @@ def run_single_simulation(
     model_path=None,
     proximity=250,
     config_path=None,
+    emergency_priority='auto',
+    emergency_range=None,
+    corridor_depth=3,
+    corridor_distance=450.0,
+    pass_through_range=30.0,
 ):
     """Run a single simulation and return the benchmark metrics JSON."""
     
@@ -63,6 +68,21 @@ def run_single_simulation(
 
     if config_path:
         cmd.extend(["--config", config_path])
+
+    if emergency_priority:
+        cmd.extend(["--emergency-priority", emergency_priority])
+
+    if emergency_range is not None:
+        cmd.extend(["--emergency-range", str(emergency_range)])
+
+    if corridor_depth is not None:
+        cmd.extend(["--corridor-depth", str(corridor_depth)])
+
+    if corridor_distance is not None:
+        cmd.extend(["--corridor-distance", str(corridor_distance)])
+
+    if pass_through_range is not None:
+        cmd.extend(["--pass-through-range", str(pass_through_range)])
     
     if security:
         cmd.append("--security")
@@ -222,6 +242,16 @@ def main():
                        help='Path to SUMO .sumocfg file (default from integrated runner)')
     parser.add_argument('--proximity', type=float, default=250.0,
                        help='Proximity threshold in meters for proximity mode')
+    parser.add_argument('--emergency-priority', choices=['auto', 'on', 'off'], default='auto',
+                       help='Emergency priority mode passed to integrated runner')
+    parser.add_argument('--emergency-range', type=float, default=None,
+                       help='Emergency detection range in meters (optional)')
+    parser.add_argument('--corridor-depth', type=int, default=3,
+                       help='Proactive green-corridor depth in junctions ahead')
+    parser.add_argument('--corridor-distance', type=float, default=450.0,
+                       help='Proactive green-corridor max distance (meters)')
+    parser.add_argument('--pass-through-range', type=float, default=30.0,
+                       help='Junction clear distance for emergency vehicles (meters)')
     parser.add_argument('--quick', action='store_true',
                        help='Quick test with fewer seeds and steps')
     parser.add_argument('--modes', type=str, default='fixed,density,proximity',
@@ -259,6 +289,12 @@ def main():
     if args.config:
         print(f"  SUMO config: {args.config}")
     print(f"  Proximity threshold: {args.proximity}")
+    print(f"  Emergency priority mode: {args.emergency_priority}")
+    if args.emergency_range is not None:
+        print(f"  Emergency range override: {args.emergency_range}m")
+    print(f"  Corridor depth: {args.corridor_depth} junctions")
+    print(f"  Corridor distance: {args.corridor_distance}m")
+    print(f"  Pass-through range: {args.pass_through_range}m")
     print(f"  Security runs: {'No-Security' if not args.skip_nosec else 'SKIPPED'}"
           f" + {'Security' if not args.skip_sec else 'SKIPPED'}")
     total_runs = len(modes) * len(seeds) * (
@@ -301,6 +337,11 @@ def main():
                     model_path=args.model,
                     proximity=args.proximity,
                     config_path=args.config,
+                    emergency_priority=args.emergency_priority,
+                    emergency_range=args.emergency_range,
+                    corridor_depth=args.corridor_depth,
+                    corridor_distance=args.corridor_distance,
+                    pass_through_range=args.pass_through_range,
                 )
                 
                 dt = time.time() - t0
