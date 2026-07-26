@@ -41,7 +41,7 @@ from edge_computing import EdgeRSU
 from edge_computing.metrics.edge_metrics import EdgeMetricsTracker
 
 class AdaptiveTrafficController:
-    def __init__(self, output_dir="./output_rule", mode="rule", security_managers=None, security_pending=False, edge_computing_enabled=False, emergency_priority_enabled=False):
+    def __init__(self, output_dir="./output_rule", mode="rule", security_managers=None, security_pending=False, edge_computing_enabled=False, emergency_priority_enabled=True):
         self.sensor_network = SensorNetwork()
         self.intersections = {}
         self.running = False

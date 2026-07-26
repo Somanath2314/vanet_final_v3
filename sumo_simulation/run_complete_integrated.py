@@ -521,8 +521,8 @@ Examples:
                        help='Path to trained PPO/DQN model (.zip file)')
     parser.add_argument('--proximity', type=float, default=250.0,
                        help='Proximity threshold for RL activation (meters)')
-    parser.add_argument('--emergency-priority', choices=['auto', 'on', 'off'], default='auto',
-                       help='Emergency priority mode: auto (on only in proximity), on (always), off (always disabled)')
+    parser.add_argument('--emergency-priority', choices=['auto', 'on', 'off'], default='on',
+                       help='Emergency priority mode: on by default, off to disable it, auto for proximity-only behavior')
     parser.add_argument('--emergency-range', type=float, default=None,
                        help='Emergency detection range in meters (default: controller default or proximity threshold in proximity mode)')
     parser.add_argument('--corridor-depth', type=int, default=3,
