@@ -129,7 +129,7 @@ Start with this (more stable than aggressive horizon):
 ### 1) Commit and push code changes on current device
 Run from repo root:
 
-```powershell
+```bash
 git add sumo_simulation/traffic_controller.py sumo_simulation/run_complete_integrated.py run_benchmark.py rl_module/vanet_env.py layout_new/routes_new.rou.xml GREEN_CORRIDOR_TUNING_PLAYBOOK.md
 git commit -m "Add proactive green-corridor control and emergency-priority tuning knobs"
 git push origin purge-largefile
@@ -138,7 +138,7 @@ git push upstream purge-largefile
 
 ### 2) Pull on another device
 
-```powershell
+```bash
 git checkout purge-largefile
 git pull origin purge-largefile
 ```
@@ -147,14 +147,45 @@ git pull origin purge-largefile
 
 ### A) Main PPO retraining run
 
-```powershell
-c:/SAPDevelop/Myproject/capstone/vanet/.venv/Scripts/python.exe rl_module/train.py --algo ppo --config layout_new/simulation_new.sumocfg --timesteps 500000 --output rl_module/trained_models --heartbeat-steps 500 --scenario-randomization --scenario-scales 0.7,0.9,1.0,1.2,1.4 --route-randomization --route-rate-min 0.6 --route-rate-max 1.4
+Current status note:
+- The latest completed PPO model is `rl_module/trained_models/ppo_traffic_20260722_200743/ppo_traffic_final.zip`.
+- It finished all 500 episodes, but the layout still shows congestion at a few junctions.
+- For the next retrain, cap the number of controlled lights so PPO learns a smaller and more stable action space.
+
+```bash
+cd /Users/apple/Desktop/vanet_final_v3
+source venv/bin/activate
+python rl_module/train.py \
+  --algo ppo \
+  --config layout_new/simulation_new.sumocfg \
+  --timesteps 500000 \
+  --max-tl 12 \
+  --ppo-n-steps 1024 \
+  --ppo-n-epochs 20 \
+  --batch-size 64 \
+  --scenario-randomization \
+  --scenario-scales 0.85,0.95,1.0,1.05,1.15 \
+  --scenario-seed 42 \
+  --route-randomization \
+  --route-rate-min 0.8 \
+  --route-rate-max 1.2 \
+  --save-freq 20000 \
+  --heartbeat-steps 100 \
+  --output rl_module/trained_models
 ```
 
 ### B) Quick sanity retrain (short)
 
-```powershell
-c:/SAPDevelop/Myproject/capstone/vanet/.venv/Scripts/python.exe rl_module/train.py --algo ppo --config layout_new/simulation_new.sumocfg --timesteps 50000 --output rl_module/trained_models --heartbeat-steps 250
+```bash
+cd /Users/apple/Desktop/vanet_final_v3
+source venv/bin/activate
+python rl_module/train.py \
+  --algo ppo \
+  --config layout_new/simulation_new.sumocfg \
+  --timesteps 50000 \
+  --max-tl 12 \
+  --output rl_module/trained_models \
+  --heartbeat-steps 250
 ```
 
 ## Post-Training Evaluation Commands
@@ -162,20 +193,50 @@ Replace <MODEL_ZIP_PATH> with the produced ppo_traffic_final.zip path.
 
 ### A) Single validation with emergency-priority knobs
 
-```powershell
-c:/SAPDevelop/Myproject/capstone/vanet/.venv/Scripts/python.exe sumo_simulation/run_complete_integrated.py --mode proximity --model <MODEL_ZIP_PATH> --proximity 250 --emergency-priority on --emergency-range 250 --corridor-depth 3 --corridor-distance 450 --pass-through-range 30 --config layout_new/simulation_new.sumocfg --steps 700 --seed 42 --output sumo_simulation/output_validation_retrained
+```bash
+cd /Users/apple/Desktop/vanet_final_v3
+source venv/bin/activate
+python sumo_simulation/run_complete_integrated.py \
+  --mode proximity \
+  --model <MODEL_ZIP_PATH> \
+  --proximity 250 \
+  --emergency-priority on \
+  --emergency-range 250 \
+  --corridor-depth 3 \
+  --corridor-distance 450 \
+  --pass-through-range 30 \
+  --config layout_new/simulation_new.sumocfg \
+  --steps 700 \
+  --seed 42 \
+  --output sumo_simulation/output_validation_retrained
 ```
 
 ### B) Full benchmark
 
-```powershell
-c:/SAPDevelop/Myproject/capstone/vanet/.venv/Scripts/python.exe run_benchmark.py --seeds 30 --seed-start 42 --steps 1000 --config layout_new/simulation_new.sumocfg --modes fixed,density,proximity --model <MODEL_ZIP_PATH> --proximity 250 --emergency-priority on --emergency-range 250 --corridor-depth 3 --corridor-distance 450 --pass-through-range 30
+```bash
+cd /Users/apple/Desktop/vanet_final_v3
+source venv/bin/activate
+python run_benchmark.py \
+  --seeds 30 \
+  --seed-start 42 \
+  --steps 1000 \
+  --config layout_new/simulation_new.sumocfg \
+  --modes fixed,density,proximity \
+  --model <MODEL_ZIP_PATH> \
+  --proximity 250 \
+  --emergency-priority on \
+  --emergency-range 250 \
+  --corridor-depth 3 \
+  --corridor-distance 450 \
+  --pass-through-range 30
 ```
 
 ### C) Export paper tables/graphs
 
-```powershell
-c:/SAPDevelop/Myproject/capstone/vanet/.venv/Scripts/python.exe export_paper_metrics.py --results-dir benchmark_results --seed-start 42 --seed-count 30
+```bash
+cd /Users/apple/Desktop/vanet_final_v3
+source venv/bin/activate
+python export_paper_metrics.py --results-dir benchmark_results --seed-start 42 --seed-count 30
 ```
 
 ## Documentation Update Rule

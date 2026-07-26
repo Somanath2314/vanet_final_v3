@@ -1,0 +1,12 @@
+Algorithm: PPO
+SUMO Config: /Users/apple/Desktop/vanet_final_v3/layout_new/simulation_new.sumocfg
+Total Timesteps: 500000
+Learning Rate: 0.0001
+Batch Size: 64
+Gamma: 0.99
+PPO n_steps: 1024
+PPO epochs: 20
+PPO clip range: 0.2
+Episodes completed: 500
+Final avg reward (last 10): -8195.81
+Best episode reward: 243238.47
